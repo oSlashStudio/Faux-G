@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class ProjectileController : MonoBehaviour {
@@ -21,17 +21,21 @@ public class ProjectileController : MonoBehaviour {
 	}
 
 	void OnCollisionEnter2D (Collision2D collision) {
-		foreach (Camera currentCamera in Camera.allCameras) {
-			Vector3 currentCameraPosition = currentCamera.transform.position;
-			// Check if distance to currentCamera is within effect distance
-			if (IsInEffectRange (new Vector2 (currentCameraPosition.x, currentCameraPosition.y))) {
-				currentCamera.GetComponent<CameraController>().toggleShaking (effectIntensity);
-			}
-		}
-		// Instantiate explosion prefab
-		Instantiate (explosionPrefab, transform.position, transform.rotation);
-		// Finally, destroy this game object
-		Destroy (gameObject);
+        if (collision.collider.tag.Equals ("Projectile")) { // Ignore projectile-to-projectile collisions
+            Physics2D.IgnoreCollision (GetComponent<Collider2D> (), collision.collider);
+        } else {
+            foreach (Camera currentCamera in Camera.allCameras) { // Loop through all cameras on scene
+                Vector3 currentCameraPosition = currentCamera.transform.position;
+                // Check if distance to currentCamera is within effect distance
+                if (IsInEffectRange (new Vector2 (currentCameraPosition.x, currentCameraPosition.y))) {
+                    currentCamera.GetComponent<CameraController> ().toggleShaking (effectIntensity);
+                }
+            }
+            // Instantiate explosion prefab
+            Instantiate (explosionPrefab, transform.position, transform.rotation);
+            // Finally, destroy this game object
+            Destroy (gameObject);
+        }
 	}
 
 	/*

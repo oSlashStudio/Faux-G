@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class WeaponController : MonoBehaviour {
@@ -6,11 +6,14 @@ public class WeaponController : MonoBehaviour {
 	public GameObject weaponMuzzlePrefab;
 	public GameObject rifleBulletPrefab;
 	public GameObject rocketLauncherShellPrefab;
+    public GameObject minigunBulletPrefab;
 	public float defaultRifleFireDelay = 0.2f;
 	public float defaultRocketLauncherFireDelay = 5.0f;
+    public float defaultMinigunFireDelay = 0.05f;
 
 	private float rifleFireDelay = 0.0f;
 	private float rocketLauncherFireDelay = 0.0f;
+    private float minigunFireDelay = 0.0f;
 
 	private int currentWeapon = 1; // Player starts with rifle as weapon (id 1)
 
@@ -31,6 +34,7 @@ public class WeaponController : MonoBehaviour {
 		// Update fire delay based on time lapsed
 		rifleFireDelay -= Time.deltaTime;
 		rocketLauncherFireDelay -= Time.deltaTime;
+        minigunFireDelay -= Time.deltaTime;
 
 		InputFire ();
 		InputChangeWeapon ();
@@ -51,6 +55,12 @@ public class WeaponController : MonoBehaviour {
 						rocketLauncherFireDelay = defaultRocketLauncherFireDelay;
 					}
 					break;
+                case 3:
+                    if (minigunFireDelay <= 0.0f) {
+                        Fire ();
+                        minigunFireDelay = defaultMinigunFireDelay;
+                    }
+                    break;
 				default:
 					break;
 			}
@@ -70,6 +80,9 @@ public class WeaponController : MonoBehaviour {
 			case 2:
 				currentWeaponProjectilePrefab = rocketLauncherShellPrefab;
 				break;
+            case 3:
+                currentWeaponProjectilePrefab = minigunBulletPrefab;
+                break;
 			default:
 				currentWeaponProjectilePrefab = rifleBulletPrefab;
 				break;
@@ -90,7 +103,12 @@ public class WeaponController : MonoBehaviour {
 				transform.localScale = new Vector3 (1.0f, 1.0f, 1.0f);
 				currentWeapon = 2;
 			}
-		}
+		} else if (Input.GetKeyDown (KeyCode.Alpha3)) {
+            if (currentWeapon != 3) {
+                transform.localScale = new Vector3 (0.25f, 1.0f, 0.25f);
+                currentWeapon = 3;
+            }
+        }
 	}
 
 }

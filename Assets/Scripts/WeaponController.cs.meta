@@ -1,10 +1,16 @@
 fileFormatVersion: 2
 guid: 05224c1c4311bac428cb13db9e9aa403
-timeCreated: 1462870532
+timeCreated: 1462957177
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - weaponMuzzlePrefab: {instanceID: 0}
+  - rifleBulletPrefab: {fileID: 145512, guid: 33b90492270bc6946997b9634998a070, type: 2}
+  - rocketLauncherShellPrefab: {fileID: 130262, guid: 9ba8e422b8ee69346a04348bb2f48175,
+      type: 2}
+  - minigunBulletPrefab: {fileID: 150562, guid: 7a472d0ac58690f4691e5a355857dca9,
+      type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
