@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class FauxGravityCircularAttractor : Attractor {
@@ -6,7 +6,7 @@ public class FauxGravityCircularAttractor : Attractor {
 	public float gravity = 9.8f;
 	public float flipForce = 750.0f;
 
-	public override void Attract (Transform targetTransform) {
+    public override void Attract (Transform targetTransform) {
 		Vector3 attractorNormal = (targetTransform.position - transform.position).normalized;
 		Vector3 targetNormal = -targetTransform.up;
 
@@ -39,5 +39,14 @@ public class FauxGravityCircularAttractor : Attractor {
 
 		targetRigidBody.AddForce (new Vector2 (flipDirection.x, flipDirection.y) * flipForce);
 	}
+
+    void OnTriggerStay2D (Collider2D collider) {
+        if (collider.tag.Equals ("Player")) {
+            collider.gameObject.GetComponent<FauxGravityBody> ().attractor = GetComponent<Attractor> ();
+            collider.gameObject.GetComponent<PlayerController> ().attractor = GetComponent<Attractor> ();
+        } else if (collider.tag.Equals ("Attractable")) {
+            collider.gameObject.GetComponent<FauxGravityBody> ().attractor = GetComponent<Attractor> ();
+        }
+    }
 
 }

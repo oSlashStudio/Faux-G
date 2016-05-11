@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class PlayerController : MonoBehaviour {
@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		rigidBody = GetComponent<Rigidbody2D>();
+		rigidBody = GetComponent<Rigidbody2D> ();
 	}
 	
 	// Update is called once per frame
@@ -32,8 +32,8 @@ public class PlayerController : MonoBehaviour {
 
 	void FixedUpdate () {
 		if (canMove) {
-			Vector3 movementVector = transform.TransformDirection (movementDirection) * moveSpeed * Time.deltaTime;
-			rigidBody.velocity += new Vector2 (movementVector.x, movementVector.y);
+            Vector3 movementVector = transform.TransformDirection (movementDirection) * moveSpeed * Time.deltaTime;
+            rigidBody.velocity += new Vector2 (movementVector.x, movementVector.y);
 		}
 	}
 

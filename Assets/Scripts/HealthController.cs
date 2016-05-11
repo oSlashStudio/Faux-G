@@ -39,17 +39,17 @@ public class HealthController : MonoBehaviour {
             switch (collision.collider.name) {
                 case "Rifle Bullet(Clone)":
                     // Modify damage callout text to indicate damage
-                    damageCallout.GetComponent<TextMesh> ().text = "10";
+                    damageCallout.GetComponent<TextMesh> ().text = "-10";
                     healthBarController.reduceHealth (10.0f); // TO-DO: Move rifle bullet damage to global preferences
                     break;
                 case "Rocket Shell(Clone)":
                     // Modify damage callout text to indicate damage
-                    damageCallout.GetComponent<TextMesh> ().text = "100";
+                    damageCallout.GetComponent<TextMesh> ().text = "-100";
                     healthBarController.reduceHealth (100.0f); // TO-DO: Move rocket shell damage to global preferences
                     break;
                 case "Minigun Bullet(Clone)":
                     // Modify damage callout text to indicate damage
-                    damageCallout.GetComponent<TextMesh> ().text = "2";
+                    damageCallout.GetComponent<TextMesh> ().text = "-2";
                     healthBarController.reduceHealth (2.0f); // TO-DO: Move minigun bullet damage to global preferences
                     break;
                 default:

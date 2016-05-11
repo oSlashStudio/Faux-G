@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class FauxGravityLinearAttractor : Attractor {
@@ -7,41 +7,37 @@ public class FauxGravityLinearAttractor : Attractor {
 	public float flipForce = 750.0f;
 	
 	public override void Attract (Transform targetTransform) {
-		// Calculate attractor normal using dot product - IMPROVE IF POSSIBLE (hefty calculations)
-		// http://stackoverflow.com/questions/5227373/minimal-perpendicular-vector-between-a-point-and-a-line
-		Vector2 targetToCenterOfGravityVector = targetTransform.position - transform.position;
-		Vector2 directionVector = transform.right;
-		Vector2 attractorPositionVector = (Vector2) transform.position + 
-			Vector2.Dot (targetToCenterOfGravityVector, directionVector) * directionVector;
-		Vector2 attractorNormal = ((Vector2) targetTransform.position - attractorPositionVector).normalized;
-
-		Vector3 targetNormal = -targetTransform.up;
+        // Calculate attractor normal using dot product - IMPROVE IF POSSIBLE (hefty calculations)
+        // http://stackoverflow.com/questions/5227373/minimal-perpendicular-vector-between-a-point-and-a-line
+        Vector3 targetToCenterOfGravityVector = targetTransform.position - transform.position;
+        Vector3 directionVector = transform.right;
+        Vector3 attractorPositionVector = transform.position +
+            Vector2.Dot (targetToCenterOfGravityVector, directionVector) * directionVector;
+        Vector3 attractorNormal = (targetTransform.position - attractorPositionVector).normalized;
 		
 		// Force component of faux gravity
 		targetTransform.GetComponent<Rigidbody2D>().AddForce (attractorNormal * gravity);
-		
-		// Rotation / Torque component of faux gravity
-		Quaternion targetRotation = Quaternion.FromToRotation (targetNormal, attractorNormal) * targetTransform.rotation;
+
+        // Rotation / Torque component of faux gravity
+        Quaternion targetRotation = Quaternion.LookRotation (Vector3.forward, -attractorNormal);
 		targetTransform.rotation = Quaternion.Slerp (targetTransform.rotation, targetRotation, 50 * Time.deltaTime);
 	}
 	
 	public override void Repel (Transform targetTransform) {
 		// Calculate repeller normal using dot product - IMPROVE IF POSSIBLE (hefty calculations)
 		// http://stackoverflow.com/questions/5227373/minimal-perpendicular-vector-between-a-point-and-a-line
-		Vector2 targetToCenterOfGravityVector = targetTransform.position - transform.position;
-		Vector2 directionVector = transform.right;
-		Vector2 repellerPositionVector = (Vector2) transform.position + 
+		Vector3 targetToCenterOfGravityVector = targetTransform.position - transform.position;
+		Vector3 directionVector = transform.right;
+		Vector3 repellerPositionVector = transform.position + 
 			Vector2.Dot (targetToCenterOfGravityVector, directionVector) * directionVector;
-		Vector2 repellerNormal = ((Vector2) targetTransform.position - repellerPositionVector).normalized;
-
-		Vector3 targetNormal = targetTransform.up;
+		Vector3 repellerNormal = (targetTransform.position - repellerPositionVector).normalized;
 		
 		// Force component of faux gravity
 		targetTransform.GetComponent<Rigidbody2D>().AddForce (repellerNormal * -gravity);
-		
-		// Rotation / Torque component of faux gravity
-		Quaternion targetRotation = Quaternion.FromToRotation (targetNormal, repellerNormal) * targetTransform.rotation;
-		targetTransform.rotation = Quaternion.Slerp (targetTransform.rotation, targetRotation, 50 * Time.deltaTime);
+
+        // Rotation / Torque component of faux gravity
+        Quaternion targetRotation = Quaternion.LookRotation (Vector3.forward, -repellerNormal);
+        targetTransform.rotation = Quaternion.Slerp (targetTransform.rotation, targetRotation, 50 * Time.deltaTime);
 	}
 
 	public override void Flip (Transform targetTransform) {
@@ -59,5 +55,14 @@ public class FauxGravityLinearAttractor : Attractor {
 
 		targetRigidBody.AddForce (flipDirection * flipForce);
 	}
+
+    void OnTriggerStay2D (Collider2D collider) {
+        if (collider.tag.Equals ("Player")) {
+            collider.gameObject.GetComponent<FauxGravityBody> ().attractor = GetComponent<Attractor> ();
+            collider.gameObject.GetComponent<PlayerController> ().attractor = GetComponent<Attractor> ();
+        } else if (collider.tag.Equals ("Attractable")) {
+            collider.gameObject.GetComponent<FauxGravityBody> ().attractor = GetComponent<Attractor> ();
+        }
+    }
 
 }

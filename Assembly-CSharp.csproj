@@ -51,6 +51,7 @@
      <Compile Include="Assets\Scripts\ExplosionController.cs" />
      <Compile Include="Assets\Scripts\FauxGravityBody.cs" />
      <Compile Include="Assets\Scripts\FauxGravityCircularAttractor.cs" />
+     <Compile Include="Assets\Scripts\FauxGravityDefaultAttractor.cs" />
      <Compile Include="Assets\Scripts\FauxGravityLinearAttractor.cs" />
      <Compile Include="Assets\Scripts\HealthBarController.cs" />
      <Compile Include="Assets\Scripts\HealthController.cs" />
