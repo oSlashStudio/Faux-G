@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class CameraController : MonoBehaviour {
@@ -13,15 +13,22 @@ public class CameraController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		transform.position = playerObject.transform.position + new Vector3 (0.0f, 0.0f, -10.0f);
+
 	}
 
 	// Update is called once per frame
 	void Update () {
+        if (playerObject == null) {
+            isShaking = false;
+        }
 		if (isShaking) {
 			Shake ();
 		} else {
-			transform.position = playerObject.transform.position + new Vector3 (0.0f, 0.0f, -10.0f);
+            if (playerObject == null) {
+                transform.position = transform.position;
+            } else {
+                transform.position = playerObject.transform.position + new Vector3 (0.0f, 0.0f, -10.0f);
+            }
 		}
 	}
 

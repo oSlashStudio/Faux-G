@@ -18,8 +18,14 @@ public class CrosshairController : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
         Vector2 mousePosition = (Vector2) Camera.main.ScreenToWorldPoint (Input.mousePosition);
+        // Direction vector
         Vector2 moveDirectionVector = mousePosition - (Vector2) transform.position;
+        // Speed towards target position is linearly related to distance
         rigidBody.MovePosition ((Vector2) transform.position + moveDirectionVector * crosshairSpeed * Time.deltaTime);
+
+        if (pivot == null) {
+            debugRaycast = false;
+        }
 
         // Debug raycast for future laser guidance implementation
         DebugRaycast ();
