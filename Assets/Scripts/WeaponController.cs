@@ -11,25 +11,29 @@ public class WeaponController : MonoBehaviour {
 	public float defaultRifleFireDelay = 0.2f;
 	public float defaultRocketLauncherFireDelay = 5.0f;
     public float defaultMinigunFireDelay = 0.1f;
+    public float rifleMaxSpreadAngle = 5.0f;
+    public float rocketLauncherMaxSpreadAngle = 1.0f;
+    public float minigunMaxSpreadAngle = 10.0f;
 
-	private float rifleFireDelay = 0.0f;
+    private float rifleFireDelay = 0.0f;
 	private float rocketLauncherFireDelay = 0.0f;
     private float minigunFireDelay = 0.0f;
+    private GameObject crosshair;
 
 	private int currentWeapon = 1; // Player starts with rifle as weapon (id 1)
 
 	// Use this for initialization
 	void Start () {
-        GameObject crosshair = (GameObject) Instantiate (crosshairPrefab, transform.position, Quaternion.identity);
+        crosshair = (GameObject) Instantiate (crosshairPrefab, transform.position, Quaternion.identity);
         crosshair.GetComponent<CrosshairController> ().pivot = weaponMuzzlePrefab;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		Vector3 mousePosition = Camera.main.ScreenToWorldPoint (Input.mousePosition);
+		Vector3 crosshairPosition = crosshair.transform.position;
 		//mousePosition = Quaternion.Euler (0.0f, 0.0f, 0.0f) * mousePosition;
-		transform.LookAt (new Vector3 (mousePosition.x, 
-		                               mousePosition.y, 
+		transform.LookAt (new Vector3 (crosshairPosition.x,
+                                       crosshairPosition.y, 
 		                               0.0f));
 		transform.Rotate (new Vector3 (-90.0f, 0.0f, 0.0f));
 
@@ -70,20 +74,25 @@ public class WeaponController : MonoBehaviour {
 	}
 	
 	void Fire () {
-		// Bullet direction is characterized by the vector between rifle and rifle muzzle
-		Vector3 bulletDirectionVector = (weaponMuzzlePrefab.transform.position - 
-		                                 transform.position).normalized;
-		// Determine the projectile prefab based on current weapon id
-		GameObject currentWeaponProjectilePrefab;
+		// Bullet direction is characterized by the vector between crosshair and weapon muzzle
+		Vector3 bulletDirectionVector = (crosshair.transform.position - 
+		                                 weaponMuzzlePrefab.transform.position).normalized;
+        Quaternion bulletRotation = Quaternion.LookRotation (bulletDirectionVector);
+        Vector3 bulletRotationVector = bulletRotation.eulerAngles;
+        // Determine the projectile prefab based on current weapon id
+        GameObject currentWeaponProjectilePrefab;
 		switch (currentWeapon) {
 			case 1:
 				currentWeaponProjectilePrefab = rifleBulletPrefab;
-				break;
+                bulletRotationVector.x += Random.Range (-1.0f, 1.0f) * rifleMaxSpreadAngle;
+                break;
 			case 2:
 				currentWeaponProjectilePrefab = rocketLauncherShellPrefab;
-				break;
+                bulletRotationVector.x += Random.Range (-1.0f, 1.0f) * rocketLauncherMaxSpreadAngle;
+                break;
             case 3:
                 currentWeaponProjectilePrefab = minigunBulletPrefab;
+                bulletRotationVector.x += Random.Range (-1.0f, 1.0f) * minigunMaxSpreadAngle;
                 break;
 			default:
 				currentWeaponProjectilePrefab = rifleBulletPrefab;
@@ -91,7 +100,7 @@ public class WeaponController : MonoBehaviour {
 		}
 		// Create projectile with appropriate position and rotation
 		Instantiate (currentWeaponProjectilePrefab, weaponMuzzlePrefab.transform.position, 
-		             Quaternion.LookRotation (bulletDirectionVector));
+		             Quaternion.Euler (bulletRotationVector));
 	}
 
 	void InputChangeWeapon () {
