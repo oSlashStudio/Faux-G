@@ -7,9 +7,10 @@ public class WeaponController : MonoBehaviour {
 	public GameObject rifleBulletPrefab;
 	public GameObject rocketLauncherShellPrefab;
     public GameObject minigunBulletPrefab;
+    public GameObject crosshairPrefab;
 	public float defaultRifleFireDelay = 0.2f;
 	public float defaultRocketLauncherFireDelay = 5.0f;
-    public float defaultMinigunFireDelay = 0.05f;
+    public float defaultMinigunFireDelay = 0.1f;
 
 	private float rifleFireDelay = 0.0f;
 	private float rocketLauncherFireDelay = 0.0f;
@@ -19,7 +20,8 @@ public class WeaponController : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+        GameObject crosshair = (GameObject) Instantiate (crosshairPrefab, transform.position, Quaternion.identity);
+        crosshair.GetComponent<CrosshairController> ().pivot = weaponMuzzlePrefab;
 	}
 	
 	// Update is called once per frame
