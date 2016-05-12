@@ -23,8 +23,7 @@ public class CrosshairController : MonoBehaviour {
     void DebugRaycast (Vector2 mousePosition) {
         if (debugRaycast) {
             Vector2 pivotPosition = (Vector2) pivot.transform.position;
-            RaycastHit2D raycastInfo = Physics2D.Raycast (pivotPosition, mousePosition - pivotPosition, Mathf.Infinity);
-            Debug.Log (raycastInfo.collider.transform.position);
+            RaycastHit2D raycastInfo = Physics2D.Raycast (pivotPosition, mousePosition - pivotPosition);
             Vector2 raycastHitPosition = raycastInfo.point;
             Vector2 directionVector = raycastHitPosition - pivotPosition;
             Debug.DrawRay (pivot.transform.position, directionVector, Color.green);
