@@ -1,31 +1,40 @@
 using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 
-public class HealthController : MonoBehaviour {
+public class HealthController : NetworkBehaviour {
 
     public GameObject healthBarPrefab;
     public GameObject damageCalloutPrefab;
     public float healthBarVerticalOffset = -1.0f;
     public float damageCalloutVerticalOffset = 1.0f;
 
-    private HealthBarController healthBarController;
+    public HealthBarController healthBarController;
 
 	// Use this for initialization
 	void Start () {
-        // Create health bar
-        GameObject healthBar = (GameObject) Instantiate (healthBarPrefab, 
-            new Vector3 (transform.position.x, transform.position.y + healthBarVerticalOffset, transform.position.z), 
-            transform.rotation);
-        // Assign transform as health bar's parent
-        healthBar.transform.parent = transform;
-        // Assign health bar's controller to parameter (access optimization)
-        healthBarController = healthBar.GetComponent<HealthBarController> ();
+        if (isLocalPlayer) {
+            CmdSpawnHealthBar (GetComponent<NetworkIdentity> ());
+        }
 	}
 	
 	// Update is called once per frame
 	void Update () {
 	
 	}
+
+    [Command]
+    void CmdSpawnHealthBar (NetworkIdentity parentNetworkIdentity) {
+        GameObject healthBar = (GameObject) Instantiate (healthBarPrefab,
+            new Vector3 (transform.position.x, transform.position.y + healthBarVerticalOffset, transform.position.z),
+            transform.rotation);
+        // Assign transform as health bar's parent
+        healthBar.transform.parent = parentNetworkIdentity.transform;
+        // Assign health bar's controller to parameter (access optimization)
+        healthBarController = healthBar.GetComponent<HealthBarController> ();
+        // Spawn health bar on server side
+        NetworkServer.SpawnWithClientAuthority (healthBar, base.connectionToClient);
+    }
 
     void OnCollisionEnter2D (Collision2D collision) {
         // Upon collision of transform with damaging projectiles
