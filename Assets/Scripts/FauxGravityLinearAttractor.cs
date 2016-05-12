@@ -56,7 +56,7 @@ public class FauxGravityLinearAttractor : Attractor {
 		targetRigidBody.AddForce (flipDirection * flipForce);
 	}
 
-    void OnTriggerStay2D (Collider2D collider) {
+    void OnTriggerEnter2D (Collider2D collider) {
         if (collider.tag.Equals ("Player")) {
             collider.gameObject.GetComponent<FauxGravityBody> ().attractor = GetComponent<Attractor> ();
             collider.gameObject.GetComponent<PlayerController> ().attractor = GetComponent<Attractor> ();

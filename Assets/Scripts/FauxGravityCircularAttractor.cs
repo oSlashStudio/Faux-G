@@ -40,7 +40,7 @@ public class FauxGravityCircularAttractor : Attractor {
 		targetRigidBody.AddForce (new Vector2 (flipDirection.x, flipDirection.y) * flipForce);
 	}
 
-    void OnTriggerStay2D (Collider2D collider) {
+    void OnTriggerEnter2D (Collider2D collider) {
         if (collider.tag.Equals ("Player")) {
             collider.gameObject.GetComponent<FauxGravityBody> ().attractor = GetComponent<Attractor> ();
             collider.gameObject.GetComponent<PlayerController> ().attractor = GetComponent<Attractor> ();
