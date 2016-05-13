@@ -1,7 +1,8 @@
 using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 
-public class ProjectileController : MonoBehaviour {
+public class ProjectileController : NetworkBehaviour {
 
 	public GameObject explosionPrefab;
 	public float bulletSpeed = 5.0f;
@@ -11,14 +12,18 @@ public class ProjectileController : MonoBehaviour {
 
 	Rigidbody2D rigidBody;
 
+    public override void OnStartServer () {
+        rigidBody = GetComponent<Rigidbody2D> ();
+        rigidBody.velocity = new Vector2 (transform.forward.x, transform.forward.y) * bulletSpeed;
+    }
+
 	// Use this for initialization
 	void Start () {
-		rigidBody = GetComponent<Rigidbody2D>();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		rigidBody.velocity += new Vector2 (transform.forward.x, transform.forward.y) * bulletSpeed;
+
 	}
 
 	void OnCollisionEnter2D (Collision2D collision) {

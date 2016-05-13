@@ -20,12 +20,14 @@ public class HealthController : NetworkBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        // Check health threshold on every frame
-        if (currentHealth <= 0.0f) {
-            Destroy (gameObject);
+        // Check health threshold on each frame @server
+        if (isServer) {
+            if (currentHealth <= 0.0f) {
+                Destroy (gameObject);
+            }
         }
         // Rescale the healthbar based on current health percentage
-        healthBar.transform.localScale = new Vector3 (currentHealth / maxHealth, transform.localScale.y, transform.localScale.z);
+        healthBar.transform.localScale = new Vector3 (currentHealth / maxHealth, healthBar.transform.localScale.y, healthBar.transform.localScale.z);
     }
     
     public void IncreaseHealth (float healAmount) {
@@ -37,7 +39,7 @@ public class HealthController : NetworkBehaviour {
                 transform.position + transform.up * damageCalloutVerticalOffset +
                 new Vector3 (0.0f, 0.0f, -1.0f), // z-offset
                 transform.rotation);
-        healCallout.GetComponent<TextMesh> ().text = "+" + healAmount.ToString ("0");
+        healCallout.GetComponent<DamageCalloutController> ().text = "+" + healAmount.ToString ("0");
         NetworkServer.Spawn (healCallout);
     }
     
@@ -50,7 +52,7 @@ public class HealthController : NetworkBehaviour {
                 transform.position + transform.up * damageCalloutVerticalOffset +
                 new Vector3 (0.0f, 0.0f, -1.0f), // z-offset
                 transform.rotation);
-        damageCallout.GetComponent<TextMesh> ().text = "-" + damageAmount.ToString ("0");
+        damageCallout.GetComponent<DamageCalloutController> ().text = "-" + damageAmount.ToString ("0");
         NetworkServer.Spawn (damageCallout);
     }
 
