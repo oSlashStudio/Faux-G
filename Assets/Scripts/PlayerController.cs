@@ -27,6 +27,11 @@ public class PlayerController : NetworkBehaviour {
         GetComponent<MeshRenderer> ().material.color = Color.red;
 
         if (isLocalPlayer) {
+            // Delete GUI camera
+            if (Camera.main.gameObject != null) {
+                Destroy (Camera.main.gameObject);
+            }
+
             // Instantiate camera
             CmdInstantiateCamera ();
 
@@ -41,7 +46,7 @@ public class PlayerController : NetworkBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		rigidBody = GetComponent<Rigidbody2D> ();
+        rigidBody = GetComponent<Rigidbody2D> ();
     }
 	
 	// Update is called once per frame
