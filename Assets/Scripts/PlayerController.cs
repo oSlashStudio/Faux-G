@@ -7,6 +7,7 @@ public class PlayerController : NetworkBehaviour {
 	public Attractor attractor;
     public GameObject crosshairPrefab;
     public GameObject weaponPrefab;
+    public GameObject cameraPrefab;
 	public float moveSpeed = 15.0f;
 	public float jumpForce = 250.0f;
     
@@ -22,10 +23,12 @@ public class PlayerController : NetworkBehaviour {
     public WeaponController weaponController;
 
     public override void OnStartLocalPlayer () {
-        Camera.main.GetComponent<CameraController> ().playerObject = gameObject;
         GetComponent<MeshRenderer> ().material.color = Color.red;
 
         if (isLocalPlayer) {
+            // Instantiate camera
+            CmdInstantiateCamera ();
+
             // Instantiate crosshair locally
             crosshair = (GameObject) Instantiate (crosshairPrefab, transform.position, Quaternion.identity);
             crosshairController = crosshair.GetComponent<CrosshairController> ();
@@ -72,6 +75,23 @@ public class PlayerController : NetworkBehaviour {
 	}
 
     [Command]
+    void CmdInstantiateCamera () {
+        GameObject camera = (GameObject) Instantiate (cameraPrefab, transform.position, Quaternion.identity);
+        camera.GetComponent<CameraController> ().playerObject = gameObject;
+        NetworkServer.SpawnWithClientAuthority (camera, connectionToClient);
+        RpcInitializeCamera (camera, gameObject);
+    }
+
+    [ClientRpc]
+    void RpcInitializeCamera (GameObject camera, GameObject player) {
+        camera.GetComponent<CameraController> ().playerObject = player;
+        if (hasAuthority) {
+            camera.GetComponent<Camera> ().enabled = true;
+            camera.GetComponent<AudioListener> ().enabled = true;
+        }
+    }
+
+    [Command]
     void CmdInstantiateWeapon () {
         weapon = (GameObject) Instantiate (weaponPrefab, transform.position + transform.up * 0.3f, Quaternion.identity);
         // Initialize weapon on server
@@ -92,6 +112,9 @@ public class PlayerController : NetworkBehaviour {
     }
 
     void UpdateCrosshairPosition () {
+        if (Camera.main == null) {
+            return;
+        }
         Vector2 mousePosition = (Vector2) Camera.main.ScreenToWorldPoint (Input.mousePosition);
         // Calculate direction vector
         Vector2 moveDirectionVector = mousePosition - (Vector2) crosshair.transform.position;

@@ -27,29 +27,31 @@ public class ProjectileController : NetworkBehaviour {
 	}
 
 	void OnCollisionEnter2D (Collision2D collision) {
-        if (!isServer) {
-            return;
-        }
         if (collision.collider.tag.Equals ("Projectile")) { // Ignore projectile-to-projectile collisions
             Physics2D.IgnoreCollision (GetComponent<Collider2D> (), collision.collider);
         } else {
-            if (collision.collider.tag.Equals ("Player")) {
-                // Handle damage to player
-                HealthController playerHealthController = collision.gameObject.GetComponent<HealthController> ();
-                playerHealthController.ReduceHealth (bulletDamage);
-            }
-            foreach (Camera currentCamera in Camera.allCameras) { // Loop through all cameras on scene
-                Vector3 currentCameraPosition = currentCamera.transform.position;
-                // Check if distance to currentCamera is within effect distance
-                if (IsInEffectRange (new Vector2 (currentCameraPosition.x, currentCameraPosition.y))) {
-                    currentCamera.GetComponent<CameraController> ().toggleShaking (effectIntensity);
+            if (isClient) { // Only simulate camera shake on client due to camera synchronization using Network Transform
+                // Loop through all cameras on scene
+                foreach (Camera currentCamera in Camera.allCameras) {
+                    Vector3 currentCameraPosition = currentCamera.transform.position;
+                    // Check if distance to currentCamera is within effect distance
+                    if (IsInEffectRange (new Vector2 (currentCameraPosition.x, currentCameraPosition.y))) {
+                        currentCamera.GetComponent<CameraController> ().toggleShaking (effectIntensity);
+                    }
                 }
             }
-            // Instantiate explosion prefab
-            GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, transform.rotation);
-            NetworkServer.Spawn (explosion);
-            // Finally, destroy this game object
-            Destroy (gameObject);
+            if (isServer) { // Only simulate collision event on server due to synchronization using SyncVar and server-side instantiation
+                if (collision.collider.tag.Equals ("Player")) {
+                    // Handle damage to player
+                    HealthController playerHealthController = collision.gameObject.GetComponent<HealthController> ();
+                    playerHealthController.ReduceHealth (bulletDamage);
+                }
+                // Instantiate explosion prefab
+                GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, transform.rotation);
+                NetworkServer.Spawn (explosion);
+                // Finally, destroy this game object
+                Destroy (gameObject);
+            }
         }
 	}
 

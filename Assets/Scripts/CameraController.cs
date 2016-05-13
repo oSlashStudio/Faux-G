@@ -1,7 +1,8 @@
 using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 
-public class CameraController : MonoBehaviour {
+public class CameraController : NetworkBehaviour {
 
 	public static float DEFAULT_SHAKE_INTENSITY = 0.5f;
 	public static float DEFAULT_SHAKE_THRESHOLD = 0.1f;
@@ -11,8 +12,18 @@ public class CameraController : MonoBehaviour {
 	public float intensity = DEFAULT_SHAKE_INTENSITY;
 	public float dampingFactor = 0.975f;
 
-	// Use this for initialization
-	void Start () {
+    public override void OnStartServer () {
+        GetComponent<Camera> ().enabled = false;
+        GetComponent<AudioListener> ().enabled = false;
+    }
+
+    public override void OnStartClient () {
+        GetComponent<Camera> ().enabled = false;
+        GetComponent<AudioListener> ().enabled = false;
+    }
+
+    // Use this for initialization
+    void Start () {
 
 	}
 
