@@ -27,7 +27,11 @@ public class HealthController : NetworkBehaviour {
         // Check health threshold on each frame @server
         if (isServer) {
             if (currentHealth <= 0.0f) {
-                Destroy (gameObject);
+                NetworkServer.Destroy (gameObject);
+                // Respawn player
+                Transform spawn = NetworkManager.singleton.GetStartPosition ();
+                GameObject newPlayer = (GameObject) Instantiate (NetworkManager.singleton.playerPrefab, spawn.position, spawn.rotation);
+                NetworkServer.ReplacePlayerForConnection (connectionToClient, newPlayer, playerControllerId);
             }
         }
         // Rescale the healthbar based on current health percentage
