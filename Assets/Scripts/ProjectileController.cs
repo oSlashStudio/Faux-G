@@ -27,6 +27,9 @@ public class ProjectileController : NetworkBehaviour {
 	}
 
 	void OnCollisionEnter2D (Collision2D collision) {
+        if (!isServer) {
+            return;
+        }
         if (collision.collider.tag.Equals ("Projectile")) { // Ignore projectile-to-projectile collisions
             Physics2D.IgnoreCollision (GetComponent<Collider2D> (), collision.collider);
         } else {
@@ -43,7 +46,8 @@ public class ProjectileController : NetworkBehaviour {
                 }
             }
             // Instantiate explosion prefab
-            Instantiate (explosionPrefab, transform.position, transform.rotation);
+            GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, transform.rotation);
+            NetworkServer.Spawn (explosion);
             // Finally, destroy this game object
             Destroy (gameObject);
         }
