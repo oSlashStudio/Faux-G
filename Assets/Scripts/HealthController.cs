@@ -27,50 +27,31 @@ public class HealthController : NetworkBehaviour {
         // Rescale the healthbar based on current health percentage
         healthBar.transform.localScale = new Vector3 (currentHealth / maxHealth, transform.localScale.y, transform.localScale.z);
     }
-
-    void OnCollisionEnter2D (Collision2D collision) {
-        // Upon collision of transform with damaging projectiles
-        if (collision.collider.tag.Equals ("Projectile")) {
-            // Instantiate damage callout and assign reference
-            GameObject damageCallout = (GameObject) Instantiate (damageCalloutPrefab, 
-                transform.position + transform.up * damageCalloutVerticalOffset + 
-                new Vector3 (0.0f, 0.0f, -1.0f), // z-offset
-                transform.rotation);
-            // Check colliding projectile type
-            switch (collision.collider.name) {
-                case "Rifle Bullet(Clone)":
-                    // Modify damage callout text to indicate damage
-                    damageCallout.GetComponent<TextMesh> ().text = "-10";
-                    CmdReduceHealth (10.0f); // TO-DO: Move rifle bullet damage to global preferences
-                    break;
-                case "Rocket Shell(Clone)":
-                    // Modify damage callout text to indicate damage
-                    damageCallout.GetComponent<TextMesh> ().text = "-100";
-                    CmdReduceHealth (100.0f); // TO-DO: Move rocket shell damage to global preferences
-                    break;
-                case "Minigun Bullet(Clone)":
-                    // Modify damage callout text to indicate damage
-                    damageCallout.GetComponent<TextMesh> ().text = "-2";
-                    CmdReduceHealth (2.0f); // TO-DO: Move minigun bullet damage to global preferences
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
     
-    public void CmdIncreaseHealth (float healAmount) {
+    public void IncreaseHealth (float healAmount) {
         if (!isServer) {
             return;
         }
         currentHealth += healAmount;
+        GameObject healCallout = (GameObject) Instantiate (damageCalloutPrefab,
+                transform.position + transform.up * damageCalloutVerticalOffset +
+                new Vector3 (0.0f, 0.0f, -1.0f), // z-offset
+                transform.rotation);
+        healCallout.GetComponent<TextMesh> ().text = "+" + healAmount.ToString ("0");
+        NetworkServer.Spawn (healCallout);
     }
     
-    public void CmdReduceHealth (float damageAmount) {
+    public void ReduceHealth (float damageAmount) {
         if (!isServer) {
             return;
         }
         currentHealth -= damageAmount;
+        GameObject damageCallout = (GameObject) Instantiate (damageCalloutPrefab,
+                transform.position + transform.up * damageCalloutVerticalOffset +
+                new Vector3 (0.0f, 0.0f, -1.0f), // z-offset
+                transform.rotation);
+        damageCallout.GetComponent<TextMesh> ().text = "-" + damageAmount.ToString ("0");
+        NetworkServer.Spawn (damageCallout);
     }
 
 }

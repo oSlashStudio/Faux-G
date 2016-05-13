@@ -5,6 +5,7 @@ public class ProjectileController : MonoBehaviour {
 
 	public GameObject explosionPrefab;
 	public float bulletSpeed = 5.0f;
+    public float bulletDamage = 10.0f;
 	public float effectRange = 20.0f;
 	public float effectIntensity = 0.2f;
 
@@ -24,6 +25,11 @@ public class ProjectileController : MonoBehaviour {
         if (collision.collider.tag.Equals ("Projectile")) { // Ignore projectile-to-projectile collisions
             Physics2D.IgnoreCollision (GetComponent<Collider2D> (), collision.collider);
         } else {
+            if (collision.collider.tag.Equals ("Player")) {
+                // Handle damage to player
+                HealthController playerHealthController = collision.gameObject.GetComponent<HealthController> ();
+                playerHealthController.ReduceHealth (bulletDamage);
+            }
             foreach (Camera currentCamera in Camera.allCameras) { // Loop through all cameras on scene
                 Vector3 currentCameraPosition = currentCamera.transform.position;
                 // Check if distance to currentCamera is within effect distance
