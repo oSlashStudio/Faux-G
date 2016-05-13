@@ -4,36 +4,28 @@ using System.Collections;
 
 public class HealthController : NetworkBehaviour {
 
-    public GameObject healthBarPrefab;
+    public GameObject healthBar;
     public GameObject damageCalloutPrefab;
-    public float healthBarVerticalOffset = -1.0f;
-    public float damageCalloutVerticalOffset = 1.0f;
+    public float healthBarVerticalOffset = 1.5f;
+    public float damageCalloutVerticalOffset = 1.5f;
 
-    public HealthBarController healthBarController;
+    public float maxHealth = 100.0f;
+    [SyncVar]
+    public float currentHealth;
 
 	// Use this for initialization
 	void Start () {
-        if (isLocalPlayer) {
-            CmdSpawnHealthBar (GetComponent<NetworkIdentity> ());
-        }
+        currentHealth = maxHealth;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-	
-	}
-
-    [Command]
-    void CmdSpawnHealthBar (NetworkIdentity parentNetworkIdentity) {
-        GameObject healthBar = (GameObject) Instantiate (healthBarPrefab,
-            new Vector3 (transform.position.x, transform.position.y + healthBarVerticalOffset, transform.position.z),
-            transform.rotation);
-        // Assign transform as health bar's parent
-        healthBar.transform.parent = parentNetworkIdentity.transform;
-        // Assign health bar's controller to parameter (access optimization)
-        healthBarController = healthBar.GetComponent<HealthBarController> ();
-        // Spawn health bar on server side
-        NetworkServer.SpawnWithClientAuthority (healthBar, base.connectionToClient);
+        // Check health threshold on every frame
+        if (currentHealth <= 0.0f) {
+            Destroy (gameObject);
+        }
+        // Rescale the healthbar based on current health percentage
+        healthBar.transform.localScale = new Vector3 (currentHealth / maxHealth, transform.localScale.y, transform.localScale.z);
     }
 
     void OnCollisionEnter2D (Collision2D collision) {
@@ -49,21 +41,36 @@ public class HealthController : NetworkBehaviour {
                 case "Rifle Bullet(Clone)":
                     // Modify damage callout text to indicate damage
                     damageCallout.GetComponent<TextMesh> ().text = "-10";
-                    healthBarController.reduceHealth (10.0f); // TO-DO: Move rifle bullet damage to global preferences
+                    CmdReduceHealth (10.0f); // TO-DO: Move rifle bullet damage to global preferences
                     break;
                 case "Rocket Shell(Clone)":
                     // Modify damage callout text to indicate damage
                     damageCallout.GetComponent<TextMesh> ().text = "-100";
-                    healthBarController.reduceHealth (100.0f); // TO-DO: Move rocket shell damage to global preferences
+                    CmdReduceHealth (100.0f); // TO-DO: Move rocket shell damage to global preferences
                     break;
                 case "Minigun Bullet(Clone)":
                     // Modify damage callout text to indicate damage
                     damageCallout.GetComponent<TextMesh> ().text = "-2";
-                    healthBarController.reduceHealth (2.0f); // TO-DO: Move minigun bullet damage to global preferences
+                    CmdReduceHealth (2.0f); // TO-DO: Move minigun bullet damage to global preferences
                     break;
                 default:
                     break;
             }
         }
     }
+    
+    public void CmdIncreaseHealth (float healAmount) {
+        if (!isServer) {
+            return;
+        }
+        currentHealth += healAmount;
+    }
+    
+    public void CmdReduceHealth (float damageAmount) {
+        if (!isServer) {
+            return;
+        }
+        currentHealth -= damageAmount;
+    }
+
 }

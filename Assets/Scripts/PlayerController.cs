@@ -7,8 +7,7 @@ public class PlayerController : NetworkBehaviour {
 	public Attractor attractor;
 	public float moveSpeed = 15.0f;
 	public float jumpForce = 250.0f;
-
-    [SyncVar]
+    
 	private Vector3 movementDirection;
 	private Rigidbody2D rigidBody;
 	private bool canMove = false; // Initially, player is spawned airborne, unable to move
