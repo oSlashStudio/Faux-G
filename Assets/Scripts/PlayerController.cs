@@ -19,8 +19,9 @@ public class PlayerController : NetworkBehaviour {
 
     private GameObject crosshair;
     private CrosshairController crosshairController;
-    public GameObject weapon;
-    public WeaponController weaponController;
+    private GameObject weapon;
+    private WeaponController weaponController;
+    private GameObject mainCamera;
 
     public override void OnStartLocalPlayer () {
         GetComponent<MeshRenderer> ().material.color = Color.red;
@@ -74,6 +75,11 @@ public class PlayerController : NetworkBehaviour {
 		canJump = true;
 	}
 
+    void OnDestroy () {
+        Destroy (crosshair);
+        Destroy (mainCamera);
+    }
+
     [Command]
     void CmdInstantiateCamera () {
         GameObject camera = (GameObject) Instantiate (cameraPrefab, transform.position, Quaternion.identity);
@@ -85,6 +91,7 @@ public class PlayerController : NetworkBehaviour {
     [ClientRpc]
     void RpcInitializeCamera (GameObject camera, GameObject player) {
         camera.GetComponent<CameraController> ().playerObject = player;
+        player.GetComponent<PlayerController> ().mainCamera = camera;
         if (hasAuthority) {
             camera.GetComponent<Camera> ().enabled = true;
             camera.GetComponent<AudioListener> ().enabled = true;

@@ -18,6 +18,10 @@ public class CrosshairController : MonoBehaviour {
 
     }
 
+    void OnDestroy () {
+        Cursor.visible = true;
+    }
+
     public void MoveTowards (Vector2 targetPosition) {
         rigidBody.MovePosition (targetPosition);
     }

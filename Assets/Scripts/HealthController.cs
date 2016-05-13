@@ -13,9 +13,13 @@ public class HealthController : NetworkBehaviour {
     [SyncVar]
     public float currentHealth;
 
+    public override void OnStartServer () {
+        currentHealth = maxHealth;
+    }
+
 	// Use this for initialization
 	void Start () {
-        currentHealth = maxHealth;
+
 	}
 	
 	// Update is called once per frame
