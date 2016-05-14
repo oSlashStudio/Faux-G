@@ -11,12 +11,15 @@ public class PlayerController : NetworkBehaviour {
 	public float moveSpeed = 15.0f;
 	public float jumpForce = 350.0f;
     public float leapForce = 850.0f;
+    public float defaultLeapDelay = 5.0f;
     
 	private Vector3 movementDirection;
 	private Rigidbody2D rigidBody;
 	private bool canMove = false; // Initially, player is spawned airborne, unable to move
 	private bool canLeap = false; // Initially, player is spawned airborne, unable to flip
 	private bool canJump = false; // Initially, player is spawned airborne, unable to jump
+    // Accessed by LeapDelayBarController
+    public float leapDelay = 0.0f; // Initial leap delay is 0, player can instantly leap after touching ground
 
     private GameObject crosshair;
     private CrosshairController crosshairController;
@@ -48,6 +51,7 @@ public class PlayerController : NetworkBehaviour {
         if (!isLocalPlayer) {
             return;
         }
+        UpdateLeapDelay ();
         UpdateCrosshairPosition ();
         UpdateWeaponDirection ();
         CmdUpdateWeaponDirection (crosshair.transform.position);
@@ -172,9 +176,17 @@ public class PlayerController : NetworkBehaviour {
         rigidBody.velocity += new Vector2 (movementVector.x, movementVector.y);
     }
 
+    void UpdateLeapDelay () {
+        if (leapDelay < 0.0f) {
+            leapDelay = 0.0f;
+        } else if (leapDelay > 0.0f) {
+            leapDelay -= Time.deltaTime;
+        }
+    }
+
 	void InputLeap () {
 		if (Input.GetKeyDown (KeyCode.Space)) {
-			if (canLeap) {
+			if (canLeap && leapDelay <= 0.0f) {
                 Leap ();
 			}
 		}
@@ -184,6 +196,8 @@ public class PlayerController : NetworkBehaviour {
         // Disable jump and leap while leaping
         canJump = false;
         canLeap = false;
+        // Introduce leap delay
+        leapDelay = defaultLeapDelay;
         rigidBody.AddForce (transform.up * leapForce);
     }
 
