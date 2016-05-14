@@ -11,8 +11,4 @@ public class FauxGravityDefaultAttractor : Attractor {
         // Intentional blank method, default attractor does nothing to fauxGravityBody
     }
 
-    public override void Flip (Transform targetTransform) {
-        // Intentional blank method, default attractor does nothing to fauxGravityBody
-    }
-
 }

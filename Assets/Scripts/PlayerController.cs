@@ -9,12 +9,13 @@ public class PlayerController : NetworkBehaviour {
     public GameObject weaponPrefab;
     public GameObject cameraPrefab;
 	public float moveSpeed = 15.0f;
-	public float jumpForce = 250.0f;
+	public float jumpForce = 350.0f;
+    public float leapForce = 850.0f;
     
 	private Vector3 movementDirection;
 	private Rigidbody2D rigidBody;
 	private bool canMove = false; // Initially, player is spawned airborne, unable to move
-	private bool canFlip = false; // Initially, player is spawned airborne, unable to flip
+	private bool canLeap = false; // Initially, player is spawned airborne, unable to flip
 	private bool canJump = false; // Initially, player is spawned airborne, unable to jump
 
     private GameObject crosshair;
@@ -54,7 +55,7 @@ public class PlayerController : NetworkBehaviour {
             InputFire ();
             InputChangeWeapon ();
             InputMove ();
-            InputFlipGravity ();
+            InputLeap ();
             InputJump ();
 		}
 	}
@@ -70,7 +71,7 @@ public class PlayerController : NetworkBehaviour {
 
 	void OnCollisionEnter2D (Collision2D collision) {
 		canMove = true;
-		canFlip = true;
+		canLeap = true;
 		canJump = true;
 	}
 
@@ -171,18 +172,23 @@ public class PlayerController : NetworkBehaviour {
         rigidBody.velocity += new Vector2 (movementVector.x, movementVector.y);
     }
 
-	void InputFlipGravity () {
-		if (Input.GetKeyDown (KeyCode.Space)) { // Flip gravity
-			if (canFlip) {
-				// Disable flip while flipping
-				canFlip = false;
-				attractor.Flip (transform);
+	void InputLeap () {
+		if (Input.GetKeyDown (KeyCode.Space)) {
+			if (canLeap) {
+                Leap ();
 			}
 		}
 	}
 
+    void Leap () {
+        // Disable jump and leap while leaping
+        canJump = false;
+        canLeap = false;
+        rigidBody.AddForce (transform.up * leapForce);
+    }
+
 	void InputJump () {
-		if (Input.GetKeyDown (KeyCode.W)) { // Jump
+		if (Input.GetKeyDown (KeyCode.W)) {
 			if (canJump) {
 				Jump ();
 			}
@@ -190,10 +196,10 @@ public class PlayerController : NetworkBehaviour {
 	}
 
 	void Jump () {
-		Vector3 jumpDirection = (attractor.transform.position - transform.position).normalized;
-		// Disable jump while jumping
+		// Disable jump and leap while jumping
 		canJump = false;
-		rigidBody.AddForce (new Vector2 (jumpDirection.x, jumpDirection.y) * jumpForce);
+        canLeap = false;
+		rigidBody.AddForce (transform.up * jumpForce);
 	}
 
 }
