@@ -44,23 +44,23 @@ public class WeaponController : NetworkBehaviour {
     }
 
 	[Command]
-	public void CmdFire (Vector3 targetPosition) {
+	public void CmdFire (Vector3 sourcePosition, Vector3 targetPosition) {
         switch (currentWeapon) {
             case 1:
                 if (rifleFireDelay <= 0.0f) {
-                    Fire (targetPosition, rifleBulletPrefab, rifleMaxSpreadAngle);
+                    Fire (sourcePosition, targetPosition, rifleBulletPrefab, rifleMaxSpreadAngle);
                     rifleFireDelay = defaultRifleFireDelay;
                 }
                 break;
             case 2:
                 if (rocketLauncherFireDelay <= 0.0f) {
-                    Fire (targetPosition, rocketLauncherShellPrefab, rocketLauncherMaxSpreadAngle);
+                    Fire (sourcePosition, targetPosition, rocketLauncherShellPrefab, rocketLauncherMaxSpreadAngle);
                     rocketLauncherFireDelay = defaultRocketLauncherFireDelay;
                 }
                 break;
             case 3:
                 if (minigunFireDelay <= 0.0f) {
-                    Fire (targetPosition, minigunBulletPrefab, minigunMaxSpreadAngle);
+                    Fire (sourcePosition, targetPosition, minigunBulletPrefab, minigunMaxSpreadAngle);
                     minigunFireDelay = defaultMinigunFireDelay;
                 }
                 break;
@@ -69,10 +69,9 @@ public class WeaponController : NetworkBehaviour {
         }
 	}
 
-    void Fire (Vector3 targetPosition, GameObject projectilePrefab, float maxSpreadAngle) {
+    void Fire (Vector3 sourcePosition, Vector3 targetPosition, GameObject projectilePrefab, float maxSpreadAngle) {
         // Bullet direction is characterized by the vector between crosshair and weapon muzzle
-        Vector3 bulletDirectionVector = (targetPosition -
-                                         weaponMuzzlePrefab.transform.position).normalized;
+        Vector3 bulletDirectionVector = (targetPosition - sourcePosition).normalized;
         Quaternion bulletRotation = Quaternion.LookRotation (bulletDirectionVector);
         Vector3 bulletRotationVector = bulletRotation.eulerAngles;
 
@@ -80,7 +79,7 @@ public class WeaponController : NetworkBehaviour {
         bulletRotationVector.x += Random.Range (-1.0f, 1.0f) * maxSpreadAngle;
 
         // Create projectile with appropriate position and rotation on the server
-        GameObject projectile = (GameObject) Instantiate (projectilePrefab, weaponMuzzlePrefab.transform.position,
+        GameObject projectile = (GameObject) Instantiate (projectilePrefab, sourcePosition,
             Quaternion.Euler (bulletRotationVector));
         // Create projectile on client
         NetworkServer.Spawn (projectile);

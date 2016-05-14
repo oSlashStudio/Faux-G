@@ -26,22 +26,15 @@ public class PlayerController : NetworkBehaviour {
     public override void OnStartLocalPlayer () {
         GetComponent<MeshRenderer> ().material.color = Color.red;
 
-        if (isLocalPlayer) {
-            // Delete GUI camera
-            if (Camera.main.gameObject != null) {
-                Destroy (Camera.main.gameObject);
-            }
+        // Instantiate camera
+        CmdInstantiateCamera ();
 
-            // Instantiate camera
-            CmdInstantiateCamera ();
+        // Instantiate crosshair locally
+        crosshair = (GameObject) Instantiate (crosshairPrefab, transform.position, Quaternion.identity);
+        crosshairController = crosshair.GetComponent<CrosshairController> ();
 
-            // Instantiate crosshair locally
-            crosshair = (GameObject) Instantiate (crosshairPrefab, transform.position, Quaternion.identity);
-            crosshairController = crosshair.GetComponent<CrosshairController> ();
-
-            // Instantiate weapon
-            CmdInstantiateWeapon ();
-        }
+        // Instantiate weapon
+        CmdInstantiateWeapon ();
     }
 
 	// Use this for initialization
@@ -56,6 +49,7 @@ public class PlayerController : NetworkBehaviour {
         }
         UpdateCrosshairPosition ();
         UpdateWeaponDirection ();
+        CmdUpdateWeaponDirection (crosshair.transform.position);
         if (canMove) {
             InputFire ();
             InputChangeWeapon ();
@@ -143,9 +137,17 @@ public class PlayerController : NetworkBehaviour {
         weaponController.UpdateWeaponDirection (crosshair.transform.position);
     }
 
+    [Command]
+    void CmdUpdateWeaponDirection (Vector3 crosshairPosition) {
+        if (weaponController == null) {
+            return;
+        }
+        weaponController.UpdateWeaponDirection (crosshairPosition);
+    }
+
     void InputFire () {
         if (Input.GetMouseButton (0)) { // Fire current weapon
-            weaponController.CmdFire (crosshair.transform.position);
+            weaponController.CmdFire (weapon.transform.FindChild ("Weapon Muzzle").position, crosshair.transform.position);
         }
     }
 

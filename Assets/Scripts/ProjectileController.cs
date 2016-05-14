@@ -33,10 +33,12 @@ public class ProjectileController : NetworkBehaviour {
             if (isClient) { // Only simulate camera shake on client due to camera synchronization using Network Transform
                 // Loop through all cameras on scene
                 foreach (Camera currentCamera in Camera.allCameras) {
-                    Vector3 currentCameraPosition = currentCamera.transform.position;
-                    // Check if distance to currentCamera is within effect distance
-                    if (IsInEffectRange (new Vector2 (currentCameraPosition.x, currentCameraPosition.y))) {
-                        currentCamera.GetComponent<CameraController> ().toggleShaking (effectIntensity);
+                    if (currentCamera.tag.Equals ("MainCamera")) {
+                        Vector3 currentCameraPosition = currentCamera.transform.position;
+                        // Check if distance to currentCamera is within effect distance
+                        if (IsInEffectRange (new Vector2 (currentCameraPosition.x, currentCameraPosition.y))) {
+                            currentCamera.GetComponent<CameraController> ().toggleShaking (effectIntensity);
+                        }
                     }
                 }
             }
