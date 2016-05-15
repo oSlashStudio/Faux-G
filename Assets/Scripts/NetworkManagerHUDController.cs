@@ -8,7 +8,8 @@ public class NetworkManagerHUDController : NetworkBehaviour {
 
 	// Use this for initialization
 	void Start () {
-
+        networkManagerHUD = NetworkManager.singleton.GetComponent<NetworkManagerHUD> ();
+        networkManagerHUD.showGUI = false;
 	}
 	
 	// Update is called once per frame
