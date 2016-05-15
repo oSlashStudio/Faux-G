@@ -32,7 +32,7 @@ public class WeaponController : NetworkBehaviour {
     private int currentWeapon = 1; // Player starts with rifle as weapon (id 1)
 
     public override void OnStartClient () {
-        
+
     }
 
     // Use this for initialization
