@@ -52,7 +52,6 @@ public class PlayerController : NetworkBehaviour {
             return;
         }
         UpdateLeapDelay ();
-        UpdateCrosshairPosition ();
         CmdUpdateWeaponPosition ();
         CmdUpdateWeaponDirection (crosshair.transform.position);
         if (canMove) {
@@ -115,19 +114,6 @@ public class PlayerController : NetworkBehaviour {
         NetworkServer.SpawnWithClientAuthority (weapon, connectionToClient);
     }
 
-    void UpdateCrosshairPosition () {
-        if (Camera.main == null) {
-            return;
-        }
-        Vector2 mousePosition = (Vector2) Camera.main.ScreenToWorldPoint (Input.mousePosition);
-        // Calculate direction vector
-        Vector2 moveDirectionVector = mousePosition - (Vector2) crosshair.transform.position;
-        // Calculate target position vector
-        Vector2 targetPosition = (Vector2) crosshair.transform.position + moveDirectionVector * crosshairController.moveSpeed * Time.deltaTime;
-        // Move crosshair towards target position
-        crosshairController.MoveTowards (targetPosition);
-    }
-
     [Command]
     void CmdUpdateWeaponPosition () {
         if (weaponController == null) {
@@ -164,7 +150,7 @@ public class PlayerController : NetworkBehaviour {
 
     void InputFire () {
         if (Input.GetMouseButton (0)) { // Fire current weapon
-            weaponController.CmdFire (weapon.transform.FindChild ("Weapon Muzzle").position, crosshair.transform.position);
+            weaponController.CmdFire (weapon.transform.FindChild ("Weapon Muzzle").position, crosshair.transform.position, crosshairController.accuracy);
         }
     }
 

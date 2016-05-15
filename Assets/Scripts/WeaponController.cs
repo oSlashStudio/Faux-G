@@ -13,13 +13,13 @@ public class WeaponController : NetworkBehaviour {
     public float defaultRocketLauncherFireDelay = 5.0f;
     public float defaultMinigunFireDelay = 0.1f;
 
-    public float rifleMaxSpreadAngle = 5.0f;
-    public float rocketLauncherMaxSpreadAngle = 0.0f;
-    public float minigunMaxSpreadAngle = 10.0f;
+    public float rifleMaxSpreadAngle = 10.0f;
+    public float rocketLauncherMaxSpreadAngle = 5.0f;
+    public float minigunMaxSpreadAngle = 20.0f;
 
-    public float rifleRecoil = 2.0f;
-    public float rocketLauncherRecoil = 5.0f;
-    public float minigunRecoil = 1.0f;
+    public float rifleRecoil = 0.3f;
+    public float rocketLauncherRecoil = 1.0f;
+    public float minigunRecoil = 0.1f;
 
     public float rocketLauncherKnockbackForce = 500.0f;
 
@@ -32,16 +32,16 @@ public class WeaponController : NetworkBehaviour {
     private int currentWeapon = 1; // Player starts with rifle as weapon (id 1)
 
     public override void OnStartClient () {
-
-    }
-
-    // Use this for initialization
-    void Start () {
         GameObject player = ClientScene.FindLocalObject (playerNetId);
         transform.parent = player.transform;
         transform.localPosition = player.transform.up * 0.3f;
         player.GetComponent<PlayerController> ().weapon = gameObject;
         player.GetComponent<PlayerController> ().weaponController = gameObject.GetComponent<WeaponController> ();
+    }
+
+    // Use this for initialization
+    void Start () {
+        
     }
 
     // Update is called once per frame
@@ -67,18 +67,18 @@ public class WeaponController : NetworkBehaviour {
     }
 
     [Command]
-    public void CmdFire (Vector3 sourcePosition, Vector3 targetPosition) {
+    public void CmdFire (Vector3 sourcePosition, Vector3 targetPosition, float accuracy) {
         switch (currentWeapon) {
             case 1:
                 if (rifleFireDelay <= 0.0f) {
-                    Fire (sourcePosition, targetPosition, rifleBulletPrefab, rifleMaxSpreadAngle);
+                    Fire (sourcePosition, targetPosition, rifleBulletPrefab, rifleMaxSpreadAngle, accuracy);
                     RpcIntroduceRecoil (rifleRecoil);
                     rifleFireDelay = defaultRifleFireDelay;
                 }
                 break;
             case 2:
                 if (rocketLauncherFireDelay <= 0.0f) {
-                    Fire (sourcePosition, targetPosition, rocketLauncherShellPrefab, rocketLauncherMaxSpreadAngle);
+                    Fire (sourcePosition, targetPosition, rocketLauncherShellPrefab, rocketLauncherMaxSpreadAngle, accuracy);
                     RpcIntroduceRecoil (rocketLauncherRecoil);
                     RpcIntroduceKnockback (rocketLauncherKnockbackForce, (sourcePosition - targetPosition).normalized);
                     rocketLauncherFireDelay = defaultRocketLauncherFireDelay;
@@ -86,7 +86,7 @@ public class WeaponController : NetworkBehaviour {
                 break;
             case 3:
                 if (minigunFireDelay <= 0.0f) {
-                    Fire (sourcePosition, targetPosition, minigunBulletPrefab, minigunMaxSpreadAngle);
+                    Fire (sourcePosition, targetPosition, minigunBulletPrefab, minigunMaxSpreadAngle, accuracy);
                     RpcIntroduceRecoil (minigunRecoil);
                     minigunFireDelay = defaultMinigunFireDelay;
                 }
@@ -96,14 +96,14 @@ public class WeaponController : NetworkBehaviour {
         }
     }
 
-    void Fire (Vector3 sourcePosition, Vector3 targetPosition, GameObject projectilePrefab, float maxSpreadAngle) {
+    void Fire (Vector3 sourcePosition, Vector3 targetPosition, GameObject projectilePrefab, float maxSpreadAngle, float accuracy) {
         // Bullet direction is characterized by the vector between crosshair and weapon muzzle
         Vector3 bulletDirectionVector = (targetPosition - sourcePosition).normalized;
         Quaternion bulletRotation = Quaternion.LookRotation (bulletDirectionVector);
         Vector3 bulletRotationVector = bulletRotation.eulerAngles;
 
-        // Randomize projectile spread
-        bulletRotationVector.x += Random.Range (-1.0f, 1.0f) * maxSpreadAngle;
+        // Calculate projectile spread based on accuracy
+        bulletRotationVector.x += Random.Range (-1.0f, 1.0f) * maxSpreadAngle * (1.0f - accuracy);
 
         // Create projectile with appropriate position and rotation on the server
         GameObject projectile = (GameObject) Instantiate (projectilePrefab, sourcePosition,
@@ -117,8 +117,7 @@ public class WeaponController : NetworkBehaviour {
     [ClientRpc]
     void RpcIntroduceRecoil (float recoil) {
         if (hasAuthority) {
-            Vector2 displacement = (Random.insideUnitCircle).normalized * recoil;
-            transform.parent.GetComponent<PlayerController> ().crosshair.transform.position += (Vector3) displacement;
+            transform.parent.GetComponent<PlayerController> ().crosshair.GetComponent<CrosshairController> ().ReduceAccuracy (recoil);
         }
     }
 
