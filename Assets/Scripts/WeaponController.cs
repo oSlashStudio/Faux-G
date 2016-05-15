@@ -8,15 +8,20 @@ public class WeaponController : NetworkBehaviour {
     public GameObject rifleBulletPrefab;
     public GameObject rocketLauncherShellPrefab;
     public GameObject minigunBulletPrefab;
+
     public float defaultRifleFireDelay = 0.2f;
     public float defaultRocketLauncherFireDelay = 5.0f;
     public float defaultMinigunFireDelay = 0.1f;
+
     public float rifleMaxSpreadAngle = 5.0f;
     public float rocketLauncherMaxSpreadAngle = 0.0f;
     public float minigunMaxSpreadAngle = 10.0f;
+
     public float rifleRecoil = 2.0f;
     public float rocketLauncherRecoil = 5.0f;
     public float minigunRecoil = 1.0f;
+
+    public float rocketLauncherKnockbackForce = 500.0f;
 
     [SyncVar]
     public NetworkInstanceId playerNetId;
@@ -75,6 +80,7 @@ public class WeaponController : NetworkBehaviour {
                 if (rocketLauncherFireDelay <= 0.0f) {
                     Fire (sourcePosition, targetPosition, rocketLauncherShellPrefab, rocketLauncherMaxSpreadAngle);
                     RpcIntroduceRecoil (rocketLauncherRecoil);
+                    RpcIntroduceKnockback (rocketLauncherKnockbackForce, (sourcePosition - targetPosition).normalized);
                     rocketLauncherFireDelay = defaultRocketLauncherFireDelay;
                 }
                 break;
@@ -111,6 +117,13 @@ public class WeaponController : NetworkBehaviour {
         if (hasAuthority) {
             Vector2 displacement = (Random.insideUnitCircle).normalized * recoil;
             transform.parent.GetComponent<PlayerController> ().crosshair.transform.position += (Vector3) displacement;
+        }
+    }
+
+    [ClientRpc]
+    void RpcIntroduceKnockback (float knockbackForce, Vector3 knockbackDirection) {
+        if (hasAuthority) {
+            transform.parent.GetComponent<Rigidbody2D> ().AddForce (knockbackDirection * knockbackForce);
         }
     }
 
