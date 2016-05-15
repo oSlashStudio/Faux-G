@@ -1,14 +1,24 @@
-﻿using UnityEngine;
+using UnityEngine;
+using UnityEngine.Networking;
 using System.Collections;
 
-public class ExplosionController : MonoBehaviour {
+public class ExplosionController : NetworkBehaviour {
+
+    public bool hasExplosionDamage = false;
+    public float explosionArea = 3.0f;
+    public float explosionDamage = 1.0f;
 
 	private float explosionDuration;
 
 	// Use this for initialization
 	void Start () {
 		explosionDuration = GetComponent<ParticleSystem>().duration;
-	}
+        if (isServer) { // Only does explosion damage on server
+            if (hasExplosionDamage) {
+                DamagePlayersInArea ();
+            }
+        }
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -17,4 +27,16 @@ public class ExplosionController : MonoBehaviour {
 			Destroy (gameObject);
 		}
 	}
+
+    void DamagePlayersInArea () {
+        Collider2D[] collidersInArea = Physics2D.OverlapCircleAll ((Vector2) transform.position, explosionArea);
+        foreach (Collider2D currentCollider in collidersInArea) {
+            if (currentCollider.tag.Equals ("Player")) {
+                // Handle damage to player
+                HealthController playerHealthController = currentCollider.gameObject.GetComponent<HealthController> ();
+                playerHealthController.ReduceHealth (explosionDamage);
+            }
+        }
+    }
+
 }

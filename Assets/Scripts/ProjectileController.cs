@@ -52,14 +52,20 @@ public class ProjectileController : NetworkBehaviour {
                     HealthController playerHealthController = collision.gameObject.GetComponent<HealthController> ();
                     playerHealthController.ReduceHealth (projectileDamage);
                 }
-                // Instantiate explosion prefab
-                GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, transform.rotation);
-                NetworkServer.Spawn (explosion);
-                // Finally, destroy this game object
+                // Destroy projectile
                 Destroy (gameObject);
             }
         }
 	}
+
+    void OnDestroy () {
+        if (!isServer) { // OnDestroy should only be invoked on the server
+            return;
+        }
+        // Instantiate explosion prefab
+        GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, transform.rotation);
+        NetworkServer.Spawn (explosion);
+    }
 
     void ShakeCamerasInRange () {
         // Loop through all cameras on scene
