@@ -109,7 +109,7 @@ public class WeaponController : NetworkBehaviour {
     [ClientRpc]
     void RpcIntroduceRecoil (float recoil) {
         if (hasAuthority) {
-            Vector2 displacement = Random.insideUnitCircle * recoil;
+            Vector2 displacement = (Random.insideUnitCircle).normalized * recoil;
             transform.parent.GetComponent<PlayerController> ().crosshair.transform.position += (Vector3) displacement;
         }
     }
