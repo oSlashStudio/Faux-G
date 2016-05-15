@@ -108,6 +108,8 @@ public class WeaponController : NetworkBehaviour {
         // Create projectile with appropriate position and rotation on the server
         GameObject projectile = (GameObject) Instantiate (projectilePrefab, sourcePosition,
             Quaternion.Euler (bulletRotationVector));
+        projectile.GetComponent<ProjectileController> ().playerNetId = playerNetId;
+        Physics2D.IgnoreCollision (projectile.GetComponent<Collider2D> (), gameObject.GetComponent<Collider2D> ());
         // Create projectile on client
         NetworkServer.Spawn (projectile);
     }

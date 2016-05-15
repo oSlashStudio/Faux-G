@@ -10,12 +10,19 @@ public class ProjectileController : NetworkBehaviour {
     public float projectileLifetime = 2.0f;
 	public float effectRange = 20.0f;
 	public float effectIntensity = 0.2f;
+    [SyncVar]
+    public NetworkInstanceId playerNetId;
 
 	Rigidbody2D rigidBody;
 
     public override void OnStartServer () {
         rigidBody = GetComponent<Rigidbody2D> ();
         rigidBody.velocity = new Vector2 (transform.forward.x, transform.forward.y) * projectileSpeed;
+    }
+
+    public override void OnStartClient () {
+        GameObject player = ClientScene.FindLocalObject (playerNetId);
+        Physics2D.IgnoreCollision (GetComponent<Collider2D> (), player.GetComponent<Collider2D> ());
     }
 
 	// Use this for initialization
