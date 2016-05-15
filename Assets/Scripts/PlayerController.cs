@@ -25,7 +25,7 @@ public class PlayerController : NetworkBehaviour {
     private CrosshairController crosshairController;
     public GameObject weapon;
     public WeaponController weaponController;
-    private GameObject mainCamera;
+    public GameObject mainCamera;
 
     public override void OnStartLocalPlayer () {
         GetComponent<MeshRenderer> ().material.color = Color.red;
@@ -88,14 +88,14 @@ public class PlayerController : NetworkBehaviour {
     void CmdInstantiateCamera () {
         GameObject camera = (GameObject) Instantiate (cameraPrefab, transform.position, Quaternion.identity);
         camera.GetComponent<CameraController> ().playerObject = gameObject;
+
+        camera.GetComponent<CameraController> ().playerNetId = GetComponent<NetworkIdentity> ().netId;
         NetworkServer.SpawnWithClientAuthority (camera, connectionToClient);
         RpcInitializeCamera (camera, gameObject);
     }
 
     [ClientRpc]
     void RpcInitializeCamera (GameObject camera, GameObject player) {
-        camera.GetComponent<CameraController> ().playerObject = player;
-        player.GetComponent<PlayerController> ().mainCamera = camera;
         if (hasAuthority) {
             camera.GetComponent<Camera> ().enabled = true;
             camera.GetComponent<AudioListener> ().enabled = true;

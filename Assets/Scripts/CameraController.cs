@@ -11,6 +11,8 @@ public class CameraController : NetworkBehaviour {
 	public bool isShaking = false;
 	public float intensity = DEFAULT_SHAKE_INTENSITY;
 	public float dampingFactor = 0.975f;
+    [SyncVar]
+    public NetworkInstanceId playerNetId; 
 
     public override void OnStartServer () {
         GetComponent<Camera> ().enabled = false;
@@ -24,8 +26,10 @@ public class CameraController : NetworkBehaviour {
 
     // Use this for initialization
     void Start () {
-
-	}
+        GameObject player = ClientScene.FindLocalObject (playerNetId);
+        playerObject = player;
+        player.GetComponent<PlayerController> ().mainCamera = gameObject;
+    }
 
 	// Update is called once per frame
 	void Update () {
