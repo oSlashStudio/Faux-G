@@ -14,6 +14,9 @@ public class WeaponController : NetworkBehaviour {
     public float rifleMaxSpreadAngle = 5.0f;
     public float rocketLauncherMaxSpreadAngle = 0.0f;
     public float minigunMaxSpreadAngle = 10.0f;
+    public float rifleRecoil = 2.0f;
+    public float rocketLauncherRecoil = 5.0f;
+    public float minigunRecoil = 1.0f;
 
     [SyncVar]
     public NetworkInstanceId playerNetId;
@@ -64,18 +67,21 @@ public class WeaponController : NetworkBehaviour {
             case 1:
                 if (rifleFireDelay <= 0.0f) {
                     Fire (sourcePosition, targetPosition, rifleBulletPrefab, rifleMaxSpreadAngle);
+                    RpcIntroduceRecoil (rifleRecoil);
                     rifleFireDelay = defaultRifleFireDelay;
                 }
                 break;
             case 2:
                 if (rocketLauncherFireDelay <= 0.0f) {
                     Fire (sourcePosition, targetPosition, rocketLauncherShellPrefab, rocketLauncherMaxSpreadAngle);
+                    RpcIntroduceRecoil (rocketLauncherRecoil);
                     rocketLauncherFireDelay = defaultRocketLauncherFireDelay;
                 }
                 break;
             case 3:
                 if (minigunFireDelay <= 0.0f) {
                     Fire (sourcePosition, targetPosition, minigunBulletPrefab, minigunMaxSpreadAngle);
+                    RpcIntroduceRecoil (minigunRecoil);
                     minigunFireDelay = defaultMinigunFireDelay;
                 }
                 break;
@@ -98,6 +104,14 @@ public class WeaponController : NetworkBehaviour {
             Quaternion.Euler (bulletRotationVector));
         // Create projectile on client
         NetworkServer.Spawn (projectile);
+    }
+
+    [ClientRpc]
+    void RpcIntroduceRecoil (float recoil) {
+        if (hasAuthority) {
+            Vector2 displacement = Random.insideUnitCircle * recoil;
+            transform.parent.GetComponent<PlayerController> ().crosshair.transform.position += (Vector3) displacement;
+        }
     }
 
     [Command]

@@ -21,7 +21,7 @@ public class PlayerController : NetworkBehaviour {
     // Accessed by LeapDelayBarController
     public float leapDelay = 0.0f; // Initial leap delay is 0, player can instantly leap after touching ground
 
-    private GameObject crosshair;
+    public GameObject crosshair;
     private CrosshairController crosshairController;
     public GameObject weapon;
     public WeaponController weaponController;
