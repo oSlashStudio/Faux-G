@@ -12,7 +12,7 @@ public class WeaponController : NetworkBehaviour {
     public float defaultRocketLauncherFireDelay = 5.0f;
     public float defaultMinigunFireDelay = 0.1f;
     public float rifleMaxSpreadAngle = 5.0f;
-    public float rocketLauncherMaxSpreadAngle = 1.0f;
+    public float rocketLauncherMaxSpreadAngle = 0.0f;
     public float minigunMaxSpreadAngle = 10.0f;
 
     [SyncVar]
