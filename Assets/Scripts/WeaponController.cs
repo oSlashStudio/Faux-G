@@ -105,6 +105,27 @@ public class WeaponController : NetworkBehaviour {
         if (currentWeapon != targetWeaponId) {
             currentWeapon = targetWeaponId;
         }
+        RpcChangeWeapon (targetWeaponId);
+    }
+
+    [ClientRpc]
+    void RpcChangeWeapon (int targetWeaponId) {
+        if (currentWeapon != targetWeaponId) {
+            currentWeapon = targetWeaponId;
+        }
+        switch (currentWeapon) {
+            case 1:
+                transform.localScale = new Vector3 (0.5f, 1.0f, 0.5f);
+                break;
+            case 2:
+                transform.localScale = new Vector3 (1.0f, 1.0f, 1.0f);
+                break;
+            case 3:
+                transform.localScale = new Vector3 (0.25f, 1.0f, 0.25f);
+                break;
+            default:
+                break;
+        }
     }
 
 }
