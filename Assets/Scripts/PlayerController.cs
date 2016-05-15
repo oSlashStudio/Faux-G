@@ -26,6 +26,8 @@ public class PlayerController : NetworkBehaviour {
     public GameObject weapon;
     public WeaponController weaponController;
     public GameObject mainCamera;
+    private bool isDead = false; // Initially, player is not dead
+    private float respawnTimer;
 
     public override void OnStartLocalPlayer () {
         GetComponent<MeshRenderer> ().material.color = Color.red;
@@ -51,6 +53,10 @@ public class PlayerController : NetworkBehaviour {
         if (!isLocalPlayer) {
             return;
         }
+        if (isDead) {
+            respawnTimer -= Time.deltaTime;
+            return;
+        }
         UpdateLeapDelay ();
         CmdUpdateWeaponPosition ();
         CmdUpdateWeaponDirection (crosshair.transform.position);
@@ -64,7 +70,7 @@ public class PlayerController : NetworkBehaviour {
 	}
 
 	void FixedUpdate () {
-        if (!isLocalPlayer) {
+        if (!isLocalPlayer || isDead) {
             return;
         }
         if (canMove) {
@@ -77,6 +83,22 @@ public class PlayerController : NetworkBehaviour {
 		canLeap = true;
 		canJump = true;
 	}
+
+    [ClientRpc]
+    public void RpcWaitForRespawn (float respawnTimer) {
+        if (isLocalPlayer) {
+            isDead = true;
+            this.respawnTimer = respawnTimer;
+            crosshair.GetComponent<SpriteRenderer> ().enabled = false;
+            GameObject[] players = GameObject.FindGameObjectsWithTag ("Player");
+            foreach (GameObject player in players) {
+                if (player.GetInstanceID () != gameObject.GetInstanceID ()) {
+                    mainCamera.GetComponent<CameraController> ().playerObject = player;
+                    break;
+                }
+            }
+        }
+    }
 
     void OnDestroy () {
         Destroy (crosshair);
@@ -213,5 +235,13 @@ public class PlayerController : NetworkBehaviour {
         canLeap = false;
 		rigidBody.AddForce (transform.up * jumpForce);
 	}
+
+    void OnGUI () {
+        if (isDead) {
+            GUIStyle style = GUI.skin.GetStyle ("Label");
+            style.alignment = TextAnchor.MiddleCenter;
+            GUI.Label (new Rect (0, 0, Screen.width, Screen.height), "Respawning in " + respawnTimer.ToString("0.00") + " seconds", style);
+        }
+    }
 
 }

@@ -11,7 +11,8 @@ public class ShieldingController : NetworkBehaviour {
     private Rigidbody2D rigidBody;
 
     public override void OnStartClient () {
-        if (!isServer) {
+        if (!isServer && hasAuthority) {
+            Debug.Log ("shieldd");
             CmdSyncShieldTransform ();
         }
     }
