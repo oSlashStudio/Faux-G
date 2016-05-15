@@ -4,38 +4,53 @@ using System.Collections;
 
 public class WeaponController : NetworkBehaviour {
 
-	public GameObject weaponMuzzlePrefab;
-	public GameObject rifleBulletPrefab;
-	public GameObject rocketLauncherShellPrefab;
+    public GameObject weaponMuzzlePrefab;
+    public GameObject rifleBulletPrefab;
+    public GameObject rocketLauncherShellPrefab;
     public GameObject minigunBulletPrefab;
-	public float defaultRifleFireDelay = 0.2f;
-	public float defaultRocketLauncherFireDelay = 5.0f;
+    public float defaultRifleFireDelay = 0.2f;
+    public float defaultRocketLauncherFireDelay = 5.0f;
     public float defaultMinigunFireDelay = 0.1f;
     public float rifleMaxSpreadAngle = 5.0f;
     public float rocketLauncherMaxSpreadAngle = 1.0f;
     public float minigunMaxSpreadAngle = 10.0f;
-    
+
+    [SyncVar]
+    public NetworkInstanceId playerNetId;
+
     private float rifleFireDelay = 0.0f;
-	private float rocketLauncherFireDelay = 0.0f;
+    private float rocketLauncherFireDelay = 0.0f;
     private float minigunFireDelay = 0.0f;
-	private int currentWeapon = 1; // Player starts with rifle as weapon (id 1)
+    private int currentWeapon = 1; // Player starts with rifle as weapon (id 1)
 
-	// Use this for initialization
-	void Start () {
+    public override void OnStartClient () {
+        
+    }
 
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    // Use this for initialization
+    void Start () {
+        GameObject player = ClientScene.FindLocalObject (playerNetId);
+        transform.parent = player.transform;
+        transform.localPosition = player.transform.up * 0.3f;
+        player.GetComponent<PlayerController> ().weapon = gameObject;
+        player.GetComponent<PlayerController> ().weaponController = gameObject.GetComponent<WeaponController> ();
+    }
+
+    // Update is called once per frame
+    void Update () {
         if (!isServer) {
             return;
         }
-		// Update fire delay based on time lapsed
-		rifleFireDelay -= Time.deltaTime;
-		rocketLauncherFireDelay -= Time.deltaTime;
+        // Update fire delay based on time lapsed
+        rifleFireDelay -= Time.deltaTime;
+        rocketLauncherFireDelay -= Time.deltaTime;
         minigunFireDelay -= Time.deltaTime;
-	}
-    
+    }
+
+    public void UpdateWeaponPosition () {
+        transform.position = transform.parent.position + transform.parent.up * 0.3f;
+    }
+
     public void UpdateWeaponDirection (Vector3 crosshairPosition) {
         transform.LookAt (new Vector3 (crosshairPosition.x,
                                        crosshairPosition.y,
@@ -43,8 +58,8 @@ public class WeaponController : NetworkBehaviour {
         transform.Rotate (new Vector3 (-90.0f, 0.0f, 0.0f));
     }
 
-	[Command]
-	public void CmdFire (Vector3 sourcePosition, Vector3 targetPosition) {
+    [Command]
+    public void CmdFire (Vector3 sourcePosition, Vector3 targetPosition) {
         switch (currentWeapon) {
             case 1:
                 if (rifleFireDelay <= 0.0f) {
@@ -67,7 +82,7 @@ public class WeaponController : NetworkBehaviour {
             default:
                 break;
         }
-	}
+    }
 
     void Fire (Vector3 sourcePosition, Vector3 targetPosition, GameObject projectilePrefab, float maxSpreadAngle) {
         // Bullet direction is characterized by the vector between crosshair and weapon muzzle
@@ -84,7 +99,7 @@ public class WeaponController : NetworkBehaviour {
         // Create projectile on client
         NetworkServer.Spawn (projectile);
     }
-    
+
     [Command]
     public void CmdChangeWeapon (int targetWeaponId) {
         if (currentWeapon != targetWeaponId) {

@@ -23,8 +23,8 @@ public class PlayerController : NetworkBehaviour {
 
     private GameObject crosshair;
     private CrosshairController crosshairController;
-    private GameObject weapon;
-    private WeaponController weaponController;
+    public GameObject weapon;
+    public WeaponController weaponController;
     private GameObject mainCamera;
 
     public override void OnStartLocalPlayer () {
@@ -53,7 +53,7 @@ public class PlayerController : NetworkBehaviour {
         }
         UpdateLeapDelay ();
         UpdateCrosshairPosition ();
-        UpdateWeaponDirection ();
+        CmdUpdateWeaponPosition ();
         CmdUpdateWeaponDirection (crosshair.transform.position);
         if (canMove) {
             InputFire ();
@@ -101,25 +101,18 @@ public class PlayerController : NetworkBehaviour {
             camera.GetComponent<AudioListener> ().enabled = true;
         }
     }
-
+    
     [Command]
     void CmdInstantiateWeapon () {
         weapon = (GameObject) Instantiate (weaponPrefab, transform.position + transform.up * 0.3f, Quaternion.identity);
         // Initialize weapon on server
         weapon.transform.parent = transform;
+        weapon.transform.localPosition = transform.up * 0.3f;
         GetComponent<PlayerController> ().weapon = weapon;
         GetComponent<PlayerController> ().weaponController = weapon.GetComponent<WeaponController> ();
 
+        weapon.GetComponent<WeaponController> ().playerNetId = GetComponent<NetworkIdentity> ().netId;
         NetworkServer.SpawnWithClientAuthority (weapon, connectionToClient);
-        RpcInitializeWeapon (weapon, gameObject);
-    }
-
-    [ClientRpc]
-    void RpcInitializeWeapon (GameObject weapon, GameObject player) {
-        // Initialize weapon on client
-        weapon.transform.parent = player.transform;
-        player.GetComponent<PlayerController> ().weapon = weapon;
-        player.GetComponent<PlayerController> ().weaponController = weapon.GetComponent<WeaponController> ();
     }
 
     void UpdateCrosshairPosition () {
@@ -135,15 +128,34 @@ public class PlayerController : NetworkBehaviour {
         crosshairController.MoveTowards (targetPosition);
     }
 
-    void UpdateWeaponDirection () {
+    [Command]
+    void CmdUpdateWeaponPosition () {
         if (weaponController == null) {
             return;
         }
-        weaponController.UpdateWeaponDirection (crosshair.transform.position);
+        weaponController.UpdateWeaponPosition ();
+        RpcUpdateWeaponPosition ();
+    }
+
+    [ClientRpc]
+    void RpcUpdateWeaponPosition () {
+        if (weaponController == null) {
+            return;
+        }
+        weaponController.UpdateWeaponPosition ();
     }
 
     [Command]
     void CmdUpdateWeaponDirection (Vector3 crosshairPosition) {
+        if (weaponController == null) {
+            return;
+        }
+        weaponController.UpdateWeaponDirection (crosshairPosition);
+        RpcUpdateWeaponDirection (crosshairPosition);
+    }
+
+    [ClientRpc]
+    void RpcUpdateWeaponDirection (Vector3 crosshairPosition) {
         if (weaponController == null) {
             return;
         }
