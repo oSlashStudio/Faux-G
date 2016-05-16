@@ -140,7 +140,7 @@ public class HealthController : NetworkBehaviour {
     }
 
     void OnGUI () {
-        if (isDead) {
+        if (isLocalPlayer && isDead) {
             GUIStyle style = GUI.skin.GetStyle ("Label");
             style.alignment = TextAnchor.MiddleCenter;
             GUI.Label (new Rect (0, 0, Screen.width, Screen.height), "Respawning in " + respawnTimer.ToString ("0.00") + " seconds", style);

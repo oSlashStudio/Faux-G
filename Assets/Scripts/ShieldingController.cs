@@ -12,7 +12,6 @@ public class ShieldingController : NetworkBehaviour {
 
     public override void OnStartClient () {
         if (!isServer && hasAuthority) {
-            Debug.Log ("shieldd");
             CmdSyncShieldTransform ();
         }
     }
