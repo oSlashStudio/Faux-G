@@ -22,13 +22,16 @@ public class CameraController : NetworkBehaviour {
     public override void OnStartClient () {
         GetComponent<Camera> ().enabled = false;
         GetComponent<AudioListener> ().enabled = false;
+
+        GameObject player = ClientScene.FindLocalObject (playerNetId);
+        playerObject = player;
+        player.GetComponent<PlayerController> ().mainCamera = gameObject;
+        player.GetComponent<PlayerController> ().cameraController = GetComponent<CameraController> ();
     }
 
     // Use this for initialization
     void Start () {
-        GameObject player = ClientScene.FindLocalObject (playerNetId);
-        playerObject = player;
-        player.GetComponent<PlayerController> ().mainCamera = gameObject;
+        
     }
 
 	// Update is called once per frame

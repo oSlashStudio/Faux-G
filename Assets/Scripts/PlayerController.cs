@@ -26,11 +26,16 @@ public class PlayerController : NetworkBehaviour {
     public GameObject weapon;
     public WeaponController weaponController;
     public GameObject mainCamera;
+    public CameraController cameraController;
 
     // Attributes required for managing on respawn spectate mode
     public bool isDead = false; // Initially, player is not dead
     private int targetPlayerId; // Index of spectated target on players array
     private GameObject[] players;
+
+    public override void OnStartServer () {
+        ScoreboardController.Instance.AssignPlayer (connectionToClient.connectionId);
+    }
 
     public override void OnStartLocalPlayer () {
         GetComponent<MeshRenderer> ().material.color = Color.red;
@@ -91,6 +96,8 @@ public class PlayerController : NetworkBehaviour {
     void CmdInstantiateCamera () {
         GameObject camera = (GameObject) Instantiate (cameraPrefab, transform.position, Quaternion.identity);
         camera.GetComponent<CameraController> ().playerObject = gameObject;
+        GetComponent<PlayerController> ().mainCamera = camera;
+        GetComponent<PlayerController> ().cameraController = camera.GetComponent<CameraController> ();
 
         camera.GetComponent<CameraController> ().playerNetId = GetComponent<NetworkIdentity> ().netId;
         NetworkServer.SpawnWithClientAuthority (camera, connectionToClient);
@@ -220,11 +227,11 @@ public class PlayerController : NetworkBehaviour {
 
     void InputCycleSpectateTarget () {
         if (Input.GetMouseButtonDown (0)) { // Left click
-            targetPlayerId = (targetPlayerId - 1) % players.Length; // Cycle left
+            targetPlayerId = (targetPlayerId - 1 + players.Length) % players.Length; // Cycle left
         } else if (Input.GetMouseButtonDown (1)) { // Right click
             targetPlayerId = (targetPlayerId + 1) % players.Length; // Cycle right
         }
-        mainCamera.GetComponent<CameraController> ().playerObject = players[targetPlayerId];
+        cameraController.playerObject = players[targetPlayerId];
     }
 
     [ClientRpc]
@@ -236,7 +243,7 @@ public class PlayerController : NetworkBehaviour {
             players = GameObject.FindGameObjectsWithTag ("Player");
             // Set main camera initial target
             targetPlayerId = players.Length - 1;
-            mainCamera.GetComponent<CameraController> ().playerObject = players[targetPlayerId];
+            cameraController.playerObject = players[targetPlayerId];
         }
     }
 

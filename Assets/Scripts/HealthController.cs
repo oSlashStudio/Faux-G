@@ -43,6 +43,7 @@ public class HealthController : NetworkBehaviour {
     void HandlePlayerDeath () {
         if (!isDead) { // If player has not been set as dead
             SetAsDead ();
+            ScoreboardController.Instance.ReduceScore (connectionToClient.connectionId, 1);
             GetComponent<PlayerController> ().RpcWaitForRespawn ();
         } else {
             // Wait for respawn timer before respawning
