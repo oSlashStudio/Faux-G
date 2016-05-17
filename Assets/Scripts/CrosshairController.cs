@@ -8,6 +8,7 @@ public class CrosshairController : MonoBehaviour {
     public float accuracyRecoveryRate = 1.0f;
     public float maxLocalScale = 10.0f;
     public float minLocalScale = 3.0f;
+    public Camera referenceCamera;
 
     private Rigidbody2D rigidBody;
 
@@ -19,6 +20,11 @@ public class CrosshairController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if (referenceCamera == null) {
+            if (Camera.main != null) {
+                referenceCamera = Camera.main;
+            }
+        }
         IncreaseAccuracy (accuracyRecoveryRate * Time.deltaTime);
         UpdateCrosshairScale ();
         UpdateCrosshairPosition ();
@@ -34,10 +40,10 @@ public class CrosshairController : MonoBehaviour {
     }
 
     void UpdateCrosshairPosition () {
-        if (Camera.main == null) {
+        if (referenceCamera == null) {
             return;
         }
-        Vector2 mousePosition = (Vector2) Camera.main.ScreenToWorldPoint (Input.mousePosition);
+        Vector2 mousePosition = referenceCamera.ScreenToWorldPoint (Input.mousePosition);
         // Calculate direction vector
         Vector2 moveDirectionVector = mousePosition - (Vector2) transform.position;
         // Calculate target position vector

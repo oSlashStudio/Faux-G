@@ -8,18 +8,22 @@ public class WeaponController : NetworkBehaviour {
     public GameObject rifleBulletPrefab;
     public GameObject rocketLauncherShellPrefab;
     public GameObject minigunBulletPrefab;
+    public GameObject sniperBulletPrefab;
 
     public float defaultRifleFireDelay = 0.2f;
     public float defaultRocketLauncherFireDelay = 5.0f;
     public float defaultMinigunFireDelay = 0.1f;
+    public float defaultSniperFireDelay = 2.0f;
 
     public float rifleMaxSpreadAngle = 10.0f;
     public float rocketLauncherMaxSpreadAngle = 5.0f;
     public float minigunMaxSpreadAngle = 20.0f;
+    public float sniperMaxSpreadAngle = 5.0f;
 
     public float rifleRecoil = 0.3f;
     public float rocketLauncherRecoil = 1.0f;
     public float minigunRecoil = 0.1f;
+    public float sniperRecoil = 1.0f;
 
     public float rocketLauncherKnockbackForce = 500.0f;
 
@@ -31,7 +35,9 @@ public class WeaponController : NetworkBehaviour {
     private float rifleFireDelay = 0.0f;
     private float rocketLauncherFireDelay = 0.0f;
     private float minigunFireDelay = 0.0f;
-    private int currentWeapon = 1; // Player starts with rifle as weapon (id 1)
+    private float sniperFireDelay = 0.0f;
+
+    public int currentWeapon = 1; // Player starts with rifle as weapon (id 1)
 
     public override void OnStartClient () {
         GameObject player = ClientScene.FindLocalObject (playerNetId);
@@ -56,6 +62,7 @@ public class WeaponController : NetworkBehaviour {
         rifleFireDelay -= Time.deltaTime;
         rocketLauncherFireDelay -= Time.deltaTime;
         minigunFireDelay -= Time.deltaTime;
+        sniperFireDelay -= Time.deltaTime;
     }
 
     public void UpdateWeaponPosition () {
@@ -92,6 +99,13 @@ public class WeaponController : NetworkBehaviour {
                     Fire (sourcePosition, targetPosition, minigunBulletPrefab, minigunMaxSpreadAngle, accuracy);
                     RpcIntroduceRecoil (minigunRecoil);
                     minigunFireDelay = defaultMinigunFireDelay;
+                }
+                break;
+            case 4:
+                if (sniperFireDelay <= 0.0f) {
+                    Fire (sourcePosition, targetPosition, sniperBulletPrefab, sniperMaxSpreadAngle, accuracy);
+                    RpcIntroduceRecoil (sniperRecoil);
+                    sniperFireDelay = defaultSniperFireDelay;
                 }
                 break;
             default:
@@ -154,6 +168,9 @@ public class WeaponController : NetworkBehaviour {
                 break;
             case 3:
                 transform.localScale = new Vector3 (0.25f, 1.0f, 0.25f);
+                break;
+            case 4:
+                transform.localScale = new Vector3 (0.5f, 1.5f, 0.5f);
                 break;
             default:
                 break;

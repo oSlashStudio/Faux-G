@@ -8,6 +8,7 @@ public class PlayerController : NetworkBehaviour {
     public GameObject crosshairPrefab;
     public GameObject weaponPrefab;
     public GameObject cameraPrefab;
+    public GameObject aimCameraPrefab;
 	public float moveSpeed = 15.0f;
 	public float jumpForce = 350.0f;
     public float leapForce = 850.0f;
@@ -22,16 +23,20 @@ public class PlayerController : NetworkBehaviour {
     public float leapDelay = 0.0f; // Initial leap delay is 0, player can instantly leap after touching ground
 
     public GameObject crosshair;
-    private CrosshairController crosshairController;
+    public CrosshairController crosshairController;
     public GameObject weapon;
     public WeaponController weaponController;
     public GameObject mainCamera;
     public CameraController cameraController;
+    public GameObject aimCamera;
+    public AimCameraController aimCameraController;
 
     // Attributes required for managing on respawn spectate mode
     public bool isDead = false; // Initially, player is not dead
     private int targetPlayerId; // Index of spectated target on players array
     private GameObject[] players;
+
+    private bool isAiming;
 
     public override void OnStartServer () {
         ScoreboardController.Instance.AssignPlayer (connectionToClient.connectionId);
@@ -40,12 +45,17 @@ public class PlayerController : NetworkBehaviour {
     public override void OnStartLocalPlayer () {
         GetComponent<MeshRenderer> ().material.color = Color.red;
 
-        // Instantiate camera
-        CmdInstantiateCamera ();
-
         // Instantiate crosshair locally
         crosshair = (GameObject) Instantiate (crosshairPrefab, transform.position, Quaternion.identity);
         crosshairController = crosshair.GetComponent<CrosshairController> ();
+
+        // Instantiate camera
+        CmdInstantiateCamera ();
+
+        // Instantiate aim camera
+        aimCamera = (GameObject) Instantiate (aimCameraPrefab, transform.position, Quaternion.identity);
+        aimCameraController = aimCamera.GetComponent<AimCameraController> ();
+        aimCameraController.crosshair = crosshair;
 
         // Instantiate weapon
         CmdInstantiateWeapon ();
@@ -67,8 +77,10 @@ public class PlayerController : NetworkBehaviour {
         }
         UpdateLeapDelay ();
         CmdUpdateWeaponDirection (crosshair.transform.position);
+
+        InputAim ();
+        InputFire ();
         if (canMove) {
-            InputFire ();
             InputChangeWeapon ();
             InputMove ();
             InputLeap ();
@@ -142,6 +154,26 @@ public class PlayerController : NetworkBehaviour {
         weaponController.UpdateWeaponDirection (crosshairPosition);
     }
 
+    void InputAim () {
+        if (Input.GetMouseButtonDown (1)) {
+            if (weaponController.currentWeapon == 4) {
+                if (isAiming) {
+                    isAiming = false;
+                    canMove = true; // Player can move after done aiming
+                    aimCamera.GetComponent<Camera> ().enabled = false;
+                    mainCamera.GetComponent<Camera> ().enabled = true;
+                    crosshairController.referenceCamera = mainCamera.GetComponent<Camera> ();
+                } else {
+                    isAiming = true;
+                    canMove = false; // Player can't move when aiming
+                    mainCamera.GetComponent<Camera> ().enabled = false;
+                    aimCamera.GetComponent<Camera> ().enabled = true;
+                    crosshairController.referenceCamera = aimCamera.GetComponent<Camera> ();
+                }
+            }
+        }
+    }
+
     void InputFire () {
         if (Input.GetMouseButton (0)) { // Fire current weapon
             weaponController.CmdFire (weapon.transform.FindChild ("Weapon Muzzle").position, crosshair.transform.position, crosshairController.accuracy);
@@ -155,6 +187,8 @@ public class PlayerController : NetworkBehaviour {
             weaponController.CmdChangeWeapon (2);
         } else if (Input.GetKeyDown (KeyCode.Alpha3)) {
             weaponController.CmdChangeWeapon (3);
+        } else if (Input.GetKeyDown (KeyCode.Alpha4)) {
+            weaponController.CmdChangeWeapon (4);
         }
     }
 
@@ -233,6 +267,7 @@ public class PlayerController : NetworkBehaviour {
     void OnDestroy () {
         Destroy (crosshair);
         Destroy (mainCamera);
+        Destroy (aimCamera);
     }
 
 }
