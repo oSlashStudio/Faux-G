@@ -80,19 +80,17 @@ public class PlayerController : NetworkBehaviour {
 
         InputAim ();
         InputFire ();
-        if (canMove) {
-            InputChangeWeapon ();
-            InputMove ();
-            InputLeap ();
-            InputJump ();
-		}
+        InputChangeWeapon ();
+        InputMove ();
+        InputLeap ();
+        InputJump ();
 	}
 
 	void FixedUpdate () {
         if (!isLocalPlayer || isDead) {
             return;
         }
-        if (canMove) {
+        if (canMove && !isAiming) {
             Move ();
 		}
 	}
@@ -159,13 +157,11 @@ public class PlayerController : NetworkBehaviour {
             if (weaponController.currentWeapon == 4) {
                 if (isAiming) {
                     isAiming = false;
-                    canMove = true; // Player can move after done aiming
                     aimCamera.GetComponent<Camera> ().enabled = false;
                     mainCamera.GetComponent<Camera> ().enabled = true;
                     crosshairController.referenceCamera = mainCamera.GetComponent<Camera> ();
                 } else {
                     isAiming = true;
-                    canMove = false; // Player can't move when aiming
                     mainCamera.GetComponent<Camera> ().enabled = false;
                     aimCamera.GetComponent<Camera> ().enabled = true;
                     crosshairController.referenceCamera = aimCamera.GetComponent<Camera> ();
@@ -181,6 +177,9 @@ public class PlayerController : NetworkBehaviour {
     }
 
     void InputChangeWeapon () {
+        if (isAiming) {
+            return;
+        }
         if (Input.GetKeyDown (KeyCode.Alpha1)) {
             weaponController.CmdChangeWeapon (1);
         } else if (Input.GetKeyDown (KeyCode.Alpha2)) {
@@ -193,11 +192,17 @@ public class PlayerController : NetworkBehaviour {
     }
 
     void InputMove () {
+        if (!canMove || isAiming) {
+            return;
+        }
         // Update movement direction based on currently pressed directional button
         movementDirection = new Vector3 (Input.GetAxisRaw ("Horizontal"), 0.0f, 0.0f).normalized;
     }
 
     void Move () {
+        if (!canMove || isAiming) {
+            return;
+        }
         Vector3 movementVector = transform.TransformDirection (movementDirection) * moveSpeed * Time.deltaTime;
         rigidBody.velocity += new Vector2 (movementVector.x, movementVector.y);
     }
@@ -212,7 +217,7 @@ public class PlayerController : NetworkBehaviour {
 
 	void InputLeap () {
 		if (Input.GetKeyDown (KeyCode.Space)) {
-			if (canLeap && leapDelay <= 0.0f) {
+			if (canMove && canLeap && leapDelay <= 0.0f && !isAiming) {
                 Leap ();
 			}
 		}
@@ -229,7 +234,7 @@ public class PlayerController : NetworkBehaviour {
 
 	void InputJump () {
 		if (Input.GetKeyDown (KeyCode.W)) {
-			if (canJump) {
+			if (canMove && canJump && !isAiming) {
 				Jump ();
 			}
 		}
