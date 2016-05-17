@@ -30,7 +30,7 @@ public class ChatboxController : NetworkBehaviour {
 
     void OnGUI () {
         GUIStyle chatBoxStyle = GUI.skin.label;
-        chatBoxStyle.alignment = TextAnchor.UpperLeft;
+        chatBoxStyle.alignment = TextAnchor.LowerLeft;
 
         GUI.SetNextControlName ("ChatBox");
         GUI.Label (new Rect (chatBoxHorizonalOffset, Screen.height - chatBoxHeight + chatBoxVerticalOffset,

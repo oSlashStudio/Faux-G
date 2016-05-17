@@ -47,7 +47,7 @@ public class PlayerChatFieldController : NetworkBehaviour {
 
     [Command]
     void CmdSendChatMessage (string chatMessage) {
-        ChatboxController.Instance.chatBoxString = chatMessage + "\n" + ChatboxController.Instance.chatBoxString;
+        ChatboxController.Instance.chatBoxString = ChatboxController.Instance.chatBoxString + "\n" + chatMessage;
     }
 
 }
