@@ -5,6 +5,7 @@ using System.Collections.Generic;
 public class ScoreboardController : NetworkBehaviour {
 
     public SyncListInt playersConnectionId = new SyncListInt ();
+    public SyncListString playerNames = new SyncListString ();
     public SyncListInt playerScores = new SyncListInt ();
 
     public static ScoreboardController Instance { get; private set; }
@@ -31,7 +32,7 @@ public class ScoreboardController : NetworkBehaviour {
             if (i != 0) {
                 scoreText += " | ";
             }
-            scoreText += "Player " + i + ": " + playerScores[i];
+            scoreText += playerNames[i] + ": " + playerScores[i];
         }
         GUI.Label (new Rect (0, 0, Screen.width, Screen.height), scoreText, style);
     }
@@ -39,7 +40,15 @@ public class ScoreboardController : NetworkBehaviour {
     public void AssignPlayer (int playerConnectionId) {
         if (!playersConnectionId.Contains (playerConnectionId)) { // If connection is not yet on the list
             playersConnectionId.Add (playerConnectionId);
+            playerNames.Add ("");
             playerScores.Add (0);
+        }
+    }
+
+    public void RenamePlayer (int playerConnectionId, string newPlayerName) {
+        if (playersConnectionId.Contains (playerConnectionId)) {
+            int indexInList = playersConnectionId.IndexOf (playerConnectionId);
+            playerNames[indexInList] = newPlayerName;
         }
     }
 
