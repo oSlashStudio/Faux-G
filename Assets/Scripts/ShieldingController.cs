@@ -10,12 +10,6 @@ public class ShieldingController : NetworkBehaviour {
 
     private Rigidbody2D rigidBody;
 
-    public override void OnStartClient () {
-        if (!isServer && hasAuthority) {
-            CmdSyncShieldTransform ();
-        }
-    }
-
 	// Use this for initialization
 	void Start () {
         rigidBody = GetComponent<Rigidbody2D> ();
@@ -25,17 +19,6 @@ public class ShieldingController : NetworkBehaviour {
 	void Update () {
         rigidBody.angularVelocity = angularVelocity;
         transform.RotateAround (rotationReference.position, Vector3.forward, rotationSpeed * Time.deltaTime);
-    }
-
-    [Command]
-    void CmdSyncShieldTransform () {
-        RpcSyncShieldTransform (transform.position, transform.rotation);
-    }
-
-    [ClientRpc]
-    void RpcSyncShieldTransform (Vector3 position, Quaternion rotation) {
-        transform.position = position;
-        transform.rotation = rotation;
     }
 
 }
