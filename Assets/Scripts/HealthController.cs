@@ -13,6 +13,7 @@ public class HealthController : NetworkBehaviour {
     [SyncVar]
     public float currentHealth;
     private bool isDead = false;
+    private int lastDamagingPlayerConnectionId; // The connection id of the last damaging player
 
     public override void OnStartServer () {
         currentHealth = maxHealth;
@@ -43,7 +44,11 @@ public class HealthController : NetworkBehaviour {
     void HandlePlayerDeath () {
         if (!isDead) { // If player has not been set as dead
             SetAsDead ();
-            ScoreboardController.Instance.ReduceScore (connectionToClient.connectionId, 1);
+            if (lastDamagingPlayerConnectionId == connectionToClient.connectionId) { // Suicide scenario
+                ScoreboardController.Instance.ReduceScore (lastDamagingPlayerConnectionId, 1);
+            } else { // Killed by others scenario
+                ScoreboardController.Instance.IncreaseScore (lastDamagingPlayerConnectionId, 1);
+            }
             GetComponent<PlayerController> ().RpcWaitForRespawn ();
         } else {
             // Wait for respawn timer before respawning
@@ -116,7 +121,7 @@ public class HealthController : NetworkBehaviour {
         NetworkServer.Spawn (healCallout);
     }
     
-    public void ReduceHealth (float damageAmount) {
+    public void ReduceHealth (float damageAmount, int damagingPlayerConnectionId) {
         if (!isServer) {
             return;
         }
@@ -126,6 +131,8 @@ public class HealthController : NetworkBehaviour {
         } else {
             currentHealth -= damageAmount;
         }
+
+        lastDamagingPlayerConnectionId = damagingPlayerConnectionId;
 
         InstantiateDamageCallout (damageAmount);
     }

@@ -39,15 +39,21 @@ public class ScoreboardController : NetworkBehaviour {
     public void AssignPlayer (int playerConnectionId) {
         if (!playersConnectionId.Contains (playerConnectionId)) { // If connection is not yet on the list
             playersConnectionId.Add (playerConnectionId);
-            playerScores.Add (10);
+            playerScores.Add (0);
+        }
+    }
+
+    public void IncreaseScore (int playerConnectionId, int scoreIncrease) {
+        if (playersConnectionId.Contains (playerConnectionId)) {
+            int indexInList = playersConnectionId.IndexOf (playerConnectionId);
+            playerScores[indexInList] += scoreIncrease;
         }
     }
 
     public void ReduceScore (int playerConnectionId, int scoreReduction) {
-        for (int i = 0; i < playersConnectionId.Count; i++) {
-            if (playersConnectionId[i] == playerConnectionId) {
-                playerScores[i] -= scoreReduction;
-            }
+        if (playersConnectionId.Contains (playerConnectionId)) {
+            int indexInList = playersConnectionId.IndexOf (playerConnectionId);
+            playerScores[indexInList] -= scoreReduction;
         }
     }
 

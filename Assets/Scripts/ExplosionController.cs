@@ -7,8 +7,10 @@ public class ExplosionController : NetworkBehaviour {
     public bool hasExplosionDamage = false;
     public float explosionArea = 3.0f;
     public float explosionDamage = 1.0f;
+    [SyncVar]
+    public int playerConnectionId;
 
-	private float explosionDuration;
+    private float explosionDuration;
 
 	// Use this for initialization
 	void Start () {
@@ -34,7 +36,7 @@ public class ExplosionController : NetworkBehaviour {
             if (currentCollider.tag.Equals ("Player")) {
                 // Handle damage to player
                 HealthController playerHealthController = currentCollider.gameObject.GetComponent<HealthController> ();
-                playerHealthController.ReduceHealth (explosionDamage);
+                playerHealthController.ReduceHealth (explosionDamage, playerConnectionId);
             }
         }
     }

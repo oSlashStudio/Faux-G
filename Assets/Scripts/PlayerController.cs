@@ -121,6 +121,7 @@ public class PlayerController : NetworkBehaviour {
         GetComponent<PlayerController> ().weaponController = weapon.GetComponent<WeaponController> ();
 
         weapon.GetComponent<WeaponController> ().playerNetId = GetComponent<NetworkIdentity> ().netId;
+        weapon.GetComponent<WeaponController> ().playerConnectionId = connectionToClient.connectionId;
         NetworkServer.SpawnWithClientAuthority (weapon, connectionToClient);
     }
 

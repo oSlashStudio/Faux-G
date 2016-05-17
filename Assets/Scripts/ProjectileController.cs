@@ -12,6 +12,8 @@ public class ProjectileController : NetworkBehaviour {
 	public float effectIntensity = 0.2f;
     [SyncVar]
     public NetworkInstanceId playerNetId;
+    [SyncVar]
+    public int playerConnectionId;
 
 	Rigidbody2D rigidBody;
 
@@ -37,10 +39,6 @@ public class ProjectileController : NetworkBehaviour {
                 ShakeCamerasInRange ();
             }
             if (isServer) {
-                // Instantiate explosion prefab
-                GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, transform.rotation);
-                NetworkServer.Spawn (explosion);
-                // Finally, destroy this game object
                 Destroy (gameObject);
             }
         }
@@ -57,7 +55,7 @@ public class ProjectileController : NetworkBehaviour {
                 if (collision.collider.tag.Equals ("Player")) {
                     // Handle damage to player
                     HealthController playerHealthController = collision.gameObject.GetComponent<HealthController> ();
-                    playerHealthController.ReduceHealth (projectileDamage);
+                    playerHealthController.ReduceHealth (projectileDamage, playerConnectionId);
                 }
                 // Destroy projectile
                 Destroy (gameObject);
@@ -71,6 +69,7 @@ public class ProjectileController : NetworkBehaviour {
         }
         // Instantiate explosion prefab
         GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, transform.rotation);
+        explosion.GetComponent<ExplosionController> ().playerConnectionId = playerConnectionId;
         NetworkServer.Spawn (explosion);
     }
 
