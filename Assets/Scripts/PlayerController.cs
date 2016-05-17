@@ -66,7 +66,6 @@ public class PlayerController : NetworkBehaviour {
             return;
         }
         UpdateLeapDelay ();
-        CmdUpdateWeaponPosition ();
         CmdUpdateWeaponDirection (crosshair.transform.position);
         if (canMove) {
             InputFire ();
@@ -123,23 +122,6 @@ public class PlayerController : NetworkBehaviour {
 
         weapon.GetComponent<WeaponController> ().playerNetId = GetComponent<NetworkIdentity> ().netId;
         NetworkServer.SpawnWithClientAuthority (weapon, connectionToClient);
-    }
-
-    [Command]
-    void CmdUpdateWeaponPosition () {
-        if (weaponController == null) {
-            return;
-        }
-        weaponController.UpdateWeaponPosition ();
-        RpcUpdateWeaponPosition ();
-    }
-
-    [ClientRpc]
-    void RpcUpdateWeaponPosition () {
-        if (weaponController == null) {
-            return;
-        }
-        weaponController.UpdateWeaponPosition ();
     }
 
     [Command]

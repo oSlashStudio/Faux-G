@@ -46,6 +46,7 @@ public class WeaponController : NetworkBehaviour {
 
     // Update is called once per frame
     void Update () {
+        UpdateWeaponPosition ();
         if (!isServer) {
             return;
         }
