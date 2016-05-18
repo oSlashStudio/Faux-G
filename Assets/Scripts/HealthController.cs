@@ -3,8 +3,7 @@ using UnityEngine.Networking;
 using System.Collections;
 
 public class HealthController : NetworkBehaviour {
-
-    public GameObject healthBar;
+    
     public GameObject damageCalloutPrefab;
     public float healthBarVerticalOffset = 1.5f;
     public float damageCalloutVerticalOffset = 1.5f;
@@ -26,9 +25,6 @@ public class HealthController : NetworkBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        // Rescale the healthbar based on current health percentage
-        healthBar.transform.localScale = new Vector3 (currentHealth / maxHealth, healthBar.transform.localScale.y, healthBar.transform.localScale.z);
-
         // Check health threshold on each frame at server
         if (isServer) {
             if (currentHealth <= 0.0f) {

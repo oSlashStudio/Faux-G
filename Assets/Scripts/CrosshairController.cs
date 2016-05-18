@@ -27,6 +27,7 @@ public class CrosshairController : MonoBehaviour {
         }
         IncreaseAccuracy (accuracyRecoveryRate * Time.deltaTime);
         UpdateCrosshairScale ();
+        UpdateCrosshairColor ();
         UpdateCrosshairPosition ();
     }
 
@@ -37,6 +38,10 @@ public class CrosshairController : MonoBehaviour {
     void UpdateCrosshairScale () {
         float currentScale = maxLocalScale - (maxLocalScale - minLocalScale) * accuracy;
         transform.localScale = new Vector3 (currentScale, currentScale, 1.0f);
+    }
+
+    void UpdateCrosshairColor () {
+        GetComponent<SpriteRenderer> ().color = Color.Lerp (Color.red, Color.green, accuracy);
     }
 
     void UpdateCrosshairPosition () {
