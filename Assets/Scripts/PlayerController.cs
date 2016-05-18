@@ -9,18 +9,21 @@ public class PlayerController : NetworkBehaviour {
     public GameObject weaponPrefab;
     public GameObject cameraPrefab;
     public GameObject aimCameraPrefab;
+
 	public float moveSpeed = 15.0f;
-	public float jumpForce = 350.0f;
-    public float leapForce = 850.0f;
-    public float defaultLeapDelay = 5.0f;
+    public float maxLeapForce = 1500.0f;
+    public float leapForce = 0.0f;
+    public float leapForceChargeRate = 1000.0f; // Leap force increase per second
+    public float staminaPerLeapForce = 0.05f; // Amount of stamina consumed per leap force unit
+
+    public float maxStamina = 100.0f;
+    public float currentStamina = 100.0f;
+    public float staminaRecoveryRate = 10.0f; // Amount of stamina recovered per second
     
 	private Vector3 movementDirection;
 	private Rigidbody2D rigidBody;
 	private bool canMove = false; // Initially, player is spawned airborne, unable to move
 	private bool canLeap = false; // Initially, player is spawned airborne, unable to flip
-	private bool canJump = false; // Initially, player is spawned airborne, unable to jump
-    // Accessed by LeapDelayBarController
-    public float leapDelay = 0.0f; // Initial leap delay is 0, player can instantly leap after touching ground
 
     public GameObject crosshair;
     public CrosshairController crosshairController;
@@ -75,15 +78,16 @@ public class PlayerController : NetworkBehaviour {
             InputCycleSpectateTarget ();
             return;
         }
-        UpdateLeapDelay ();
+
         CmdUpdateWeaponDirection (crosshair.transform.position);
+
+        RecoverStamina ();
 
         InputAim ();
         InputFire ();
         InputChangeWeapon ();
         InputMove ();
         InputLeap ();
-        InputJump ();
 	}
 
 	void FixedUpdate () {
@@ -98,7 +102,6 @@ public class PlayerController : NetworkBehaviour {
 	void OnCollisionEnter2D (Collision2D collision) {
 		canMove = true;
 		canLeap = true;
-		canJump = true;
 	}
 
     [Command]
@@ -150,6 +153,15 @@ public class PlayerController : NetworkBehaviour {
             return;
         }
         weaponController.UpdateWeaponDirection (crosshairPosition);
+    }
+
+    void RecoverStamina () {
+        float staminaRecovered = staminaRecoveryRate * Time.deltaTime;
+        if (currentStamina + staminaRecovered > maxStamina) {
+            currentStamina = maxStamina;
+        } else {
+            currentStamina += staminaRecovered;
+        }
     }
 
     void InputAim () {
@@ -207,45 +219,43 @@ public class PlayerController : NetworkBehaviour {
         rigidBody.velocity += new Vector2 (movementVector.x, movementVector.y);
     }
 
-    void UpdateLeapDelay () {
-        if (leapDelay < 0.0f) {
-            leapDelay = 0.0f;
-        } else if (leapDelay > 0.0f) {
-            leapDelay -= Time.deltaTime;
-        }
-    }
-
 	void InputLeap () {
-		if (Input.GetKeyDown (KeyCode.Space)) {
-			if (canMove && canLeap && leapDelay <= 0.0f && !isAiming) {
+        if (Input.GetKeyUp (KeyCode.Space)) {
+            if (canMove && canLeap && !isAiming) {
                 Leap ();
+            }
+        } else if (Input.GetKey (KeyCode.Space)) {
+			if (canMove && canLeap && !isAiming) {
+                ChargeLeap ();
 			}
 		}
 	}
 
     void Leap () {
-        // Disable jump and leap while leaping
-        canJump = false;
+        // Disable leap while leaping
         canLeap = false;
-        // Introduce leap delay
-        leapDelay = defaultLeapDelay;
+        // Introduce upwards force
         rigidBody.AddForce (transform.up * leapForce);
+        // Reset leapForce
+        leapForce = 0.0f;
     }
 
-	void InputJump () {
-		if (Input.GetKeyDown (KeyCode.W)) {
-			if (canMove && canJump && !isAiming) {
-				Jump ();
-			}
-		}
-	}
+    void ChargeLeap () {
+        float leapForceIncrease = leapForceChargeRate * Time.deltaTime;
+        if (leapForce + leapForceIncrease > maxLeapForce) { // If leap force after increase will exceed max leap force
+            leapForceIncrease = maxLeapForce - leapForce;
+        }
 
-	void Jump () {
-		// Disable jump and leap while jumping
-		canJump = false;
-        canLeap = false;
-		rigidBody.AddForce (transform.up * jumpForce);
-	}
+        float staminaRequired = leapForceIncrease * staminaPerLeapForce;
+        if (staminaRequired > currentStamina) { // If not enough stamina
+            leapForceIncrease = currentStamina / staminaPerLeapForce;
+            leapForce += leapForceIncrease;
+            currentStamina = 0.0f;
+        } else {
+            leapForce += leapForceIncrease;
+            currentStamina -= staminaRequired;
+        }
+    }
 
     void InputCycleSpectateTarget () {
         if (Input.GetMouseButtonDown (0)) { // Left click
