@@ -41,10 +41,6 @@ public class PlayerController : NetworkBehaviour {
 
     private bool isAiming;
 
-    public override void OnStartServer () {
-        ScoreboardController.Instance.AssignPlayer (connectionToClient.connectionId);
-    }
-
     public override void OnStartLocalPlayer () {
         GetComponent<MeshRenderer> ().material.color = Color.red;
 

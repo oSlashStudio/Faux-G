@@ -11,7 +11,7 @@ public class NameTagController : NetworkBehaviour {
 
     public override void OnStartServer () {
         nameTagTextMesh = nameTag.GetComponent<TextMesh> ();
-        SetPlayerName ("Player " + connectionToClient.connectionId.ToString ());
+        playerName = "Player " + connectionToClient.connectionId;
     }
 
     public override void OnStartClient () {
@@ -30,7 +30,7 @@ public class NameTagController : NetworkBehaviour {
 
     public void SetPlayerName (string designatedPlayerName) {
         playerName = designatedPlayerName;
-        ScoreboardController.Instance.RenamePlayer (connectionToClient.connectionId, designatedPlayerName);
+        GameManagerController.Instance.RenamePlayer (connectionToClient.connectionId, designatedPlayerName);
     }
 
 }

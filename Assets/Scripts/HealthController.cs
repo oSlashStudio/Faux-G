@@ -7,12 +7,19 @@ public class HealthController : NetworkBehaviour {
     public GameObject damageCalloutPrefab;
     public float healthBarVerticalOffset = 1.5f;
     public float damageCalloutVerticalOffset = 1.5f;
-    public float respawnTimer = 5.0f;
+    public float defaultRespawnTime = 5.0f;
     public float maxHealth = 100.0f;
     [SyncVar]
     public float currentHealth;
+    [SyncVar]
     private bool isDead = false;
+    [SyncVar]
+    private int respawnTimeNormalized;
+    private float respawnTime;
+    
     private int lastDamagingPlayerConnectionId; // The connection id of the last damaging player
+    [SyncVar]
+    private string lastDamagingPlayerName;
 
     public override void OnStartServer () {
         currentHealth = maxHealth;
@@ -48,8 +55,8 @@ public class HealthController : NetworkBehaviour {
             GetComponent<PlayerController> ().RpcWaitForRespawn ();
         } else {
             // Wait for respawn timer before respawning
-            if (respawnTimer > 0.0f) {
-                UpdateRespawnTimer ();
+            if (respawnTime > 0.0f) {
+                UpdateRespawnTime ();
                 return;
             }
 
@@ -61,25 +68,15 @@ public class HealthController : NetworkBehaviour {
 
     void SetAsDead () {
         isDead = true; // Set as dead
-        RpcSetAsDead (); // Transmit dead status to client
+        respawnTime = defaultRespawnTime;
+        lastDamagingPlayerName = GameManagerController.Instance.GetPlayerName (lastDamagingPlayerConnectionId);
     }
 
-    [ClientRpc]
-    void RpcSetAsDead () {
-        if (isLocalPlayer) {
-            isDead = true;
-        }
-    }
-
-    void UpdateRespawnTimer () {
-        respawnTimer -= Time.fixedDeltaTime; // Decrease current respawn timer
-        RpcUpdateRespawnTimer (respawnTimer); // Transmit current respawn timer to client
-    }
-
-    [ClientRpc]
-    void RpcUpdateRespawnTimer (float respawnTimer) {
-        if (isLocalPlayer) {
-            this.respawnTimer = respawnTimer;
+    void UpdateRespawnTime () {
+        respawnTime -= Time.deltaTime; // Decrease current respawn timer
+        int respawnTimeNormalized = Mathf.RoundToInt (respawnTime);
+        if (this.respawnTimeNormalized != respawnTimeNormalized) {
+            this.respawnTimeNormalized = respawnTimeNormalized;
         }
     }
 
@@ -144,9 +141,14 @@ public class HealthController : NetworkBehaviour {
 
     void OnGUI () {
         if (isLocalPlayer && isDead) {
-            GUIStyle style = GUI.skin.GetStyle ("Label");
+            GUIStyle style = GUI.skin.label;
             style.alignment = TextAnchor.MiddleCenter;
-            GUI.Label (new Rect (0, 0, Screen.width, Screen.height), "Respawning in " + respawnTimer.ToString ("0.00") + " seconds", style);
+            style.fontSize = 16;
+            GUI.Label (
+                new Rect (0, 0, Screen.width, Screen.height), 
+                "Killed by " + lastDamagingPlayerName + "\nRespawning in " + respawnTimeNormalized + " seconds", 
+                style
+            );
         }
     }
 

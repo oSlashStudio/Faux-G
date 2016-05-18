@@ -40,7 +40,7 @@ public class ScoreboardController : NetworkBehaviour {
     public void AssignPlayer (int playerConnectionId) {
         if (!playersConnectionId.Contains (playerConnectionId)) { // If connection is not yet on the list
             playersConnectionId.Add (playerConnectionId);
-            playerNames.Add ("");
+            playerNames.Add ("Player " + playerConnectionId);
             playerScores.Add (0);
         }
     }
