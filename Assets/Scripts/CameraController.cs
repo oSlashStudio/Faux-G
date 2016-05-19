@@ -12,17 +12,9 @@ public class CameraController : NetworkBehaviour {
 	public float intensity = DEFAULT_SHAKE_INTENSITY;
 	public float dampingFactor = 0.975f;
     [SyncVar]
-    public NetworkInstanceId playerNetId; 
-
-    public override void OnStartServer () {
-        GetComponent<Camera> ().enabled = false;
-        GetComponent<AudioListener> ().enabled = false;
-    }
+    public NetworkInstanceId playerNetId;
 
     public override void OnStartClient () {
-        GetComponent<Camera> ().enabled = false;
-        GetComponent<AudioListener> ().enabled = false;
-
         GameObject player = ClientScene.FindLocalObject (playerNetId);
         playerObject = player;
         player.GetComponent<PlayerController> ().mainCamera = gameObject;

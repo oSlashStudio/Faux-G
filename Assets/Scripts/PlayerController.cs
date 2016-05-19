@@ -106,6 +106,8 @@ public class PlayerController : NetworkBehaviour {
         camera.GetComponent<CameraController> ().playerObject = gameObject;
         GetComponent<PlayerController> ().mainCamera = camera;
         GetComponent<PlayerController> ().cameraController = camera.GetComponent<CameraController> ();
+        camera.GetComponent<Camera> ().enabled = true;
+        camera.GetComponent<AudioListener> ().enabled = true;
 
         camera.GetComponent<CameraController> ().playerNetId = GetComponent<NetworkIdentity> ().netId;
         NetworkServer.SpawnWithClientAuthority (camera, connectionToClient);
