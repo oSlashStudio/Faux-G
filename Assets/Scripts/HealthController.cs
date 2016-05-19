@@ -83,7 +83,9 @@ public class HealthController : NetworkBehaviour {
     void RespawnPlayer () {
         // Respawn player routine
         Transform spawn = NetworkManager.singleton.GetStartPosition ();
-        GameObject newPlayer = (GameObject) Instantiate (NetworkManager.singleton.playerPrefab, spawn.position, spawn.rotation);
+        GameObject newPlayer = (GameObject) Instantiate (NetworkManager.singleton.playerPrefab, spawn.position, Quaternion.identity);
+        newPlayer.GetComponent<NameTagController> ().playerName = GetComponent<NameTagController> ().playerName;
+        newPlayer.GetComponent<PlayerController> ().playerColor = GetComponent<PlayerController> ().playerColor;
         NetworkServer.ReplacePlayerForConnection (connectionToClient, newPlayer, playerControllerId);
     }
 

@@ -7,11 +7,11 @@ public class NameTagController : NetworkBehaviour {
     public GameObject nameTag;
     private TextMesh nameTagTextMesh;
     [SyncVar]
-    private string playerName = "";
+    public string playerName = "";
 
     public override void OnStartServer () {
         nameTagTextMesh = nameTag.GetComponent<TextMesh> ();
-        playerName = "Player " + connectionToClient.connectionId;
+        // playerName = "Player " + connectionToClient.connectionId;
     }
 
     public override void OnStartClient () {
@@ -25,6 +25,9 @@ public class NameTagController : NetworkBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if (nameTagTextMesh == null) {
+            return;
+        }
         nameTagTextMesh.text = playerName;
 	}
 

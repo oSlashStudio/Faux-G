@@ -5,11 +5,18 @@ using System.Collections.Generic;
 public class NetworkManagerController : NetworkManager {
 
     private Queue<int> playersToAssign = new Queue<int> ();
+    private Queue<string> playerNamesToAssign = new Queue<string> ();
     private Queue<int> playersToUnassign = new Queue<int> ();
 
+    public static NetworkLobbyManagerController Instance { get; private set; }
+    
     public override void OnServerConnect (NetworkConnection conn) {
-        playersToAssign.Enqueue (conn.connectionId);
         base.OnServerConnect (conn);
+    }
+
+    public void AssignPlayer (int playerConnectionId, string playerName) {
+        playersToAssign.Enqueue (playerConnectionId);
+        playerNamesToAssign.Enqueue (playerName);
     }
 
     public override void OnServerDisconnect (NetworkConnection conn) {
@@ -21,9 +28,9 @@ public class NetworkManagerController : NetworkManager {
         if (GameManagerController.Instance == null) {
             return;
         }
-
+        
         if (playersToAssign.Count != 0) {
-            GameManagerController.Instance.AssignPlayer (playersToAssign.Dequeue ());
+            GameManagerController.Instance.AssignPlayer (playersToAssign.Dequeue (), playerNamesToAssign.Dequeue ());
         }
         if (playersToUnassign.Count != 0) {
             GameManagerController.Instance.UnassignPlayer (playersToUnassign.Dequeue ());

@@ -198,6 +198,7 @@ namespace Prototype.NetworkLobby {
         public void OnRemovePlayerClick () {
             if (isLocalPlayer) {
                 RemovePlayer ();
+                LobbyManager.s_Singleton.GoBackButton ();
             } else if (isServer)
                 LobbyManager.s_Singleton.KickPlayer (connectionToClient);
 

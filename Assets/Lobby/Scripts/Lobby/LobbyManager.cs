@@ -237,7 +237,7 @@ namespace Prototype.NetworkLobby
 
             ChangeTo(lobbyPanel);
             backDelegate = StopHostClbk;
-            SetServerInfo("Hosting", networkAddress);
+            SetServerInfo ("Hosting", networkAddress);
         }
 
         public override void OnMatchCreate(CreateMatchResponse matchInfo)

@@ -31,12 +31,12 @@ public class GameManagerController : NetworkBehaviour {
 	
 	}
 
-    public void AssignPlayer (int playerConnectionId) {
+    public void AssignPlayer (int playerConnectionId, string playerName) {
         if (!playersConnectionId.Contains (playerConnectionId)) { // If connection is not yet on the list
             playersConnectionId.Add (playerConnectionId);
-            playerNames.Add ("Player " + playerConnectionId);
+            playerNames.Add (playerName);
 
-            ScoreboardController.Instance.AssignPlayer (playerConnectionId);
+            ScoreboardController.Instance.AssignPlayer (playerConnectionId, playerName);
         }
     }
 

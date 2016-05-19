@@ -37,10 +37,10 @@ public class ScoreboardController : NetworkBehaviour {
         GUI.Label (new Rect (0, 0, Screen.width, Screen.height), scoreText, style);
     }
 
-    public void AssignPlayer (int playerConnectionId) {
+    public void AssignPlayer (int playerConnectionId, string playerName) {
         if (!playersConnectionId.Contains (playerConnectionId)) { // If connection is not yet on the list
             playersConnectionId.Add (playerConnectionId);
-            playerNames.Add ("Player " + playerConnectionId);
+            playerNames.Add (playerName);
             playerScores.Add (0);
         }
     }

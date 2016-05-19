@@ -40,10 +40,14 @@ public class PlayerController : NetworkBehaviour {
     private GameObject[] players;
 
     private bool isAiming;
+    [SyncVar]
+    public Color playerColor;
+
+    public override void OnStartServer () {
+        NetworkLobbyManagerController.Instance.AssignPlayer (connectionToClient.connectionId, GetComponent<NameTagController> ().playerName);
+    }
 
     public override void OnStartLocalPlayer () {
-        GetComponent<MeshRenderer> ().material.color = Color.red;
-
         // Instantiate crosshair locally
         crosshair = (GameObject) Instantiate (crosshairPrefab, transform.position, Quaternion.identity);
         crosshairController = crosshair.GetComponent<CrosshairController> ();
@@ -63,6 +67,7 @@ public class PlayerController : NetworkBehaviour {
 	// Use this for initialization
 	void Start () {
         rigidBody = GetComponent<Rigidbody2D> ();
+        GetComponent<MeshRenderer> ().material.color = playerColor;
     }
 	
 	// Update is called once per frame
