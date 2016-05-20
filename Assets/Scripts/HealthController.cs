@@ -143,11 +143,11 @@ public class HealthController : NetworkBehaviour {
 
     void OnGUI () {
         if (isLocalPlayer && isDead) {
-            GUIStyle style = GUI.skin.label;
+            GUIStyle style = GUI.skin.box;
             style.alignment = TextAnchor.MiddleCenter;
             style.fontSize = 16;
-            GUI.Label (
-                new Rect (0, 0, Screen.width, Screen.height), 
+            GUI.Box (
+                new Rect (Screen.width / 2.0f - 100.0f, Screen.height / 2.0f - 50.0f, 200.0f, 100.0f), 
                 "Killed by " + lastDamagingPlayerName + "\nRespawning in " + respawnTimeNormalized + " seconds", 
                 style
             );
