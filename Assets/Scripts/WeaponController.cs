@@ -142,7 +142,7 @@ public class WeaponController : NetworkBehaviour {
             Quaternion.Euler (bulletRotationVector));
         projectile.GetComponent<ProjectileController> ().playerNetId = playerNetId;
         projectile.GetComponent<ProjectileController> ().playerConnectionId = playerConnectionId;
-        projectile.GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", GetComponentInParent<PlayerController> ().playerColor);
+
         Physics2D.IgnoreCollision (projectile.GetComponent<Collider2D> (), gameObject.GetComponent<Collider2D> ());
         // Create projectile on client
         NetworkServer.Spawn (projectile);
@@ -162,7 +162,6 @@ public class WeaponController : NetworkBehaviour {
             Quaternion.Euler (bulletRotationVector));
         projectile.GetComponent<HomingProjectileController> ().playerNetId = playerNetId;
         projectile.GetComponent<HomingProjectileController> ().playerConnectionId = playerConnectionId;
-        projectile.GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", GetComponentInParent<PlayerController> ().playerColor);
         // Set target routine
         Collider2D[] targetColliders = Physics2D.OverlapCircleAll (targetPosition, 2.0f);
         if (targetColliders != null) {

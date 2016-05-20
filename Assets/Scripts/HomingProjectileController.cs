@@ -23,11 +23,18 @@ public class HomingProjectileController : NetworkBehaviour {
     public override void OnStartServer () {
         rigidBody = GetComponent<Rigidbody2D> ();
         rigidBody.velocity = new Vector2 (transform.forward.x, transform.forward.y).normalized * projectileSpeed;
+
+        GameObject player = NetworkServer.FindLocalObject (playerNetId);
+        Physics2D.IgnoreCollision (GetComponent<Collider2D> (), player.GetComponent<Collider2D> ());
+
+        GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<PlayerController> ().playerColor);
     }
 
     public override void OnStartClient () {
         GameObject player = ClientScene.FindLocalObject (playerNetId);
         Physics2D.IgnoreCollision (GetComponent<Collider2D> (), player.GetComponent<Collider2D> ());
+
+        GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<PlayerController> ().playerColor);
     }
 
     // Use this for initialization
