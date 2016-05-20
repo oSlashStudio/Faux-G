@@ -162,9 +162,14 @@ public class WeaponController : NetworkBehaviour {
         projectile.GetComponent<HomingProjectileController> ().playerNetId = playerNetId;
         projectile.GetComponent<HomingProjectileController> ().playerConnectionId = playerConnectionId;
         // Set target routine
-        Collider2D targetCollider = Physics2D.OverlapCircle (targetPosition, 0.1f);
-        if (targetCollider != null && targetCollider.tag.Equals ("Player")) {
-            projectile.GetComponent<HomingProjectileController> ().targetPlayerNetId = targetCollider.gameObject.GetComponent<NetworkIdentity> ().netId;
+        Collider2D[] targetColliders = Physics2D.OverlapCircleAll (targetPosition, 2.0f);
+        if (targetColliders != null) {
+            foreach (Collider2D targetCollider in targetColliders) {
+                if (targetCollider.tag.Equals ("Player")) {
+                    projectile.GetComponent<HomingProjectileController> ().targetPlayerNetId = targetCollider.gameObject.GetComponent<NetworkIdentity> ().netId;
+                    break;
+                }
+            }
         }
 
         Physics2D.IgnoreCollision (projectile.GetComponent<Collider2D> (), gameObject.GetComponent<Collider2D> ());
