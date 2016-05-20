@@ -25,7 +25,11 @@ public class HealthBarController : MonoBehaviour {
     }
 
     void UpdateHealthBarColor (float currentHealth, float maxHealth) {
-        spriteRenderer.color = Color.Lerp (Color.red, Color.green, currentHealth / maxHealth);
+        if (currentHealth / maxHealth <= 0.5f) {
+            spriteRenderer.color = Color.Lerp (Color.red, Color.yellow, currentHealth / maxHealth * 2.0f);
+        } else {
+            spriteRenderer.color = Color.Lerp (Color.yellow, Color.green, currentHealth / maxHealth * 2.0f - 1.0f);
+        }
     }
 
 }

@@ -25,7 +25,7 @@ public class StaminaBarController : MonoBehaviour {
     }
 
     void UpdateStaminaBarColor (float currentStamina, float maxStamina) {
-        spriteRenderer.color = Color.Lerp (Color.red, Color.cyan, currentStamina / maxStamina);
+        spriteRenderer.color = Color.Lerp (Color.gray, Color.white, currentStamina / maxStamina);
     }
 
 }

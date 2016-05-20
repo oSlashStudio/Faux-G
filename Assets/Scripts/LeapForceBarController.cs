@@ -25,7 +25,7 @@ public class LeapForceBarController : MonoBehaviour {
     }
 
     void UpdateLeapForceBarColor (float leapForce, float maxLeapForce) {
-        spriteRenderer.color = Color.Lerp (Color.yellow, Color.white, leapForce / maxLeapForce);
+        spriteRenderer.color = Color.Lerp (new Color (1.0f, 1.0f, 0.0f), new Color (1.0f, 0.5f, 0.0f), leapForce / maxLeapForce);
     }
 
 }
