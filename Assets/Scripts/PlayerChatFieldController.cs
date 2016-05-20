@@ -48,11 +48,13 @@ public class PlayerChatFieldController : NetworkBehaviour {
     [Command]
     void CmdSendChatMessage (string chatMessage) {
         string[] tokens = chatMessage.Split (' ');
-        if (tokens.Length != 0 && tokens[0].Equals ("/name")) {
-            string designatedPlayerName = chatMessage.Substring (chatMessage.IndexOf (' '));
+        if (tokens.Length > 1 && tokens[0].Equals ("/name")) {
+            string designatedPlayerName = chatMessage.Substring (chatMessage.IndexOf (' ') + 1);
+            ChatboxController.Instance.chatBoxString += "\n" + GetComponent<NameTagController> ().playerName + " just changed name to " +
+                designatedPlayerName;
             GetComponent<NameTagController> ().SetPlayerName (designatedPlayerName);
         } else {
-            ChatboxController.Instance.chatBoxString = ChatboxController.Instance.chatBoxString + "\n" + chatMessage;
+            ChatboxController.Instance.chatBoxString += "\n" + GetComponent<NameTagController> ().playerName + ": " + chatMessage;
         }
     }
 
