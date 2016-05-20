@@ -19,7 +19,7 @@ public class ProjectileController : NetworkBehaviour {
 
     public override void OnStartServer () {
         rigidBody = GetComponent<Rigidbody2D> ();
-        rigidBody.velocity = new Vector2 (transform.forward.x, transform.forward.y) * projectileSpeed;
+        rigidBody.velocity = new Vector2 (transform.forward.x, transform.forward.y).normalized * projectileSpeed;
     }
 
     public override void OnStartClient () {
