@@ -55,6 +55,8 @@ public class CrosshairController : MonoBehaviour {
         Vector2 targetPosition = (Vector2) transform.position + moveDirectionVector * moveSpeed * Time.deltaTime;
         // Move crosshair towards target position
         MoveTowards (targetPosition);
+        // Normalize crosshair z-position to -2.0f
+        transform.position = new Vector3 (transform.position.x, transform.position.y, -2.0f);
     }
 
     public void MoveTowards (Vector2 targetPosition) {

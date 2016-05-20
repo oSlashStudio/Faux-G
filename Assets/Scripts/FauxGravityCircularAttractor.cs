@@ -14,7 +14,13 @@ public class FauxGravityCircularAttractor : Attractor {
 
 		// Rotation / Torque component of faux gravity
 		Quaternion targetRotation = Quaternion.FromToRotation (targetNormal, attractorNormal) * targetTransform.rotation;
-		targetTransform.rotation = Quaternion.Slerp (targetTransform.rotation, targetRotation, 50 * Time.deltaTime);
+        // Keep track of old x and y-rotation
+        Vector3 targetTransformOldRotation = targetTransform.rotation.eulerAngles;
+        // Rotate transform according to gravity
+        targetTransform.rotation = Quaternion.Slerp (targetTransform.rotation, targetRotation, 50 * Time.deltaTime);
+        // Assert old x and y-rotation
+        Vector3 targetTransformRotation = targetTransform.rotation.eulerAngles;
+        targetTransform.rotation = Quaternion.Euler (targetTransformOldRotation.x, targetTransformOldRotation.y, targetTransformRotation.z);
 	}
 
 	public override void Repel (Transform targetTransform) {
@@ -23,11 +29,17 @@ public class FauxGravityCircularAttractor : Attractor {
 		
 		// Force component of faux gravity
 		targetTransform.GetComponent<Rigidbody2D>().AddForce (repellerNormal * -gravity);
-		
-		// Rotation / Torque component of faux gravity
-		Quaternion targetRotation = Quaternion.FromToRotation (targetNormal, repellerNormal) * targetTransform.rotation;
-		targetTransform.rotation = Quaternion.Slerp (targetTransform.rotation, targetRotation, 50 * Time.deltaTime);
-	}
+        
+        // Rotation / Torque component of faux gravity
+        Quaternion targetRotation = Quaternion.FromToRotation (targetNormal, repellerNormal) * targetTransform.rotation;
+        // Keep track of old x and y-rotation
+        Vector3 targetTransformOldRotation = targetTransform.rotation.eulerAngles;
+        // Rotate transform according to gravity
+        targetTransform.rotation = Quaternion.Slerp (targetTransform.rotation, targetRotation, 50 * Time.deltaTime);
+        // Assert old x and y-rotation
+        Vector3 targetTransformRotation = targetTransform.rotation.eulerAngles;
+        targetTransform.rotation = Quaternion.Euler (targetTransformOldRotation.x, targetTransformOldRotation.y, targetTransformRotation.z);
+    }
 
     void OnTriggerEnter2D (Collider2D collider) {
         if (collider.tag.Equals ("Player")) {
