@@ -171,7 +171,7 @@ public class PlayerController : NetworkBehaviour {
 
     void InputAim () {
         if (Input.GetMouseButtonDown (1)) {
-            if (weaponController.currentWeapon == 4) {
+            if (weaponController.currentWeapon == 4 || weaponController.currentWeapon == 5) {
                 if (isAiming) {
                     isAiming = false;
                     aimCamera.GetComponent<Camera> ().enabled = false;
@@ -205,6 +205,8 @@ public class PlayerController : NetworkBehaviour {
             weaponController.CmdChangeWeapon (3);
         } else if (Input.GetKeyDown (KeyCode.Alpha4)) {
             weaponController.CmdChangeWeapon (4);
+        } else if (Input.GetKeyDown (KeyCode.Alpha5)) {
+            weaponController.CmdChangeWeapon (5);
         }
     }
 

@@ -9,23 +9,28 @@ public class WeaponController : NetworkBehaviour {
     public GameObject rocketLauncherShellPrefab;
     public GameObject minigunBulletPrefab;
     public GameObject sniperBulletPrefab;
+    public GameObject missileLauncherShellPrefab;
 
     public float defaultRifleFireDelay = 0.2f;
     public float defaultRocketLauncherFireDelay = 5.0f;
     public float defaultMinigunFireDelay = 0.1f;
     public float defaultSniperFireDelay = 2.0f;
+    public float defaultMissileLauncherFireDelay = 5.0f;
 
     public float rifleMaxSpreadAngle = 10.0f;
     public float rocketLauncherMaxSpreadAngle = 5.0f;
     public float minigunMaxSpreadAngle = 20.0f;
     public float sniperMaxSpreadAngle = 5.0f;
+    public float missileLauncherMaxSpreadAngle = 10.0f;
 
     public float rifleRecoil = 0.3f;
     public float rocketLauncherRecoil = 1.0f;
     public float minigunRecoil = 0.1f;
     public float sniperRecoil = 1.0f;
+    public float missileLauncherRecoil = 1.0f;
 
     public float rocketLauncherKnockbackForce = 500.0f;
+    public float missileLauncherKnockbackForce = 500.0f;
 
     [SyncVar]
     public NetworkInstanceId playerNetId;
@@ -36,6 +41,7 @@ public class WeaponController : NetworkBehaviour {
     private float rocketLauncherFireDelay = 0.0f;
     private float minigunFireDelay = 0.0f;
     private float sniperFireDelay = 0.0f;
+    private float missileLauncherFireDelay = 0.0f;
 
     public int currentWeapon = 1; // Player starts with rifle as weapon (id 1)
 
@@ -63,6 +69,7 @@ public class WeaponController : NetworkBehaviour {
         rocketLauncherFireDelay -= Time.deltaTime;
         minigunFireDelay -= Time.deltaTime;
         sniperFireDelay -= Time.deltaTime;
+        missileLauncherFireDelay -= Time.deltaTime;
     }
 
     public void UpdateWeaponPosition () {
@@ -108,6 +115,14 @@ public class WeaponController : NetworkBehaviour {
                     sniperFireDelay = defaultSniperFireDelay;
                 }
                 break;
+            case 5:
+                if (missileLauncherFireDelay <= 0.0f) {
+                    FireWithHoming (sourcePosition, targetPosition, missileLauncherShellPrefab, missileLauncherMaxSpreadAngle, accuracy);
+                    RpcIntroduceRecoil (missileLauncherRecoil);
+                    RpcIntroduceKnockback (missileLauncherKnockbackForce, (sourcePosition - targetPosition).normalized);
+                    missileLauncherFireDelay = defaultMissileLauncherFireDelay;
+                }
+                break;
             default:
                 break;
         }
@@ -127,6 +142,31 @@ public class WeaponController : NetworkBehaviour {
             Quaternion.Euler (bulletRotationVector));
         projectile.GetComponent<ProjectileController> ().playerNetId = playerNetId;
         projectile.GetComponent<ProjectileController> ().playerConnectionId = playerConnectionId;
+        Physics2D.IgnoreCollision (projectile.GetComponent<Collider2D> (), gameObject.GetComponent<Collider2D> ());
+        // Create projectile on client
+        NetworkServer.Spawn (projectile);
+    }
+
+    void FireWithHoming (Vector3 sourcePosition, Vector3 targetPosition, GameObject projectilePrefab, float maxSpreadAngle, float accuracy) {
+        // Bullet direction is characterized by the vector between crosshair and weapon muzzle
+        Vector3 bulletDirectionVector = (targetPosition - sourcePosition).normalized;
+        Quaternion bulletRotation = Quaternion.LookRotation (bulletDirectionVector);
+        Vector3 bulletRotationVector = bulletRotation.eulerAngles;
+
+        // Calculate projectile spread based on accuracy
+        bulletRotationVector.x += Random.Range (-1.0f, 1.0f) * maxSpreadAngle * (1.0f - accuracy);
+
+        // Create projectile with appropriate position and rotation on the server
+        GameObject projectile = (GameObject) Instantiate (projectilePrefab, sourcePosition,
+            Quaternion.Euler (bulletRotationVector));
+        projectile.GetComponent<HomingProjectileController> ().playerNetId = playerNetId;
+        projectile.GetComponent<HomingProjectileController> ().playerConnectionId = playerConnectionId;
+        // Set target routine
+        Collider2D targetCollider = Physics2D.OverlapCircle (targetPosition, 0.1f);
+        if (targetCollider != null && targetCollider.tag.Equals ("Player")) {
+            projectile.GetComponent<HomingProjectileController> ().targetPlayerNetId = targetCollider.gameObject.GetComponent<NetworkIdentity> ().netId;
+        }
+
         Physics2D.IgnoreCollision (projectile.GetComponent<Collider2D> (), gameObject.GetComponent<Collider2D> ());
         // Create projectile on client
         NetworkServer.Spawn (projectile);
@@ -171,6 +211,9 @@ public class WeaponController : NetworkBehaviour {
                 break;
             case 4:
                 transform.localScale = new Vector3 (0.5f, 1.5f, 0.5f);
+                break;
+            case 5:
+                transform.localScale = new Vector3 (1.0f, 1.5f, 1.0f);
                 break;
             default:
                 break;
