@@ -166,7 +166,7 @@ public class WeaponController : NetworkBehaviour {
         Collider2D[] targetColliders = Physics2D.OverlapCircleAll (targetPosition, 2.0f);
         if (targetColliders != null) {
             foreach (Collider2D targetCollider in targetColliders) {
-                if (targetCollider.tag.Equals ("Player")) {
+                if (targetCollider.tag.Equals ("Player") || targetCollider.tag.Equals ("Enemy")) {
                     projectile.GetComponent<HomingProjectileController> ().targetPlayerNetId = targetCollider.gameObject.GetComponent<NetworkIdentity> ().netId;
                     break;
                 }

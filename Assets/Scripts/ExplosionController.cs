@@ -33,7 +33,7 @@ public class ExplosionController : NetworkBehaviour {
     void DamagePlayersInArea () {
         Collider2D[] collidersInArea = Physics2D.OverlapCircleAll ((Vector2) transform.position, explosionArea);
         foreach (Collider2D currentCollider in collidersInArea) {
-            if (currentCollider.tag.Equals ("Player")) {
+            if (currentCollider.tag.Equals ("Player") || currentCollider.tag.Equals("Enemy")) {
                 // Handle damage to player
                 HealthController playerHealthController = currentCollider.gameObject.GetComponent<HealthController> ();
                 playerHealthController.ReduceHealth (explosionDamage, playerConnectionId);

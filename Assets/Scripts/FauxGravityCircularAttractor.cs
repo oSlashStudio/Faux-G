@@ -12,6 +12,10 @@ public class FauxGravityCircularAttractor : Attractor {
 		// Force component of faux gravity
 		targetTransform.GetComponent<Rigidbody2D>().AddForce (attractorNormal * gravity);
 
+        if (!targetTransform.GetComponent<FauxGravityBody> ().isRotatable) {
+            return;
+        }
+
 		// Rotation / Torque component of faux gravity
 		Quaternion targetRotation = Quaternion.FromToRotation (targetNormal, attractorNormal) * targetTransform.rotation;
         // Keep track of old x and y-rotation
@@ -29,7 +33,11 @@ public class FauxGravityCircularAttractor : Attractor {
 		
 		// Force component of faux gravity
 		targetTransform.GetComponent<Rigidbody2D>().AddForce (repellerNormal * -gravity);
-        
+
+        if (!targetTransform.GetComponent<FauxGravityBody> ().isRotatable) {
+            return;
+        }
+
         // Rotation / Torque component of faux gravity
         Quaternion targetRotation = Quaternion.FromToRotation (targetNormal, repellerNormal) * targetTransform.rotation;
         // Keep track of old x and y-rotation

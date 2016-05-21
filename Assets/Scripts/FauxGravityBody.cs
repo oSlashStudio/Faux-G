@@ -1,10 +1,11 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 
 public class FauxGravityBody : MonoBehaviour {
 
 	public Attractor attractor;
 	public bool isAttracted = true;
+    public bool isRotatable = true;
 
 	private Rigidbody2D rigidBody;
 
@@ -12,7 +13,10 @@ public class FauxGravityBody : MonoBehaviour {
 	void Start () {
 		rigidBody = GetComponent<Rigidbody2D>();
 
-		rigidBody.constraints = RigidbodyConstraints2D.FreezeRotation;
+        if (isRotatable) {
+            rigidBody.constraints = RigidbodyConstraints2D.FreezeRotation;
+        }
+
 		rigidBody.gravityScale = 0.0f;
 	}
 	

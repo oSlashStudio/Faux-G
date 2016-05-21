@@ -27,14 +27,18 @@ public class HomingProjectileController : NetworkBehaviour {
         GameObject player = NetworkServer.FindLocalObject (playerNetId);
         Physics2D.IgnoreCollision (GetComponent<Collider2D> (), player.GetComponent<Collider2D> ());
 
-        GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<PlayerController> ().playerColor);
+        if (player.tag.Equals ("Player")) {
+            GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<PlayerController> ().playerColor);
+        }
     }
 
     public override void OnStartClient () {
         GameObject player = ClientScene.FindLocalObject (playerNetId);
         Physics2D.IgnoreCollision (GetComponent<Collider2D> (), player.GetComponent<Collider2D> ());
 
-        GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<PlayerController> ().playerColor);
+        if (player.tag.Equals ("Player")) {
+            GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<PlayerController> ().playerColor);
+        }
     }
 
     // Use this for initialization
@@ -80,7 +84,7 @@ public class HomingProjectileController : NetworkBehaviour {
                 ShakeCamerasInRange ();
             }
             if (isServer) { // Only simulate collision event on server due to synchronization using SyncVar and server-side instantiation
-                if (collision.collider.tag.Equals ("Player")) {
+                if (collision.collider.tag.Equals ("Player") || collision.collider.tag.Equals ("Enemy")) {
                     // Handle damage to player
                     HealthController playerHealthController = collision.gameObject.GetComponent<HealthController> ();
                     playerHealthController.ReduceHealth (projectileDamage, playerConnectionId);

@@ -17,6 +17,10 @@ public class FauxGravityLinearAttractor : Attractor {
 		// Force component of faux gravity
 		targetTransform.GetComponent<Rigidbody2D>().AddForce (attractorNormal * gravity);
 
+        if (!targetTransform.GetComponent<FauxGravityBody> ().isRotatable) {
+            return;
+        }
+
         // Rotation / Torque component of faux gravity
         Quaternion targetRotation = Quaternion.LookRotation (Vector3.forward, -attractorNormal);
 		targetTransform.rotation = Quaternion.Slerp (targetTransform.rotation, targetRotation, 50 * Time.deltaTime);
@@ -33,6 +37,10 @@ public class FauxGravityLinearAttractor : Attractor {
 		
 		// Force component of faux gravity
 		targetTransform.GetComponent<Rigidbody2D>().AddForce (repellerNormal * -gravity);
+
+        if (!targetTransform.GetComponent<FauxGravityBody> ().isRotatable) {
+            return;
+        }
 
         // Rotation / Torque component of faux gravity
         Quaternion targetRotation = Quaternion.LookRotation (Vector3.forward, -repellerNormal);

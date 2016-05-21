@@ -5,7 +5,6 @@ using System.Collections;
 public class HealthController : NetworkBehaviour {
     
     public GameObject damageCalloutPrefab;
-    public float healthBarVerticalOffset = 1.5f;
     public float damageCalloutVerticalOffset = 1.5f;
     public float defaultRespawnTime = 5.0f;
     public float maxHealth = 100.0f;
@@ -69,7 +68,11 @@ public class HealthController : NetworkBehaviour {
     void SetAsDead () {
         isDead = true; // Set as dead
         respawnTime = defaultRespawnTime;
-        lastDamagingPlayerName = GameManagerController.Instance.GetPlayerName (lastDamagingPlayerConnectionId);
+        if (lastDamagingPlayerConnectionId == -1) {
+            lastDamagingPlayerName = "Enemy";
+        } else {
+            lastDamagingPlayerName = GameManagerController.Instance.GetPlayerName (lastDamagingPlayerConnectionId);
+        }
     }
 
     void UpdateRespawnTime () {
