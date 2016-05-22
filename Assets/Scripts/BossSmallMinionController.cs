@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
 
+[NetworkSettings (sendInterval = 0.05f)]
 public class BossSmallMinionController : NetworkBehaviour {
 
     public GameObject bulletPrefab;
@@ -39,6 +40,8 @@ public class BossSmallMinionController : NetworkBehaviour {
             }
 
             Move ();
+
+            SyncRigidbody ();
         }
 	}
 
@@ -78,6 +81,11 @@ public class BossSmallMinionController : NetworkBehaviour {
 
     void Move () {
         rigidBody.velocity = (targetPosition - (Vector2) transform.position).normalized * moveSpeed;
+    }
+
+    void SyncRigidbody () {
+        position = transform.position;
+        velocity = rigidBody.velocity;
     }
 
     void OnPositionSync (Vector3 newPosition) {
