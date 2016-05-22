@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
 
+[NetworkSettings(sendInterval = 0.05f)]
 public class BossSmallController : NetworkBehaviour {
 
     public float maxAngularVelocity = 360.0f;
@@ -9,24 +10,29 @@ public class BossSmallController : NetworkBehaviour {
     public float physicalHitDamage = 20.0f;
     public float defaultPhysicalHitCooldown = 3.0f;
     public float defaultFireDelay = 5.0f;
+    public float defaultSpawnMinionDelay = 10.0f;
     public int numBulletsSpawned = 18;
 
     public GameObject bulletPrefab;
+    public GameObject minionPrefab;
 
     private Rigidbody2D rigidBody;
     private Component halo;
     
-    [SyncVar]
+    [SyncVar(hook = "OnPositionSync")]
     private Vector3 position;
-    [SyncVar]
+    [SyncVar(hook = "OnVelocitySync")]
     private Vector3 velocity;
-    [SyncVar]
+    [SyncVar(hook = "OnAngularVelocitySync")]
     private float angularVelocity = 0.0f;
     [SyncVar]
     private bool isDamaging = false;
 
     private float physicalHitCooldown;
     private float fireDelay;
+    private float spawnMinionDelay;
+
+    private GameObject minion;
 
 	// Use this for initialization
 	void Start () {
@@ -35,6 +41,7 @@ public class BossSmallController : NetworkBehaviour {
 
         physicalHitCooldown = defaultPhysicalHitCooldown;
         fireDelay = defaultFireDelay;
+        spawnMinionDelay = defaultSpawnMinionDelay;
 	}
 	
 	// Update is called once per frame
@@ -44,20 +51,26 @@ public class BossSmallController : NetworkBehaviour {
             rigidBody.angularVelocity = angularVelocity;
 
             physicalHitCooldown -= Time.deltaTime;
-
-            if (physicalHitCooldown < 0.0f && !isDamaging) {
+            if (physicalHitCooldown <= 0.0f && !isDamaging) {
                 isDamaging = true;
             }
 
             fireDelay -= Time.deltaTime;
-
-            if (fireDelay < 0.0f) {
+            if (fireDelay <= 0.0f) {
                 Fire ();
                 fireDelay = defaultFireDelay;
             }
-        }
 
-        SyncRigidbody ();
+            if (minion == null) {
+                spawnMinionDelay -= Time.deltaTime;
+                if (spawnMinionDelay <= 0.0f) {
+                    SpawnMinion ();
+                    spawnMinionDelay = defaultSpawnMinionDelay;
+                }
+            }
+
+            SyncRigidbody ();
+        }
 
         if (isDamaging) {
             halo.GetType ().GetProperty ("enabled").SetValue (halo, true, null);
@@ -91,16 +104,17 @@ public class BossSmallController : NetworkBehaviour {
         }
     }
 
+    void SpawnMinion () {
+        Vector3 spawnPositionShift = -transform.position.normalized * 5.0f;
+        minion = (GameObject) Instantiate (minionPrefab, transform.position + spawnPositionShift, Quaternion.identity);
+
+        NetworkServer.Spawn (minion);
+    }
+
     void SyncRigidbody () {
-        if (isServer) {
-            position = transform.position;
-            velocity = rigidBody.velocity;
-            // Angular velocity is already synced from server
-        } else if (isClient) {
-            transform.position = position;
-            rigidBody.velocity = velocity;
-            rigidBody.angularVelocity = angularVelocity;
-        }
+        position = transform.position;
+        velocity = rigidBody.velocity;
+        // Angular velocity is already synced from server
     }
 
     void OnCollisionEnter2D (Collision2D collision) {
@@ -118,6 +132,26 @@ public class BossSmallController : NetworkBehaviour {
                 angularVelocity = 0.0f;
             }
         }
+    }
+
+    void OnPositionSync (Vector3 newPosition) {
+        position = newPosition;
+
+        if ((transform.position - position).magnitude > 0.5f) {
+            transform.position = position;
+        }
+    }
+
+    void OnVelocitySync (Vector3 newVelocity) {
+        velocity = newVelocity;
+
+        rigidBody.velocity = velocity;
+    }
+
+    void OnAngularVelocitySync (float newAngularVelocity) {
+        angularVelocity = newAngularVelocity;
+
+        rigidBody.angularVelocity = angularVelocity;
     }
 
 }
