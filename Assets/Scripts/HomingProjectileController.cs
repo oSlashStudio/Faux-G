@@ -14,6 +14,8 @@ public class HomingProjectileController : NetworkBehaviour {
     public NetworkInstanceId playerNetId;
     [SyncVar]
     public int playerConnectionId;
+    [SyncVar]
+    private Quaternion rotation;
 
     public NetworkInstanceId targetPlayerNetId;
     private GameObject targetPlayer;
@@ -30,6 +32,8 @@ public class HomingProjectileController : NetworkBehaviour {
         if (player.tag.Equals ("Player")) {
             GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<PlayerController> ().playerColor);
         }
+
+        rotation = transform.rotation;
     }
 
     public override void OnStartClient () {
@@ -39,6 +43,8 @@ public class HomingProjectileController : NetworkBehaviour {
         if (player.tag.Equals ("Player")) {
             GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<PlayerController> ().playerColor);
         }
+
+        transform.rotation = rotation;
     }
 
     // Use this for initialization
@@ -74,6 +80,12 @@ public class HomingProjectileController : NetworkBehaviour {
             if (isServer) {
                 Destroy (gameObject);
             }
+        }
+
+        if (isServer) {
+            rotation = transform.rotation;
+        } else if (isClient) {
+            transform.rotation = rotation;
         }
     }
 

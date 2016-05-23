@@ -14,6 +14,8 @@ public class ProjectileController : NetworkBehaviour {
     public NetworkInstanceId playerNetId;
     [SyncVar]
     public int playerConnectionId;
+    [SyncVar]
+    private Quaternion rotation;
 
 	Rigidbody2D rigidBody;
 
@@ -27,6 +29,8 @@ public class ProjectileController : NetworkBehaviour {
         if (player.tag.Equals ("Player")) {
             GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<PlayerController> ().playerColor);
         }
+
+        rotation = transform.rotation;
     }
 
     public override void OnStartClient () {
@@ -36,6 +40,8 @@ public class ProjectileController : NetworkBehaviour {
         if (player.tag.Equals ("Player")) {
             GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<PlayerController> ().playerColor);
         }
+
+        transform.rotation = rotation;
     }
 
 	// Use this for initialization
