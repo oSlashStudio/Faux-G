@@ -91,9 +91,7 @@ public class BossSmallMinionController : NetworkBehaviour {
     void OnPositionSync (Vector3 newPosition) {
         position = newPosition;
 
-        if ((transform.position - position).magnitude > 0.5f) {
-            transform.position = position;
-        }
+        transform.position = position;
     }
 
     void OnVelocitySync (Vector3 newVelocity) {
