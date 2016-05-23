@@ -54,9 +54,10 @@ public class ProjectileController : NetworkBehaviour {
         if (projectileLifetime <= 0.0f) {
             if (isClient) {
                 ShakeCamerasInRange ();
+                Destroy (gameObject);
             }
             if (isServer) {
-                Destroy (gameObject);
+                NetworkServer.Destroy (gameObject);
             }
         }
 	}
@@ -67,6 +68,7 @@ public class ProjectileController : NetworkBehaviour {
         } else {
             if (isClient) { // Only simulate camera shake on client due to camera synchronization using Network Transform
                 ShakeCamerasInRange ();
+                Destroy (gameObject);
             }
             if (isServer) { // Only simulate collision event on server due to synchronization using SyncVar and server-side instantiation
                 if (collision.collider.tag.Equals ("Player") || collision.collider.tag.Equals ("Enemy")) {
@@ -75,7 +77,7 @@ public class ProjectileController : NetworkBehaviour {
                     playerHealthController.ReduceHealth (projectileDamage, playerConnectionId);
                 }
                 // Destroy projectile
-                Destroy (gameObject);
+                NetworkServer.Destroy (gameObject);
             }
         }
 	}

@@ -43,6 +43,9 @@ public class PlayerController : NetworkBehaviour {
     [SyncVar]
     public Color playerColor;
 
+    private float defaultWeaponRotationSyncDelay = 0.1f;
+    private float weaponRotationSyncDelay;
+
     public override void OnStartServer () {
         NetworkLobbyManagerController.Instance.AssignPlayer (connectionToClient.connectionId, GetComponent<NameTagController> ().playerName);
     }
@@ -68,6 +71,8 @@ public class PlayerController : NetworkBehaviour {
 	void Start () {
         rigidBody = GetComponent<Rigidbody2D> ();
         GetComponent<MeshRenderer> ().material.color = playerColor;
+
+        weaponRotationSyncDelay = defaultWeaponRotationSyncDelay;
     }
 	
 	// Update is called once per frame
@@ -80,7 +85,12 @@ public class PlayerController : NetworkBehaviour {
             return;
         }
 
-        CmdUpdateWeaponDirection (crosshair.transform.position);
+        weaponRotationSyncDelay -= Time.deltaTime;
+        if (weaponRotationSyncDelay <= 0.0f) {
+            CmdUpdateWeaponDirection (crosshair.transform.position);
+
+            weaponRotationSyncDelay = defaultWeaponRotationSyncDelay;
+        }
 
         RecoverStamina ();
 
