@@ -2,7 +2,6 @@ using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
 
-[NetworkSettings(sendInterval = 0.05f)]
 public class BossSmallController : NetworkBehaviour {
 
     public float maxAngularVelocity = 360.0f;
@@ -18,12 +17,7 @@ public class BossSmallController : NetworkBehaviour {
 
     private Rigidbody2D rigidBody;
     private Component halo;
-    
-    [SyncVar(hook = "OnPositionSync")]
-    private Vector3 position;
-    [SyncVar(hook = "OnVelocitySync")]
-    private Vector3 velocity;
-    [SyncVar(hook = "OnAngularVelocitySync")]
+
     private float angularVelocity = 0.0f;
     [SyncVar]
     private bool isDamaging = false;
@@ -68,8 +62,6 @@ public class BossSmallController : NetworkBehaviour {
                     spawnMinionDelay = defaultSpawnMinionDelay;
                 }
             }
-
-            SyncRigidbody ();
         }
 
         if (isDamaging) {
@@ -93,7 +85,7 @@ public class BossSmallController : NetworkBehaviour {
             Vector3 angle = new Vector3 (0.0f, 0.0f, i * 360.0f / numBulletsSpawned);
             Vector3 positionShift = Quaternion.Euler (angle) * Vector3.right * 1.0f;
 
-            GameObject bullet = (GameObject) Instantiate (bulletPrefab, position + positionShift, Quaternion.LookRotation (positionShift));
+            GameObject bullet = (GameObject) Instantiate (bulletPrefab, transform.position + positionShift, Quaternion.LookRotation (positionShift));
 
             bullet.GetComponent<ProjectileController> ().playerNetId = GetComponent<NetworkIdentity> ().netId;
             bullet.GetComponent<ProjectileController> ().playerConnectionId = -1;
@@ -111,12 +103,6 @@ public class BossSmallController : NetworkBehaviour {
         NetworkServer.Spawn (minion);
     }
 
-    void SyncRigidbody () {
-        position = transform.position;
-        velocity = rigidBody.velocity;
-        // Angular velocity is already synced from server
-    }
-
     void OnCollisionEnter2D (Collision2D collision) {
         if (isServer) {
             if (collision.collider.tag.Equals ("Player")) {
@@ -132,24 +118,6 @@ public class BossSmallController : NetworkBehaviour {
                 angularVelocity = 0.0f;
             }
         }
-    }
-
-    void OnPositionSync (Vector3 newPosition) {
-        position = newPosition;
-
-        transform.position = position;
-    }
-
-    void OnVelocitySync (Vector3 newVelocity) {
-        velocity = newVelocity;
-
-        rigidBody.velocity = velocity;
-    }
-
-    void OnAngularVelocitySync (float newAngularVelocity) {
-        angularVelocity = newAngularVelocity;
-
-        rigidBody.angularVelocity = angularVelocity;
     }
 
 }
