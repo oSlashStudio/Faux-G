@@ -1,12 +1,45 @@
 fileFormatVersion: 2
-guid: 8b070c9dbfd93dc49a0ba9339658b9fe
-timeCreated: 1463982822
+guid: eec851763d553ce41a5c1442bbb911a1
+timeCreated: 1463995548
 licenseType: Free
 ModelImporter:
   serializedVersion: 19
-  fileIDToRecycleName: {}
+  fileIDToRecycleName:
+    100000: Cone002
+    100002: Cone003
+    100004: Cone004
+    100006: Cone005
+    100008: //RootNode
+    100010: Pyramid002
+    100012: Pyramid003
+    400000: Cone002
+    400002: Cone003
+    400004: Cone004
+    400006: Cone005
+    400008: //RootNode
+    400010: Pyramid002
+    400012: Pyramid003
+    2300000: Cone002
+    2300002: Cone003
+    2300004: Cone004
+    2300006: Cone005
+    2300008: Pyramid002
+    2300010: Pyramid003
+    3300000: Cone002
+    3300002: Cone003
+    3300004: Cone004
+    3300006: Cone005
+    3300008: Pyramid002
+    3300010: Pyramid003
+    4300000: Cone002
+    4300002: Cone003
+    4300004: Cone004
+    4300006: Pyramid002
+    4300008: Pyramid003
+    4300010: Cone005
+    9500000: //RootNode
   materials:
-    importMaterials: 1
+    importMaterials: 0
     materialName: 0
     materialSearch: 1
   animations:
@@ -30,7 +63,7 @@ ModelImporter:
   meshes:
     lODScreenPercentages: []
     globalScale: 1
-    meshCompression: 0
+    meshCompression: 3
     addColliders: 0
     importBlendShapes: 1
     swapUVChannels: 0
@@ -48,7 +81,7 @@ ModelImporter:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
-  importAnimation: 1
+  importAnimation: 0
   copyAvatar: 0
   humanDescription:
     human: []
@@ -63,7 +96,7 @@ ModelImporter:
     rootMotionBoneName: 
     hasTranslationDoF: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 2
+  animationType: 0
   humanoidOversampling: 1
   additionalBone: 0
   userData: 

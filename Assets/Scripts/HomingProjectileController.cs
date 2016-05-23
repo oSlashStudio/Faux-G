@@ -62,7 +62,8 @@ public class HomingProjectileController : NetworkBehaviour {
         }
 
         if (targetPlayer != null) {
-            rigidBody.velocity = (targetPlayer.transform.position - transform.position).normalized * projectileSpeed;
+            transform.LookAt (targetPlayer.transform.position);
+            rigidBody.velocity = new Vector2 (transform.forward.x, transform.forward.y).normalized * projectileSpeed;
         }
 
         projectileLifetime -= Time.deltaTime;
