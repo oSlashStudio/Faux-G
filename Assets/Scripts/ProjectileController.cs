@@ -57,7 +57,7 @@ public class ProjectileController : NetworkBehaviour {
                 Destroy (gameObject);
             }
             if (isServer) {
-                NetworkServer.Destroy (gameObject);
+                Destroy (gameObject);
             }
         }
 	}
@@ -77,7 +77,7 @@ public class ProjectileController : NetworkBehaviour {
                     playerHealthController.ReduceHealth (projectileDamage, playerConnectionId);
                 }
                 // Destroy projectile
-                NetworkServer.Destroy (gameObject);
+                Destroy (gameObject);
             }
         }
 	}
