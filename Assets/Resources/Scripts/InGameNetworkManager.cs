@@ -106,10 +106,6 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     void OnLevelWasLoaded () {
         isInGame = true;
 
-        if (PhotonNetwork.isMasterClient) { // If master client, instantiate boss
-            PhotonNetwork.InstantiateSceneObject ("Boss Small", new Vector3 (1.0f, 1.0f, 0.0f), Quaternion.identity, 0, null);
-        }
-
         SpawnPlayer ();
     }
 

@@ -45,7 +45,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
             foreach (PhotonPlayer player in playersInRoom) {
                 GUILayout.BeginHorizontal ();
 
-                GUILayout.Label (player.name); // Player name label
+                GUILayout.Label (player.name, GUILayout.Width (200.0f)); // Player name label
 
                 if (player.isLocal) { // Local player
                     if (GUILayout.Button ("Leave")) { // Leave button

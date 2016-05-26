@@ -97,6 +97,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
                     PhotonNetwork.JoinRandomRoom ();
                 }
                 if (GUILayout.Button ("Find Room")) {
+                    PhotonNetwork.player.name = playerName;
                     isFindingRoom = true;
                 }
             }
