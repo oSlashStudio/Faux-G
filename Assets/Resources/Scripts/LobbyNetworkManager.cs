@@ -13,9 +13,17 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
 
     // Use this for initialization
     void Start () {
+        if (PhotonNetwork.connected || PhotonNetwork.connecting) {
+            if (PhotonNetwork.player.name != null) { // If already has a name
+                playerName = PhotonNetwork.player.name;
+            }
+            return; // Already connected, skip return;
+        }
+
         PhotonNetwork.ConnectUsingSettings ("v0.1");
         PhotonNetwork.sendRate = 15;
         PhotonNetwork.sendRateOnSerialize = 15;
+        PhotonNetwork.automaticallySyncScene = true;
     }
 
     // Update is called once per frame
@@ -58,7 +66,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
             
             RoomInfo[] rooms = PhotonNetwork.GetRoomList ();
             foreach (RoomInfo room in rooms) {
-                if (GUILayout.Button (room.name + " (" + room.playerCount + "/" + room.maxPlayers + " players)")) {
+                if (GUILayout.Button (room.name + " (" + room.playerCount + "/" + room.maxPlayers + ")")) {
                     JoinRoom (room.name);
                 }
             }
@@ -80,8 +88,6 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
             if (playerName == "") {
                 promptMessage = "Player name can't be empty";
             } else {
-                promptMessage = "";
-
                 if (GUILayout.Button ("Create Room")) {
                     PhotonNetwork.player.name = playerName;
                     CreateRoom ();

@@ -7,7 +7,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     public GameObject[] spawnLocations;
 
     // Current state related variables
-    private bool isInRoom = false;
+    private bool isInGame = false;
 
     // Player respawn related variables
     public float defaultRespawnTimer = 10.0f;
@@ -19,8 +19,6 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     // Spectating related variables
     public GameObject spectateCamera;
     private bool isSpectating;
-    private Camera spectateCameraComponent;
-    private AudioListener spectateCameraAudioListener;
 
     public bool IsDead {
         get {
@@ -57,19 +55,18 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         set {
             isSpectating = value;
             if (isSpectating) {
-                spectateCameraComponent.enabled = true;
-                spectateCameraAudioListener.enabled = true;
+                spectateCamera.GetComponent<Camera> ().enabled = true;
+                spectateCamera.GetComponent<AudioListener> ().enabled = true;
             } else {
-                spectateCameraComponent.enabled = false;
-                spectateCameraAudioListener.enabled = false;
+                spectateCamera.GetComponent<Camera> ().enabled = false;
+                spectateCamera.GetComponent<AudioListener> ().enabled = false;
             }
         }
     }
 
 	// Use this for initialization
 	void Start () {
-        spectateCameraComponent = spectateCamera.GetComponent<Camera> ();
-        spectateCameraAudioListener = spectateCamera.GetComponent<AudioListener> ();
+        
 	}
 	
 	// Update is called once per frame
@@ -85,7 +82,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     void OnGUI () {
         GUILayout.Label (PhotonNetwork.connectionStateDetailed.ToString ());
-        if (!isInRoom) { // Not in room yet
+        if (!isInGame) { // Not in game yet
             return;
         }
 
@@ -106,12 +103,12 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         }
     }
 
-    public override void OnCreatedRoom () {
-        PhotonNetwork.InstantiateSceneObject ("Boss Small", new Vector3 (1.0f, 1.0f, 0.0f), Quaternion.identity, 0, null);
-    }
+    void OnLevelWasLoaded () {
+        isInGame = true;
 
-    public override void OnJoinedRoom () {
-        isInRoom = true;
+        if (PhotonNetwork.isMasterClient) { // If master client, instantiate boss
+            PhotonNetwork.InstantiateSceneObject ("Boss Small", new Vector3 (1.0f, 1.0f, 0.0f), Quaternion.identity, 0, null);
+        }
 
         SpawnPlayer ();
     }
