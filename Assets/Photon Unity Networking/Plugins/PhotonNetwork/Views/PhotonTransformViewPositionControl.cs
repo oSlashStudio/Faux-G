@@ -1,4 +1,4 @@
-﻿// ----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
 // <copyright file="PhotonTransformViewPositionControl.cs" company="Exit Games GmbH">
 //   PhotonNetwork Framework for Unity - Copyright (C) 2016 Exit Games GmbH
 // </copyright>
@@ -167,7 +167,7 @@ public class PhotonTransformViewPositionControl
         switch( m_Model.ExtrapolateOption )
         {
         case PhotonTransformViewPositionModel.ExtrapolateOptions.SynchronizeValues:
-            Quaternion turnRotation = Quaternion.Euler( 0, m_SynchronizedTurnSpeed * timePassed, 0 );
+            Quaternion turnRotation = Quaternion.Euler( 0, 0, m_SynchronizedTurnSpeed * timePassed );
             extrapolatePosition = turnRotation * ( m_SynchronizedSpeed * timePassed );
             break;
         case PhotonTransformViewPositionModel.ExtrapolateOptions.FixedSpeed:
