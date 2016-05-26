@@ -1,14 +1,15 @@
 using UnityEngine;
 using System.Collections;
 
-public class ProjectileController : MonoBehaviour {
+public class ThrowableController : MonoBehaviour {
 
     public GameObject explosionPrefab;
     
-    // Physics related variables
-    public float projectileSpeed = 20.0f;
-    public float projectileLifetime = 1.0f;
-    public float projectileDamage = 5.0f;
+    public float throwableLifetime;
+    public bool isExplodingOnCollision;
+
+    private float haloBlinkDelay;
+    private bool isHaloEnabled;
 
     // Owner information variables
     private bool isPlayerInstantiated = false;
@@ -25,18 +26,17 @@ public class ProjectileController : MonoBehaviour {
     }
 
     // Cached components
-    private Rigidbody2D rigidBody;
+    private Component halo;
 
-	// Use this for initialization
-	void Start () {
-        rigidBody = GetComponent<Rigidbody2D> ();
-        rigidBody.velocity = transform.forward * projectileSpeed;
+    // Use this for initialization
+    void Start () {
+        halo = GetComponent ("Halo");
     }
 	
 	// Update is called once per frame
 	void Update () {
-        projectileLifetime -= Time.deltaTime;
-        if (projectileLifetime <= 0.0f) {
+        throwableLifetime -= Time.deltaTime;
+        if (throwableLifetime <= 0.0f) {
             GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, Quaternion.identity);
 
             if (isPlayerInstantiated) {
@@ -45,16 +45,17 @@ public class ProjectileController : MonoBehaviour {
 
             Destroy (gameObject);
         }
+
+        haloBlinkDelay -= Time.deltaTime;
+        if (haloBlinkDelay <= 0.0f) {
+            ToggleHalo ();
+            haloBlinkDelay = throwableLifetime / 6.0f;
+        }
 	}
 
     void OnCollisionEnter2D (Collision2D collision) {
-        HealthController targetHealthController = collision.gameObject.GetComponent<HealthController> ();
-        if (targetHealthController != null) { // If target has health component
-            if (isPlayerInstantiated) {
-                targetHealthController.Damage (projectileDamage, instantiatorViewId);
-            } else {
-                targetHealthController.Damage (projectileDamage);
-            }
+        if (!isExplodingOnCollision) { // Not exploding on collision, ignore collision event
+            return;
         }
 
         GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, Quaternion.identity);
@@ -64,6 +65,11 @@ public class ProjectileController : MonoBehaviour {
         }
 
         Destroy (gameObject);
+    }
+
+    void ToggleHalo () {
+        isHaloEnabled = !isHaloEnabled;
+        halo.GetType ().GetProperty ("enabled").SetValue (halo, isHaloEnabled, null);
     }
 
 }

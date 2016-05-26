@@ -11,6 +11,8 @@ public class WeaponController : Photon.MonoBehaviour {
     public int currentWeapon = 0; // Id of the currently active weapon
 
     private List<float> fireDelays;
+    public bool isThrowing;
+    public float throwForce;
 
     // Cached components
     private GameObject player; // The player associated with this weapon
@@ -69,7 +71,11 @@ public class WeaponController : Photon.MonoBehaviour {
         UpdateWeaponDirection ();
         UpdateFireDelays ();
 
-        InputFire ();
+        if (weapons[currentWeapon].isThrowable) {
+            InputThrow ();
+        } else {
+            InputFire ();
+        }
         InputChangeWeapon ();
         InputAim ();
     }
@@ -88,6 +94,68 @@ public class WeaponController : Photon.MonoBehaviour {
     void UpdateFireDelays () {
         for (int i = 0; i < fireDelays.Count; i++) {
             fireDelays[i] -= Time.deltaTime;
+        }
+    }
+
+    void InputThrow () {
+        if (Input.GetMouseButtonDown (0)) { // On mouse down, start charging
+            CheckThrow ();
+        } else if (Input.GetMouseButtonUp (0)) { // On mouse release, throw
+            Throw ();
+        } else if (Input.GetMouseButton (0)) { // On mouse still down, continue charging
+            ChargeThrow ();
+        }
+    }
+
+    void CheckThrow () {
+        if (fireDelays[currentWeapon] <= 0.0f) {
+            StartChargeThrow ();
+            fireDelays[currentWeapon] = weapons[currentWeapon].defaultFireDelay;
+        }
+    }
+
+    void StartChargeThrow () {
+        // Initialize throw related variables
+        isThrowing = true;
+        throwForce = 0.0f;
+    }
+
+    void Throw () {
+        if (!isThrowing) {
+            return;
+        }
+
+        Vector3 throwDirection = (crosshair.transform.position - transform.position).normalized;
+        Vector2 throwDirectionalForce = throwDirection * throwForce;
+        photonView.RPC ("RpcThrow", PhotonTargets.All, transform.position, throwDirectionalForce);
+        // Reset throw related variables
+        isThrowing = false;
+        throwForce = 0.0f;
+    }
+
+    [PunRPC]
+    void RpcThrow (Vector3 throwPosition, Vector2 throwDirectionalForce) {
+        GameObject throwableObject = (GameObject) Instantiate (weapons[currentWeapon].projectilePrefab, throwPosition, Quaternion.identity);
+
+        Physics2D.IgnoreCollision (throwableObject.GetComponent<Collider2D> (), player.GetComponent<Collider2D> ());
+
+        // Set throwableObject owner
+        throwableObject.GetComponent<ThrowableController> ().InstantiatorViewId = photonView.viewID;
+
+        throwableObject.GetComponent<Rigidbody2D> ().AddForce (throwDirectionalForce);
+    }
+
+    void ChargeThrow () {
+        if (!isThrowing) {
+            return;
+        }
+
+        float throwForceIncrease = weapons[currentWeapon].throwForceIncreaseRate * Time.deltaTime;
+        // Special case: throw force after increase exceeds max throw force
+        if (throwForce + throwForceIncrease > weapons[currentWeapon].maxThrowForce) {
+            throwForce = weapons[currentWeapon].maxThrowForce;
+        } else {
+            throwForce += throwForceIncrease;
         }
     }
 

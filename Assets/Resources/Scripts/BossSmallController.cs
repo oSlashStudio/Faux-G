@@ -75,7 +75,7 @@ public class BossSmallController : Photon.MonoBehaviour {
     }
 
     void SpawnMinion () {
-        Vector3 spawnPositionShift = -transform.position.normalized * 5.0f;
+        Vector3 spawnPositionShift = -transform.position.normalized * 10.0f;
 
         minion = PhotonNetwork.InstantiateSceneObject ("Boss Small Minion", transform.position + spawnPositionShift, Quaternion.identity, 0, null);
     }

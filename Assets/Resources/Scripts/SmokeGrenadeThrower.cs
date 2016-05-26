@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
 
-public class HomingMissileLauncher : Weapon {
+public class SmokeGrenadeThrower : Weapon {
     
 }

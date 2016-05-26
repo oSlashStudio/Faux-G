@@ -8,7 +8,8 @@ public class ExplosionController : MonoBehaviour {
     public bool hasExplosionDamage = false;
     public float explosionArea = 3.0f;
     public float explosionDamage = 1.0f;
-    private float explosionDuration;
+    private float explosionDuration; // Explosion duration (directly taken from particle emitter duration)
+    public float explosionDurationOffset; // The offset from explosion duration, useful for slowly fading emitter
 
     // Owner information variables
     private bool isPlayerInstantiated = false;
@@ -27,6 +28,7 @@ public class ExplosionController : MonoBehaviour {
     // Use this for initialization
     void Start () {
         explosionDuration = GetComponent<ParticleSystem> ().duration;
+        explosionDuration += explosionDurationOffset;
         if (hasExplosionDamage) {
             DamagePlayersInArea ();
         }
