@@ -8,11 +8,11 @@ public class SpectateCameraController : MonoBehaviour {
     private Vector3 cameraMoveDirection;
 
     // Cached components
-    private NetworkManager networkManager;
+    private InGameNetworkManager networkManager;
 
     // Use this for initialization
     void Start () {
-        networkManager = GameObject.FindObjectOfType<NetworkManager> ();
+        networkManager = GameObject.FindObjectOfType<InGameNetworkManager> ();
     }
 	
 	// Update is called once per frame

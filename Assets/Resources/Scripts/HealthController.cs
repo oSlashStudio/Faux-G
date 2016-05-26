@@ -12,11 +12,11 @@ public class HealthController : Photon.MonoBehaviour {
     private int lastDamagerViewId;
 
     // Cached components
-    private NetworkManager networkManager;
+    private InGameNetworkManager networkManager;
 
 	// Use this for initialization
 	void Start () {
-        networkManager = GameObject.FindObjectOfType<NetworkManager> ();
+        networkManager = GameObject.FindObjectOfType<InGameNetworkManager> ();
         currentHealth = maxHealth;
 	}
 	
