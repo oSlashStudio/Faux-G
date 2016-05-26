@@ -290,6 +290,12 @@ public class WeaponController : Photon.MonoBehaviour {
             CheckChangeWeapon (3);
         } else if (Input.GetKeyDown (KeyCode.Alpha5)) {
             CheckChangeWeapon (4);
+        } else if (Input.GetKeyDown (KeyCode.Alpha6)) {
+            CheckChangeWeapon (5);
+        } else if (Input.GetKeyDown (KeyCode.Alpha7)) {
+            CheckChangeWeapon (6);
+        } else if (Input.GetKeyDown (KeyCode.Alpha8)) {
+            CheckChangeWeapon (7);
         }
     }
 
