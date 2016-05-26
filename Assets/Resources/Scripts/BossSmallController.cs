@@ -6,7 +6,7 @@ public class BossSmallController : Photon.MonoBehaviour {
     public GameObject bulletPrefab;
 
     public float angularVelocity = 540.0f;
-    public float PhysicalHitDamage = 10.0f; // Damage everytime boss hits player
+    public float physicalHitDamage = 10.0f; // Damage everytime boss hits player
     public float defaultFireDelay = 5.0f;
     public float defaultSpawnMinionDelay = 15.0f;
     public int numBulletsSpawned = 12;
@@ -17,10 +17,12 @@ public class BossSmallController : Photon.MonoBehaviour {
     // Cached components
     private Rigidbody2D rigidBody;
     private GameObject minion;
+    private PhotonTransformView photonTransformView;
 
     // Use this for initialization
     void Start () {
         rigidBody = GetComponent<Rigidbody2D> ();
+        photonTransformView = GetComponent<PhotonTransformView> ();
 
         if (!photonView.isMine) {
             rigidBody.isKinematic = true; // If this client can't control, set isKinematic to true
@@ -51,6 +53,9 @@ public class BossSmallController : Photon.MonoBehaviour {
                 spawnMinionDelay = defaultSpawnMinionDelay;
             }
         }
+
+        // Synchronize velocity and angular velocity over the network
+        photonTransformView.SetSynchronizedValues (rigidBody.velocity, rigidBody.angularVelocity);
     }
 
     void Fire () {
@@ -76,10 +81,21 @@ public class BossSmallController : Photon.MonoBehaviour {
     }
 
     void OnCollisionEnter2D (Collision2D collision) {
+        if (!photonView.isMine) { // Only check collision on master client
+            return;
+        }
+
         HealthController targetHealthController = collision.gameObject.GetComponent<HealthController> ();
         if (targetHealthController != null) { // If target has health component
-            targetHealthController.Damage (PhysicalHitDamage);
+            // Assumption: A target with health also has a photon view component
+            PhotonView targetPhotonView = collision.gameObject.GetComponent<PhotonView> ();
+            photonView.RPC ("RpcApplyPhysicalHitDamage", targetPhotonView.owner, targetPhotonView.viewID, physicalHitDamage);
         }
+    }
+
+    [PunRPC]
+    void RpcApplyPhysicalHitDamage (int targetViewId, float physicalHitDamage) {
+        PhotonView.Find (targetViewId).GetComponent<HealthController> ().Damage (physicalHitDamage);
     }
 
 }
