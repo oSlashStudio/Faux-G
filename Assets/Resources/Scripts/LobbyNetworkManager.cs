@@ -29,7 +29,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
             if (PhotonNetwork.player.name != null) { // If already has a name
                 playerName = PhotonNetwork.player.name;
             }
-            return; // Already connected, skip return;
+            return; // Already connected, skip reconnection
         }
 
         PhotonNetwork.ConnectUsingSettings ("v0.1");
@@ -54,11 +54,11 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
 
         if (!isInLobby) { // Scenario 1: Player is not in lobby yet
             ConnectingGUI ();
-        } else if (isFindingRoom) {
+        } else if (isFindingRoom) { // Scenario 2: Player is finding room
             FindRoomGUI ();
-        } else if (isCreatingRoom) {
+        } else if (isCreatingRoom) { // Scenario 3: Player is creating room
             CreateRoomGUI ();
-        } else {
+        } else { // Scenario 4: Player is still in lobby
             LobbyGUI ();
         }
     }
@@ -95,7 +95,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         foreach (RoomInfo room in rooms) {
             GUILayout.BeginHorizontal ();
             GUILayout.Label (room.name + " (" + room.playerCount + "/" + room.maxPlayers + ")", GUILayout.Width (150));
-
+            // Room's currently selected map
             byte selectedMapId = (byte) room.customProperties["map"];
             switch (selectedMapId) {
                 case 0:
@@ -111,7 +111,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
                     GUILayout.Label ("Unknown", GUILayout.Width (150.0f));
                     break;
             }
-            if (GUILayout.Button ("Join")) {
+            if (GUILayout.Button ("Join")) { // Join button
                 JoinRoom (room.name);
             }
             GUILayout.EndHorizontal ();
@@ -188,7 +188,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
     }
 
     public override void OnPhotonRandomJoinFailed (object[] codeAndMsg) {
-        promptMessage = "No rooms can be joined right now";
+        promptMessage = "No rooms can be joined right now"; // TO FIX: This message is not shown
     }
 
     void CreateRoom () {
@@ -196,20 +196,20 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         roomOptions.isOpen = true;
         roomOptions.isVisible = true;
         roomOptions.maxPlayers = 4;
-
+        // Setup custom room properties (map, etc.)
         roomOptions.customRoomProperties = new ExitGames.Client.Photon.Hashtable ();
         roomOptions.customRoomProperties.Add ("map", (byte) selectedMapId);
         roomOptions.customRoomPropertiesForLobby = new string[] { "map" };
 
         PhotonNetwork.CreateRoom (roomName, roomOptions, TypedLobby.Default);
 
-        PhotonNetwork.LoadLevel (1);
+        PhotonNetwork.LoadLevel (1); // Load Room scene
     }
 
     void JoinRoom (string roomName) {
         PhotonNetwork.JoinRoom (roomName);
 
-        PhotonNetwork.LoadLevel (1);
+        PhotonNetwork.LoadLevel (1); // Load Room scene
     }
 
 }
