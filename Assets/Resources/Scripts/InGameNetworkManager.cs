@@ -81,7 +81,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     }
 
     void OnGUI () {
-        GUILayout.Label (PhotonNetwork.connectionStateDetailed.ToString ());
+        GUILayout.Label (PhotonNetwork.GetPing ().ToString () + " ms");
         if (!isInGame) { // Not in game yet
             return;
         }
