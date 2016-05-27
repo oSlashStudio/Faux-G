@@ -105,6 +105,8 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     void OnLevelWasLoaded () {
         isInGame = true;
+        // Scene has been loaded, resume in-game instantiation
+        PhotonNetwork.isMessageQueueRunning = true;
 
         SpawnPlayer ();
     }

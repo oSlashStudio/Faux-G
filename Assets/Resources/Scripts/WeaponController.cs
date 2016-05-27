@@ -135,14 +135,7 @@ public class WeaponController : Photon.MonoBehaviour {
 
     [PunRPC]
     void RpcThrow (Vector3 throwPosition, Vector2 throwDirectionalForce) {
-        GameObject throwableObject = (GameObject) Instantiate (weapons[currentWeapon].projectilePrefab, throwPosition, Quaternion.identity);
-
-        Physics2D.IgnoreCollision (throwableObject.GetComponent<Collider2D> (), player.GetComponent<Collider2D> ());
-
-        // Set throwableObject owner
-        throwableObject.GetComponent<ThrowableController> ().InstantiatorViewId = photonView.viewID;
-
-        throwableObject.GetComponent<Rigidbody2D> ().AddForce (throwDirectionalForce);
+        weapons[currentWeapon].Throw (throwPosition, throwDirectionalForce, player, photonView.viewID);
     }
 
     void ChargeThrow () {
@@ -196,12 +189,7 @@ public class WeaponController : Photon.MonoBehaviour {
 
     [PunRPC]
     void RpcFire (Vector3 projectilePosition, Quaternion projectileRotation) {
-        GameObject projectile = (GameObject) Instantiate (weapons[currentWeapon].projectilePrefab, projectilePosition, projectileRotation);
-
-        Physics2D.IgnoreCollision (projectile.GetComponent<Collider2D> (), player.GetComponent<Collider2D> ());
-
-        // Set projectile owner
-        projectile.GetComponent<ProjectileController> ().InstantiatorViewId = photonView.viewID;
+        weapons[currentWeapon].Fire (projectilePosition, projectileRotation, player, photonView.viewID);
 
         // Networked effects
         PlayFireSoundClip ();
@@ -229,13 +217,7 @@ public class WeaponController : Photon.MonoBehaviour {
 
     [PunRPC]
     void RpcFireHoming (Vector3 projectilePosition, Quaternion projectileRotation, int targetViewId) {
-        GameObject projectile = (GameObject) Instantiate (weapons[currentWeapon].projectilePrefab, projectilePosition, projectileRotation);
-
-        Physics2D.IgnoreCollision (projectile.GetComponent<Collider2D> (), player.GetComponent<Collider2D> ());
-        projectile.GetComponent<HomingProjectileController> ().Target = targetViewId;
-
-        // Set projectile owner
-        projectile.GetComponent<HomingProjectileController> ().InstantiatorViewId = photonView.viewID;
+        weapons[currentWeapon].FireHoming (projectilePosition, projectileRotation, player, photonView.viewID, targetViewId);
 
         // Networked effects
         PlayFireSoundClip ();

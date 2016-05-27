@@ -35,7 +35,6 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         PhotonNetwork.ConnectUsingSettings ("v0.1");
         PhotonNetwork.sendRate = 15;
         PhotonNetwork.sendRateOnSerialize = 15;
-        PhotonNetwork.automaticallySyncScene = true;
     }
 
     // Update is called once per frame
