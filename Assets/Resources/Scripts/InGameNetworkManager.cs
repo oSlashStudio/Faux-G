@@ -6,6 +6,17 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     public GameObject[] spawnLocations;
 
+    private ExitGames.Client.Photon.Hashtable classHashtable;
+    private int selectedClassId;
+    private string[] classNames = new string[] {
+        "Assaulter",
+        "Recon",
+        "Light",
+        "Demolitionist",
+        "Heatseeker",
+        "Sieger"
+    };
+
     // Current state related variables
     private bool isInGame = false;
 
@@ -88,16 +99,22 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
         if (isDead) { // Player is currently dead
             GUILayout.BeginArea (new Rect (
-                Screen.width / 2.0f - 100.0f, 
-                Screen.height / 2.0f - 50.0f, 
-                200.0f, 
-                100.0f
+                Screen.width / 2.0f - 200.0f, 
+                Screen.height / 2.0f - 100.0f, 
+                400.0f, 
+                200.0f
                 ));
 
             GUIStyle respawnLabelStyle = GUI.skin.label;
             respawnLabelStyle.alignment = TextAnchor.MiddleCenter;
             GUILayout.Label ("Killed by " + killerName + ", respawning in " + respawnTimer.ToString ("0") + "...", respawnLabelStyle);
-            GUILayout.Label ("In the meantime, you can spectate other players by moving this spectate camera around.", respawnLabelStyle);
+            GUILayout.Label ("Spectate other players by moving this spectate camera around.", respawnLabelStyle);
+
+            // Class selection window
+            GUILayout.Label ("Select Class:");
+            selectedClassId = GUILayout.SelectionGrid (selectedClassId, classNames, 4);
+            classHashtable["class"] = (byte) selectedClassId;
+            PhotonNetwork.player.SetCustomProperties (classHashtable);
 
             GUILayout.EndArea ();
         }
@@ -108,6 +125,8 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         // Scene has been loaded, resume in-game instantiation
         PhotonNetwork.isMessageQueueRunning = true;
 
+        classHashtable = PhotonNetwork.player.customProperties;
+        selectedClassId = (byte) classHashtable["class"];
         SpawnPlayer ();
     }
 
@@ -121,22 +140,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     }
 
     string GetClassName (byte classId) {
-        switch (classId) {
-            case 0:
-                return "Assaulter";
-            case 1:
-                return "Recon";
-            case 2:
-                return "Light";
-            case 3:
-                return "Demolitionist";
-            case 4:
-                return "Heatseeker";
-            case 5:
-                return "Sieger";
-            default:
-                return null;
-        }
+        return classNames[classId];
     }
 
 }
