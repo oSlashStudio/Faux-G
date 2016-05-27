@@ -109,11 +109,24 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         SpawnPlayer ();
     }
 
-    public void SpawnPlayer () {
+    void SpawnPlayer () {
         IsSpectating = false;
 
         int spawnLocationId = Random.Range (0, spawnLocations.Length);
-        PhotonNetwork.Instantiate ("Sniper", spawnLocations[spawnLocationId].transform.position, Quaternion.identity, 0);
+
+        string className = GetClassName ((byte) PhotonNetwork.player.customProperties["class"]);
+        PhotonNetwork.Instantiate (className, spawnLocations[spawnLocationId].transform.position, Quaternion.identity, 0);
+    }
+
+    string GetClassName (byte classId) {
+        switch (classId) {
+            case 0:
+                return "Assaulter";
+            case 1:
+                return "Recon";
+            default:
+                return null;
+        }
     }
 
 }
