@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
 
-public class Handgun : Weapon {
+public class Magnum : Weapon {
 
 }
