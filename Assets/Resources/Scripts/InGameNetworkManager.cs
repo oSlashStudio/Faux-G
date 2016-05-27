@@ -124,6 +124,12 @@ public class InGameNetworkManager : Photon.PunBehaviour {
                 return "Assaulter";
             case 1:
                 return "Recon";
+            case 2:
+                return "Light";
+            case 3:
+                return "Demolitionist";
+            case 4:
+                return "Heatseeker";
             default:
                 return null;
         }

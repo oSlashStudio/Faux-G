@@ -8,7 +8,10 @@ public class RoomNetworkManager : Photon.PunBehaviour {
     private int selectedClassId = 0;
     private string[] classNames = new string[] {
         "Assaulter",
-        "Recon"
+        "Recon", 
+        "Light", 
+        "Demolitionist", 
+        "Heatseeker"
     };
     private ExitGames.Client.Photon.Hashtable classHashtable = new ExitGames.Client.Photon.Hashtable ();
 
@@ -68,7 +71,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
             }
 
             GUILayout.Label ("Select Class:");
-            selectedClassId = GUILayout.Toolbar (selectedClassId, classNames);
+            selectedClassId = GUILayout.SelectionGrid (selectedClassId, classNames, 4);
             classHashtable["class"] = (byte) selectedClassId;
             PhotonNetwork.player.SetCustomProperties (classHashtable);
 
