@@ -115,7 +115,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         int spawnLocationId = Random.Range (0, spawnLocations.Length);
 
         string className = GetClassName ((byte) PhotonNetwork.player.customProperties["class"]);
-        PhotonNetwork.Instantiate (className, spawnLocations[spawnLocationId].transform.position, Quaternion.identity, 0);
+        PhotonNetwork.Instantiate ("Classes/" + className, spawnLocations[spawnLocationId].transform.position, Quaternion.identity, 0);
     }
 
     string GetClassName (byte classId) {
