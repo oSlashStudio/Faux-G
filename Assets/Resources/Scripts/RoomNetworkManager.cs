@@ -61,8 +61,13 @@ public class RoomNetworkManager : Photon.PunBehaviour {
             }
 
             if (PhotonNetwork.isMasterClient) {
-                if (GUILayout.Button ("Start")) { // Start button
-                    PhotonNetwork.LoadLevel (2);
+                if (GUILayout.Button ("Start Game")) {
+                    if (PhotonNetwork.room.customProperties.ContainsKey ("map")) {
+                        byte selectedMapId = (byte) PhotonNetwork.room.customProperties["map"];
+                        PhotonNetwork.LoadLevel (selectedMapId + 2); // 2 is the offset taking lobby and room into account
+                    } else {
+                        // Handle error "map" key not found
+                    }
                 }
             }
 
