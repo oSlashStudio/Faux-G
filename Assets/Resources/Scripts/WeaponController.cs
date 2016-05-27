@@ -8,7 +8,7 @@ public class WeaponController : Photon.MonoBehaviour {
     public GameObject crosshairPrefab;
     public GameObject aimCameraPrefab;
 
-    public int currentWeapon = 0; // Id of the currently active weapon
+    private int currentWeapon; // Id of the currently active weapon
 
     private List<float> fireDelays;
     public bool isThrowing;
@@ -53,6 +53,8 @@ public class WeaponController : Photon.MonoBehaviour {
         aimCamera = (GameObject) Instantiate (aimCameraPrefab, Vector3.zero, Quaternion.identity);
         aimCameraComponent = aimCamera.GetComponent<Camera> ();
         aimCamera.GetComponent<AimCameraController> ().crosshair = crosshair;
+
+        ChangeWeapon (0); // Initialize equipped weapon (weapon 0 by default)
     }
 
     void InitializeFireDelays () {
