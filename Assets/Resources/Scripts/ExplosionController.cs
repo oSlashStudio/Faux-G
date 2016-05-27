@@ -4,6 +4,8 @@ using System.Collections;
 
 public class ExplosionController : MonoBehaviour {
 
+    public AudioClip explosionSoundClip;
+
     // Explosion related variables
     public bool hasExplosionDamage = false;
     public float explosionArea = 3.0f;
@@ -14,6 +16,9 @@ public class ExplosionController : MonoBehaviour {
     // Owner information variables
     private bool isPlayerInstantiated = false;
     private int instantiatorViewId;
+
+    // Cached components
+    private AudioSource audioSource;
 
     public int InstantiatorViewId {
         get {
@@ -27,6 +32,11 @@ public class ExplosionController : MonoBehaviour {
 
     // Use this for initialization
     void Start () {
+        audioSource = GetComponent<AudioSource> ();
+        if (explosionSoundClip != null) {
+            audioSource.PlayOneShot (explosionSoundClip);
+        }
+
         explosionDuration = GetComponent<ParticleSystem> ().duration;
         explosionDuration += explosionDurationOffset;
         if (hasExplosionDamage) {
