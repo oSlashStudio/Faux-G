@@ -58,9 +58,9 @@ public class ExplosionController : MonoBehaviour {
             HealthController targetHealthController = currentCollider.gameObject.GetComponent<HealthController> ();
             if (targetHealthController != null) { // If target has health component
                 if (isPlayerInstantiated) {
-                    targetHealthController.Damage (explosionDamage, instantiatorViewId);
+                    targetHealthController.Damage (explosionDamage, instantiatorViewId, currentCollider.transform.position);
                 } else {
-                    targetHealthController.Damage (explosionDamage);
+                    targetHealthController.Damage (explosionDamage, currentCollider.transform.position);
                 }
             }
         }

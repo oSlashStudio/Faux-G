@@ -89,13 +89,13 @@ public class BossSmallController : Photon.MonoBehaviour {
         if (targetHealthController != null) { // If target has health component
             // Assumption: A target with health also has a photon view component
             PhotonView targetPhotonView = collision.gameObject.GetComponent<PhotonView> ();
-            photonView.RPC ("RpcApplyPhysicalHitDamage", targetPhotonView.owner, targetPhotonView.viewID, physicalHitDamage);
+            photonView.RPC ("RpcApplyPhysicalHitDamage", targetPhotonView.owner, targetPhotonView.viewID, physicalHitDamage, collision.contacts[0].point);
         }
     }
 
     [PunRPC]
-    void RpcApplyPhysicalHitDamage (int targetViewId, float physicalHitDamage) {
-        PhotonView.Find (targetViewId).GetComponent<HealthController> ().Damage (physicalHitDamage);
+    void RpcApplyPhysicalHitDamage (int targetViewId, float physicalHitDamage, Vector2 damagePoint) {
+        PhotonView.Find (targetViewId).GetComponent<HealthController> ().Damage (physicalHitDamage, damagePoint);
     }
 
 }

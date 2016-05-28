@@ -35,15 +35,15 @@ public class HealthController : Photon.MonoBehaviour {
         }
 	}
 
-    public void Heal (float healAmount) {
+    public void Heal (float healAmount, Vector2 healPoint) {
         if (!photonView.isMine) {
             return;
         }
-        photonView.RPC ("RpcHeal", PhotonTargets.AllBufferedViaServer, healAmount);
+        photonView.RPC ("RpcHeal", PhotonTargets.AllBufferedViaServer, healAmount, healPoint);
     }
 
     [PunRPC]
-    void RpcHeal (float healAmount) {
+    void RpcHeal (float healAmount, Vector2 healPoint) {
         // Special case: if health after heal exceeds max health
         if (currentHealth + healAmount > maxHealth) {
             currentHealth = maxHealth;
@@ -51,11 +51,11 @@ public class HealthController : Photon.MonoBehaviour {
             currentHealth += healAmount;
         }
 
-        InstantiateHealCallout (healAmount);
+        InstantiateHealCallout (healAmount, healPoint);
     }
 
-    void InstantiateHealCallout (float healAmount) {
-        Vector3 calloutPosition = new Vector3 (transform.position.x, transform.position.y, -2.0f);
+    void InstantiateHealCallout (float healAmount, Vector2 healPoint) {
+        Vector3 calloutPosition = new Vector3 (healPoint.x, healPoint.y, -2.0f);
         GameObject callout = (GameObject) Instantiate (calloutPrefab, calloutPosition, Quaternion.identity);
         callout.GetComponent<TextMesh> ().text = "+" + healAmount.ToString ("0");
         callout.GetComponent<TextMesh> ().color = Color.green;
@@ -64,27 +64,27 @@ public class HealthController : Photon.MonoBehaviour {
     /*
      * This function handles damage from player.
      */
-    public void Damage (float damageAmount, int damagingPlayerViewId) {
+    public void Damage (float damageAmount, int damagingPlayerViewId, Vector2 damagePoint) {
         if (!photonView.isMine) {
             return;
         }
-        photonView.RPC ("RpcDamage", PhotonTargets.AllBufferedViaServer, damageAmount);
+        photonView.RPC ("RpcDamage", PhotonTargets.AllBufferedViaServer, damageAmount, damagePoint);
         lastDamagerViewId = damagingPlayerViewId;
     }
 
     /*
      * This function handles damage from enemy / unknown sources.
      */
-    public void Damage (float damageAmount) {
+    public void Damage (float damageAmount, Vector2 damagePoint) {
         if (!photonView.isMine) {
             return;
         }
-        photonView.RPC ("RpcDamage", PhotonTargets.AllBufferedViaServer, damageAmount);
+        photonView.RPC ("RpcDamage", PhotonTargets.AllBufferedViaServer, damageAmount, damagePoint);
         lastDamagerViewId = 0;
     }
 
     [PunRPC]
-    void RpcDamage (float damageAmount) {
+    void RpcDamage (float damageAmount, Vector2 damagePoint) {
         // Special case: if health after damage goes below 0
         if (currentHealth - damageAmount < 0.0f) {
             currentHealth = 0.0f;
@@ -92,11 +92,11 @@ public class HealthController : Photon.MonoBehaviour {
             currentHealth -= damageAmount;
         }
 
-        InstantiateDamageCallout (damageAmount);
+        InstantiateDamageCallout (damageAmount, damagePoint);
     }
 
-    void InstantiateDamageCallout (float damageAmount) {
-        Vector3 calloutPosition = new Vector3 (transform.position.x, transform.position.y, -2.0f);
+    void InstantiateDamageCallout (float damageAmount, Vector2 damagePoint) {
+        Vector3 calloutPosition = new Vector3 (damagePoint.x, damagePoint.y, -2.0f);
         GameObject callout = (GameObject) Instantiate (calloutPrefab, calloutPosition, Quaternion.identity);
         callout.GetComponent<TextMesh> ().text = "-" + damageAmount.ToString ("0");
         callout.GetComponent<TextMesh> ().color = Color.red;

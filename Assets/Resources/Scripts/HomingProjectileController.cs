@@ -71,9 +71,9 @@ public class HomingProjectileController : MonoBehaviour {
         HealthController targetHealthController = collision.gameObject.GetComponent<HealthController> ();
         if (targetHealthController != null) { // If target has health component
             if (isPlayerInstantiated) {
-                targetHealthController.Damage (projectileDamage, instantiatorViewId);
+                targetHealthController.Damage (projectileDamage, instantiatorViewId, collision.contacts[0].point);
             } else {
-                targetHealthController.Damage (projectileDamage);
+                targetHealthController.Damage (projectileDamage, collision.contacts[0].point);
             }
         }
 
