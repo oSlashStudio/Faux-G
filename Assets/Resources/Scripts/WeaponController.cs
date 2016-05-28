@@ -62,7 +62,7 @@ public class WeaponController : Photon.MonoBehaviour {
         throwForceBar = (GameObject) Instantiate (throwForceBarPrefab, Vector3.zero, Quaternion.identity);
         throwForceBar.transform.parent = transform;
         throwForceBar.transform.localPosition = -throwForceBar.transform.parent.right * 2.5f;
-        throwForceBar.transform.localRotation = Quaternion.Euler (new Vector3 (0.0f, 90.0f, 90.0f));
+        throwForceBar.transform.localRotation = Quaternion.Euler (new Vector3 (0.0f, 270.0f, 270.0f));
     }
 
     void InitializeFireDelays () {
