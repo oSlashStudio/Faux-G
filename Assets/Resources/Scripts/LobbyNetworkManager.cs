@@ -170,7 +170,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
             }
             if (GUILayout.Button ("Join Random Room")) {
                 PhotonNetwork.player.name = playerName;
-                PhotonNetwork.JoinRandomRoom ();
+                JoinRandomRoom ();
             }
             if (GUILayout.Button ("Find Room")) {
                 PhotonNetwork.player.name = playerName;
@@ -202,6 +202,12 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         roomOptions.customRoomPropertiesForLobby = new string[] { "map" };
 
         PhotonNetwork.CreateRoom (roomName, roomOptions, TypedLobby.Default);
+
+        PhotonNetwork.LoadLevel (1); // Load Room scene
+    }
+
+    void JoinRandomRoom () {
+        PhotonNetwork.JoinRandomRoom ();
 
         PhotonNetwork.LoadLevel (1); // Load Room scene
     }

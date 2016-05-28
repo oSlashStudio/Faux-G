@@ -319,6 +319,11 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void ToggleWeapon () {
+        photonView.RPC ("RpcToggleWeapon", PhotonTargets.AllBuffered);
+    }
+
+    [PunRPC]
+    void RpcToggleWeapon () {
         weapons[currentWeapon].Toggle ();
     }
 
