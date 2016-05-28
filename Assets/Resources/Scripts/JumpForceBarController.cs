@@ -14,18 +14,18 @@ public class JumpForceBarController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        float maxLeapForce = playerController.maxJumpForce;
-        float leapForce = playerController.jumpForce;
-        UpdateLeapForceBarScale (leapForce, maxLeapForce);
-        UpdateLeapForceBarColor (leapForce, maxLeapForce);
+        float maxJumpForce = playerController.maxJumpForce;
+        float jumpForce = playerController.jumpForce;
+        UpdateJumpForceBarScale (jumpForce, maxJumpForce);
+        UpdateJumpForceBarColor (jumpForce, maxJumpForce);
 	}
 
-    void UpdateLeapForceBarScale (float leapForce, float maxLeapForce) {
-        transform.localScale = new Vector3 (leapForce / maxLeapForce, transform.localScale.y, transform.localScale.z);
+    void UpdateJumpForceBarScale (float jumpForce, float maxJumpForce) {
+        transform.localScale = new Vector3 (jumpForce / maxJumpForce, transform.localScale.y, transform.localScale.z);
     }
 
-    void UpdateLeapForceBarColor (float leapForce, float maxLeapForce) {
-        spriteRenderer.color = Color.Lerp (new Color (1.0f, 1.0f, 0.0f), new Color (1.0f, 0.5f, 0.0f), leapForce / maxLeapForce);
+    void UpdateJumpForceBarColor (float jumpForce, float maxJumpForce) {
+        spriteRenderer.color = Color.Lerp (new Color (1.0f, 1.0f, 0.0f), new Color (1.0f, 0.5f, 0.0f), jumpForce / maxJumpForce);
     }
 
 }

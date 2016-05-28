@@ -7,8 +7,9 @@ public class WeaponController : Photon.MonoBehaviour {
     public GameObject mainCameraPrefab;
     public GameObject crosshairPrefab;
     public GameObject aimCameraPrefab;
+    public GameObject throwForceBarPrefab;
 
-    private int currentWeapon; // Id of the currently active weapon
+    public int currentWeapon; // Id of the currently active weapon
 
     private List<float> fireDelays;
     public bool isThrowing;
@@ -24,6 +25,7 @@ public class WeaponController : Photon.MonoBehaviour {
     private SpriteRenderer crosshairSpriteRenderer;
     private GameObject aimCamera;
     private Camera aimCameraComponent;
+    private GameObject throwForceBar;
     private AudioSource audioSource;
 
 	// Use this for initialization
@@ -55,6 +57,12 @@ public class WeaponController : Photon.MonoBehaviour {
         aimCamera.GetComponent<AimCameraController> ().crosshair = crosshair;
 
         ChangeWeapon (0); // Initialize equipped weapon (weapon 0 by default)
+
+        // Instantiate throw force bar
+        throwForceBar = (GameObject) Instantiate (throwForceBarPrefab, Vector3.zero, Quaternion.identity);
+        throwForceBar.transform.parent = transform;
+        throwForceBar.transform.localPosition = -throwForceBar.transform.parent.right * 2.5f;
+        throwForceBar.transform.localRotation = Quaternion.Euler (new Vector3 (0.0f, 90.0f, 90.0f));
     }
 
     void InitializeFireDelays () {
@@ -357,6 +365,7 @@ public class WeaponController : Photon.MonoBehaviour {
         Destroy (mainCamera);
         Destroy (crosshair);
         Destroy (aimCamera);
+        Destroy (throwForceBar);
     }
 
 }
