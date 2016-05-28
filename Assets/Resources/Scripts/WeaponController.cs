@@ -293,8 +293,8 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void CheckChangeWeapon (int weaponId) {
-        if (playerController.isAiming) {
-            return; // Can't change weapon while aiming
+        if (playerController.isAiming || isThrowing) {
+            return; // Can't change weapon while aiming or throwing
         }
 
         if ((0 <= weaponId) && (weaponId < weapons.Length)) { // Check for weapon id validity
