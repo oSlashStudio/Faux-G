@@ -39,6 +39,9 @@ public class HealthController : Photon.MonoBehaviour {
         if (!photonView.isMine) {
             return;
         }
+        if (healAmount == 0.0f) { // Ignore 0 heal
+            return;
+        }
         photonView.RPC ("RpcHeal", PhotonTargets.AllBufferedViaServer, healAmount, healPoint);
     }
 
@@ -77,6 +80,9 @@ public class HealthController : Photon.MonoBehaviour {
      */
     public void Damage (float damageAmount, Vector2 damagePoint) {
         if (!photonView.isMine) {
+            return;
+        }
+        if (damageAmount == 0.0f) { // Ignore 0 damage
             return;
         }
         photonView.RPC ("RpcDamage", PhotonTargets.AllBufferedViaServer, damageAmount, damagePoint);

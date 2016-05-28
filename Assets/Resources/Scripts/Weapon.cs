@@ -17,9 +17,14 @@ public class Weapon : MonoBehaviour {
     public float maxSpreadAngle;
     public float recoil;
     public float knockbackForce;
+    public bool canToggle;
     public bool canAim;
     public bool isHoming;
     public float homingSearchRadius;
+
+    public virtual void Toggle () {
+        // By default this does nothing
+    }
 
     public virtual void Throw (Vector3 throwPosition, Vector2 throwDirectionalForce, GameObject player, int instantiatorId) {
         GameObject throwableObject = (GameObject) Instantiate (projectilePrefab, throwPosition, Quaternion.identity);

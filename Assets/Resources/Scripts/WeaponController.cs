@@ -79,6 +79,7 @@ public class WeaponController : Photon.MonoBehaviour {
             InputFire ();
         }
         InputChangeWeapon ();
+        InputToggle ();
         InputAim ();
     }
 
@@ -303,6 +304,22 @@ public class WeaponController : Photon.MonoBehaviour {
     [PunRPC]
     void RpcChangeWeapon (int weaponId) {
         currentWeapon = weaponId;
+    }
+
+    void InputToggle () {
+        if (Input.GetMouseButtonDown (1)) {
+            CheckToggle ();
+        }
+    }
+
+    void CheckToggle () {
+        if (weapons[currentWeapon].canToggle) {
+            ToggleWeapon ();
+        }
+    }
+
+    void ToggleWeapon () {
+        weapons[currentWeapon].Toggle ();
     }
 
     void InputAim () {
