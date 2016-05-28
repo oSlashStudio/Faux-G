@@ -4,11 +4,13 @@ using System.Collections;
 public class ProjectileController : MonoBehaviour {
 
     public GameObject explosionPrefab;
-    
+
     // Physics related variables
-    public float projectileSpeed = 20.0f;
-    public float projectileLifetime = 1.0f;
-    public float projectileDamage = 5.0f;
+    public float projectileSpeed;
+    public float projectileLifetime;
+
+    public float projectileHeal;
+    public float projectileDamage;
 
     // Owner information variables
     private bool isPlayerInstantiated = false;
@@ -51,8 +53,10 @@ public class ProjectileController : MonoBehaviour {
         HealthController targetHealthController = collision.gameObject.GetComponent<HealthController> ();
         if (targetHealthController != null) { // If target has health component
             if (isPlayerInstantiated) {
+                targetHealthController.Heal (projectileHeal, collision.contacts[0].point);
                 targetHealthController.Damage (projectileDamage, instantiatorId, collision.contacts[0].point);
             } else {
+                targetHealthController.Heal (projectileHeal, collision.contacts[0].point);
                 targetHealthController.Damage (projectileDamage, collision.contacts[0].point);
             }
         }

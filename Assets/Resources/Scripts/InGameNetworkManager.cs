@@ -15,7 +15,8 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         "Demolitionist",
         "Heatseeker",
         "Sieger", 
-        "Heavy"
+        "Heavy", 
+        "Healer"
     };
 
     // Current state related variables

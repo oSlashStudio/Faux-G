@@ -13,7 +13,8 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         "Demolitionist", 
         "Heatseeker", 
         "Sieger", 
-        "Heavy"
+        "Heavy", 
+        "Healer"
     };
     private ExitGames.Client.Photon.Hashtable classHashtable = new ExitGames.Client.Photon.Hashtable ();
 

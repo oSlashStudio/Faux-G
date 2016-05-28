@@ -71,6 +71,9 @@ public class HealthController : Photon.MonoBehaviour {
         if (!photonView.isMine) {
             return;
         }
+        if (damageAmount == 0.0f) { // Ignore 0 damage
+            return;
+        }
         photonView.RPC ("RpcDamage", PhotonTargets.AllBufferedViaServer, damageAmount, damagePoint);
         lastDamagerId = damagingPlayerId;
     }
