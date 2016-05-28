@@ -78,7 +78,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
 
             if (PhotonNetwork.isMasterClient) {
                 if (GUILayout.Button ("Start Game")) {
-                    photonView.RPC ("RpcLoadLevel", PhotonTargets.AllBufferedViaServer);
+                    StartGame ();                    
                 }
             }
 
@@ -93,6 +93,14 @@ public class RoomNetworkManager : Photon.PunBehaviour {
     public override void OnLeftRoom () {
         isInRoom = false;
         PhotonNetwork.LoadLevel (0);
+    }
+
+    void StartGame () {
+        // Close access to the room when starting, this includes reconnection
+        PhotonNetwork.room.open = false;
+        PhotonNetwork.room.visible = false;
+        // Prompts all clients to load in-game scene
+        photonView.RPC ("RpcLoadLevel", PhotonTargets.AllBufferedViaServer);
     }
 
     [PunRPC]
