@@ -137,7 +137,7 @@ public class WeaponController : Photon.MonoBehaviour {
 
     [PunRPC]
     void RpcThrow (Vector3 throwPosition, Vector2 throwDirectionalForce) {
-        weapons[currentWeapon].Throw (throwPosition, throwDirectionalForce, player, photonView.viewID);
+        weapons[currentWeapon].Throw (throwPosition, throwDirectionalForce, player, photonView.owner.ID);
     }
 
     void ChargeThrow () {
@@ -191,7 +191,7 @@ public class WeaponController : Photon.MonoBehaviour {
 
     [PunRPC]
     void RpcFire (Vector3 projectilePosition, Quaternion projectileRotation) {
-        weapons[currentWeapon].Fire (projectilePosition, projectileRotation, player, photonView.viewID);
+        weapons[currentWeapon].Fire (projectilePosition, projectileRotation, player, photonView.owner.ID);
 
         // Networked effects
         PlayFireSoundClip ();
@@ -219,7 +219,7 @@ public class WeaponController : Photon.MonoBehaviour {
 
     [PunRPC]
     void RpcFireHoming (Vector3 projectilePosition, Quaternion projectileRotation, int targetViewId) {
-        weapons[currentWeapon].FireHoming (projectilePosition, projectileRotation, player, photonView.viewID, targetViewId);
+        weapons[currentWeapon].FireHoming (projectilePosition, projectileRotation, player, photonView.owner.ID, targetViewId);
 
         // Networked effects
         PlayFireSoundClip ();

@@ -13,15 +13,15 @@ public class ThrowableController : MonoBehaviour {
 
     // Owner information variables
     private bool isPlayerInstantiated = false;
-    private int instantiatorViewId;
+    private int instantiatorId;
 
-    public int InstantiatorViewId {
+    public int InstantiatorId {
         get {
-            return instantiatorViewId;
+            return instantiatorId;
         }
         set {
             isPlayerInstantiated = true;
-            instantiatorViewId = value;
+            instantiatorId = value;
         }
     }
 
@@ -40,7 +40,7 @@ public class ThrowableController : MonoBehaviour {
             GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, Quaternion.identity);
 
             if (isPlayerInstantiated) {
-                explosion.GetComponent<ExplosionController> ().InstantiatorViewId = instantiatorViewId;
+                explosion.GetComponent<ExplosionController> ().InstantiatorId = instantiatorId;
             }
 
             Destroy (gameObject);
@@ -61,7 +61,7 @@ public class ThrowableController : MonoBehaviour {
         GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, Quaternion.identity);
 
         if (isPlayerInstantiated) {
-            explosion.GetComponent<ExplosionController> ().InstantiatorViewId = instantiatorViewId;
+            explosion.GetComponent<ExplosionController> ().InstantiatorId = instantiatorId;
         }
 
         Destroy (gameObject);

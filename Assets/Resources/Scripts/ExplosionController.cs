@@ -15,18 +15,18 @@ public class ExplosionController : MonoBehaviour {
 
     // Owner information variables
     private bool isPlayerInstantiated = false;
-    private int instantiatorViewId;
+    private int instantiatorId;
 
     // Cached components
     private AudioSource audioSource;
 
-    public int InstantiatorViewId {
+    public int InstantiatorId {
         get {
-            return instantiatorViewId;
+            return instantiatorId;
         }
         set {
             isPlayerInstantiated = true;
-            instantiatorViewId = value;
+            instantiatorId = value;
         }
     }
 
@@ -58,7 +58,7 @@ public class ExplosionController : MonoBehaviour {
             HealthController targetHealthController = currentCollider.gameObject.GetComponent<HealthController> ();
             if (targetHealthController != null) { // If target has health component
                 if (isPlayerInstantiated) {
-                    targetHealthController.Damage (explosionDamage, instantiatorViewId, currentCollider.transform.position);
+                    targetHealthController.Damage (explosionDamage, instantiatorId, currentCollider.transform.position);
                 } else {
                     targetHealthController.Damage (explosionDamage, currentCollider.transform.position);
                 }

@@ -9,7 +9,7 @@ public class HealthController : Photon.MonoBehaviour {
     public float currentHealth;
 
     // Killer information variables
-    private int lastDamagerViewId;
+    private int lastDamagerId;
 
     // Cached components
     private InGameNetworkManager networkManager;
@@ -29,7 +29,7 @@ public class HealthController : Photon.MonoBehaviour {
             if (gameObject.tag.Equals ("Player")) {
                 // Handle player respawn
                 networkManager.IsDead = true;
-                networkManager.KillerViewId = lastDamagerViewId;
+                networkManager.KillerId = lastDamagerId;
             }
             PhotonNetwork.Destroy (gameObject);
         }
@@ -64,12 +64,12 @@ public class HealthController : Photon.MonoBehaviour {
     /*
      * This function handles damage from player.
      */
-    public void Damage (float damageAmount, int damagingPlayerViewId, Vector2 damagePoint) {
+    public void Damage (float damageAmount, int damagingPlayerId, Vector2 damagePoint) {
         if (!photonView.isMine) {
             return;
         }
         photonView.RPC ("RpcDamage", PhotonTargets.AllBufferedViaServer, damageAmount, damagePoint);
-        lastDamagerViewId = damagingPlayerViewId;
+        lastDamagerId = damagingPlayerId;
     }
 
     /*
@@ -80,7 +80,7 @@ public class HealthController : Photon.MonoBehaviour {
             return;
         }
         photonView.RPC ("RpcDamage", PhotonTargets.AllBufferedViaServer, damageAmount, damagePoint);
-        lastDamagerViewId = 0;
+        lastDamagerId = 0;
     }
 
     [PunRPC]

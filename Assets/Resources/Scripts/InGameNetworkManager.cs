@@ -24,7 +24,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     public float defaultRespawnTimer = 10.0f;
     private bool isDead = false;
     private float respawnTimer = 0.0f;
-    private int killerViewId;
+    private int killerId;
     private string killerName;
 
     // Spectating related variables
@@ -43,17 +43,16 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         }
     }
 
-    public int KillerViewId {
+    public int KillerId {
         get {
-            return killerViewId;
+            return killerId;
         }
         set {
-            killerViewId = value;
-            PhotonView killerPhotonView = PhotonView.Find (killerViewId);
-            if (killerPhotonView == null) {
+            killerId = value;
+            PhotonPlayer killerPlayer = PhotonPlayer.Find (killerId);
+            if (killerPlayer == null) {
                 killerName = "Enemy";
             } else {
-                PhotonPlayer killerPlayer = killerPhotonView.owner;
                 killerName = killerPlayer.name;
             }
         }

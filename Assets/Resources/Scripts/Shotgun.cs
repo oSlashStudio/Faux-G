@@ -6,7 +6,7 @@ public class Shotgun : Weapon {
     public int numShrapnels = 3;
     public float separationAngle = 10; // The angle separating each pair of shrapnels
 
-    public override void Fire (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorViewId) {
+    public override void Fire (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId) {
         if (numShrapnels % 2 == 1) { // Odd number of shrapnels
             for (int i = -numShrapnels / 2; i <= numShrapnels / 2; i++) {
                 Quaternion instantiateRotation = Quaternion.Euler (projectileRotation.eulerAngles + new Vector3 (separationAngle * i, 0.0f, 0.0f));
@@ -15,7 +15,7 @@ public class Shotgun : Weapon {
                     instantiatePosition,
                     instantiateRotation,
                     player,
-                    instantiatorViewId
+                    instantiatorId
                     );
             }
         } else { // Even number of shrapnels
@@ -26,20 +26,20 @@ public class Shotgun : Weapon {
                     instantiatePosition,
                     instantiateRotation,
                     player,
-                    instantiatorViewId
+                    instantiatorId
                     );
             }
         }
     }
 
-    void InstantiateProjectile (Vector3 position, Quaternion rotation, GameObject player, int instantiatorViewId) {
+    void InstantiateProjectile (Vector3 position, Quaternion rotation, GameObject player, int instantiatorId) {
         GameObject projectile = (GameObject) Instantiate (
                 projectilePrefab,
                 position,
                 rotation);
         Physics2D.IgnoreCollision (projectile.GetComponent<Collider2D> (), player.GetComponent<Collider2D> ());
         // Set projectile owner
-        projectile.GetComponent<ProjectileController> ().InstantiatorViewId = instantiatorViewId;
+        projectile.GetComponent<ProjectileController> ().InstantiatorId = instantiatorId;
     }
 
 }

@@ -16,15 +16,15 @@ public class HomingProjectileController : MonoBehaviour {
 
     // Owner information variables
     private bool isPlayerInstantiated = false;
-    private int instantiatorViewId;
+    private int instantiatorId;
 
-    public int InstantiatorViewId {
+    public int InstantiatorId {
         get {
-            return instantiatorViewId;
+            return instantiatorId;
         }
         set {
             isPlayerInstantiated = true;
-            instantiatorViewId = value;
+            instantiatorId = value;
         }
     }
 
@@ -56,7 +56,7 @@ public class HomingProjectileController : MonoBehaviour {
         projectileLifetime -= Time.deltaTime;
         if (projectileLifetime <= 0.0f) {
             GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, Quaternion.identity);
-            explosion.GetComponent<ExplosionController> ().InstantiatorViewId = instantiatorViewId;
+            explosion.GetComponent<ExplosionController> ().InstantiatorId = instantiatorId;
 
             Destroy (gameObject);
         }
@@ -71,14 +71,14 @@ public class HomingProjectileController : MonoBehaviour {
         HealthController targetHealthController = collision.gameObject.GetComponent<HealthController> ();
         if (targetHealthController != null) { // If target has health component
             if (isPlayerInstantiated) {
-                targetHealthController.Damage (projectileDamage, instantiatorViewId, collision.contacts[0].point);
+                targetHealthController.Damage (projectileDamage, instantiatorId, collision.contacts[0].point);
             } else {
                 targetHealthController.Damage (projectileDamage, collision.contacts[0].point);
             }
         }
 
         GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, Quaternion.identity);
-        explosion.GetComponent<ExplosionController> ().InstantiatorViewId = instantiatorViewId;
+        explosion.GetComponent<ExplosionController> ().InstantiatorId = instantiatorId;
 
         Destroy (gameObject);
     }
