@@ -24,11 +24,15 @@ public class ThrowForceBarController : MonoBehaviour {
     }
 
     void UpdateThrowForceBarScale (float throwForce, float maxThrowForce) {
-        transform.localScale = new Vector3 (throwForce / maxThrowForce, transform.localScale.y, transform.localScale.z);
+        transform.localScale = new Vector3 (throwForce / maxThrowForce, 2 * throwForce / maxThrowForce, transform.localScale.z);
     }
 
     void UpdateThrowForceBarColor (float throwForce, float maxThrowForce) {
-        spriteRenderer.color = Color.Lerp (new Color (1.0f, 0.0f, 0.0f), new Color (1.0f, 1.0f, 0.0f), throwForce / maxThrowForce);
+        if (throwForce / maxThrowForce <= 0.5f) {
+            spriteRenderer.color = Color.Lerp (new Color (1.0f, 0.0f, 0.0f), new Color (1.0f, 1.0f, 0.0f), throwForce / maxThrowForce * 2.0f);
+        } else {
+            spriteRenderer.color = Color.Lerp (new Color (1.0f, 1.0f, 0.0f), new Color (0.0f, 1.0f, 0.0f), throwForce / maxThrowForce * 2.0f - 1.0f);
+        }
     }
 
 }
