@@ -14,8 +14,8 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         "Light",
         "Demolitionist",
         "Heatseeker",
-        "Sieger", 
-        "Heavy", 
+        "Sieger",
+        "Heavy",
         "Healer"
     };
 
@@ -32,6 +32,11 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     // Spectating related variables
     public GameObject spectateCamera;
     private bool isSpectating;
+
+    // Broadcast message related variables
+    private string broadcastMessage;
+    public float defaultBroadcastTimer = 5.0f;
+    private float broadcastTimer;
 
     public bool IsDead {
         get {
@@ -57,6 +62,8 @@ public class InGameNetworkManager : Photon.PunBehaviour {
             } else {
                 killerName = killerPlayer.name;
             }
+
+            Broadcast ("<b>" + killerName + "</b>" + " just killed " + "<b>" + PhotonNetwork.player.name + "</b>");
         }
     }
 
@@ -76,19 +83,24 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         }
     }
 
-	// Use this for initialization
-	void Start () {
-        
-	}
-	
-	// Update is called once per frame
-	void Update () {
+    // Use this for initialization
+    void Start () {
+
+    }
+
+    // Update is called once per frame
+    void Update () {
         if (isDead) {
             respawnTimer -= Time.deltaTime;
             if (respawnTimer <= 0.0f) {
                 isDead = false;
                 SpawnPlayer ();
             }
+        }
+
+        broadcastTimer -= Time.deltaTime;
+        if (broadcastTimer <= 0.0f) {
+            broadcastMessage = "";
         }
     }
 
@@ -100,9 +112,9 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
         if (isDead) { // Player is currently dead
             GUILayout.BeginArea (new Rect (
-                Screen.width / 2.0f - 200.0f, 
-                Screen.height / 2.0f - 100.0f, 
-                400.0f, 
+                Screen.width / 2.0f - 200.0f,
+                Screen.height / 2.0f - 100.0f,
+                400.0f,
                 200.0f
                 ));
 
@@ -118,6 +130,30 @@ public class InGameNetworkManager : Photon.PunBehaviour {
             PhotonNetwork.player.SetCustomProperties (classHashtable);
 
             GUILayout.EndArea ();
+        }
+
+        if (!string.IsNullOrEmpty (broadcastMessage) && broadcastTimer >= 0.0f) {
+            GUIStyle broadcastStyle = GUI.skin.label;
+            broadcastStyle.alignment = TextAnchor.UpperCenter;
+            broadcastStyle.richText = true;
+            broadcastStyle.normal.textColor = new Color (
+                broadcastStyle.normal.textColor.r,
+                broadcastStyle.normal.textColor.g,
+                broadcastStyle.normal.textColor.b,
+                broadcastTimer / defaultBroadcastTimer
+                );
+
+            GUILayout.BeginArea (new Rect (Screen.width / 2.0f - 100.0f, 0.0f, 200.0f, 50.0f));
+            GUILayout.Label (broadcastMessage, broadcastStyle);
+            GUILayout.EndArea ();
+
+            // Reset style (without this reset, other GUI components will be affected)
+            broadcastStyle.normal.textColor = new Color (
+                broadcastStyle.normal.textColor.r,
+                broadcastStyle.normal.textColor.g,
+                broadcastStyle.normal.textColor.b,
+                1.0f
+                );
         }
     }
 
@@ -142,6 +178,16 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     string GetClassName (byte classId) {
         return classNames[classId];
+    }
+
+    void Broadcast (string message) {
+        photonView.RPC ("RpcBroadcast", PhotonTargets.All, message);
+    }
+
+    [PunRPC]
+    void RpcBroadcast (string message) {
+        broadcastMessage = message;
+        broadcastTimer = defaultBroadcastTimer;
     }
 
 }
