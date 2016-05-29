@@ -3,8 +3,6 @@ using System.Collections;
 
 public class RoomNetworkManager : Photon.PunBehaviour {
 
-    private bool isInRoom = false;
-
     private int selectedClassId = 0;
     private string[] classNames = new string[] {
         "Assaulter",
@@ -20,7 +18,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
 
 	// Use this for initialization
 	void Start () {
-	
+
 	}
 	
 	// Update is called once per frame
@@ -32,7 +30,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         GUIStyle centeredLabel = GUI.skin.label;
         centeredLabel.alignment = TextAnchor.MiddleCenter;
 
-        if (!isInRoom) { // Not in room yet
+        if (!PhotonNetwork.inRoom) { // Not in room yet
             GUILayout.BeginArea (new Rect (
                 Screen.width / 2.0f - 100.0f,
                 Screen.height / 2.0f - 50.0f,
@@ -88,12 +86,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         }
     }
 
-    public override void OnJoinedRoom () {
-        isInRoom = true;
-    }
-
     public override void OnLeftRoom () {
-        isInRoom = false;
         PhotonNetwork.LoadLevel (0);
     }
 
