@@ -95,7 +95,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         PhotonNetwork.room.open = false;
         PhotonNetwork.room.visible = false;
         // Prompts all clients to load in-game scene
-        photonView.RPC ("RpcLoadLevel", PhotonTargets.AllBufferedViaServer);
+        photonView.RPC ("RpcLoadLevel", PhotonTargets.All);
     }
 
     [PunRPC]

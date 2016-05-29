@@ -42,7 +42,7 @@ public class HealthController : Photon.MonoBehaviour {
         if (healAmount == 0.0f) { // Ignore 0 heal
             return;
         }
-        photonView.RPC ("RpcHeal", PhotonTargets.AllBufferedViaServer, healAmount, healPoint);
+        photonView.RPC ("RpcHeal", PhotonTargets.All, healAmount, healPoint);
     }
 
     [PunRPC]
@@ -74,7 +74,7 @@ public class HealthController : Photon.MonoBehaviour {
         if (damageAmount == 0.0f) { // Ignore 0 damage
             return;
         }
-        photonView.RPC ("RpcDamage", PhotonTargets.AllBufferedViaServer, damageAmount, damagePoint);
+        photonView.RPC ("RpcDamage", PhotonTargets.All, damageAmount, damagePoint);
         lastDamagerId = damagingPlayerId;
     }
 
@@ -88,7 +88,7 @@ public class HealthController : Photon.MonoBehaviour {
         if (damageAmount == 0.0f) { // Ignore 0 damage
             return;
         }
-        photonView.RPC ("RpcDamage", PhotonTargets.AllBufferedViaServer, damageAmount, damagePoint);
+        photonView.RPC ("RpcDamage", PhotonTargets.All, damageAmount, damagePoint);
         lastDamagerId = 0;
     }
 

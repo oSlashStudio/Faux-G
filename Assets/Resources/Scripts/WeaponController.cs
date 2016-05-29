@@ -306,7 +306,7 @@ public class WeaponController : Photon.MonoBehaviour {
         // Change crosshair sprite
         crosshairSpriteRenderer.sprite = weapons[weaponId].crosshairSprite;
         // Call RpcChangeWeapon subroutine on all instances over the network
-        photonView.RPC ("RpcChangeWeapon", PhotonTargets.AllBufferedViaServer, weaponId);
+        photonView.RPC ("RpcChangeWeapon", PhotonTargets.All, weaponId);
     }
 
     [PunRPC]
@@ -327,7 +327,7 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void ToggleWeapon () {
-        photonView.RPC ("RpcToggleWeapon", PhotonTargets.AllBuffered);
+        photonView.RPC ("RpcToggleWeapon", PhotonTargets.All);
     }
 
     [PunRPC]
