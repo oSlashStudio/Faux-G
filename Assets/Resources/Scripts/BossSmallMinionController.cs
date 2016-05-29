@@ -16,10 +16,12 @@ public class BossSmallMinionController : Photon.MonoBehaviour {
 
     // Cached components
     private Rigidbody2D rigidBody;
+    private PhotonTransformView photonTransformView;
 
     // Use this for initialization
     void Start () {
         rigidBody = GetComponent<Rigidbody2D> ();
+        photonTransformView = GetComponent<PhotonTransformView> ();
 
         if (!photonView.isMine) {
             rigidBody.isKinematic = true; // If this client can't control, set isKinematic to true
@@ -45,6 +47,8 @@ public class BossSmallMinionController : Photon.MonoBehaviour {
         }
 
         Move ();
+
+        photonTransformView.SetSynchronizedValues (rigidBody.velocity, rigidBody.angularVelocity);
     }
 
     void Fire () {
