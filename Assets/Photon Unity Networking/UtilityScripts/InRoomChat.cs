@@ -26,15 +26,11 @@ public class InRoomChat : Photon.MonoBehaviour {
             this.GuiRect.y = Screen.height - this.GuiRect.height;
         }
 
-        if (messageScrollViewStyle == null) {
-            messageScrollViewStyle = GUI.skin.scrollView;
-            messageScrollViewStyle.alignment = TextAnchor.LowerLeft;
-        }
+        messageScrollViewStyle = GUI.skin.scrollView;
+        messageScrollViewStyle.alignment = TextAnchor.LowerLeft;
 
-        if (messageLabelStyle == null) {
-            messageLabelStyle = GUI.skin.label;
-            messageLabelStyle.alignment = TextAnchor.MiddleLeft;
-        }
+        messageLabelStyle = GUI.skin.label;
+        messageLabelStyle.alignment = TextAnchor.MiddleLeft;
 
         if (!this.IsVisible || PhotonNetwork.connectionStateDetailed != PeerState.Joined) {
             return;
@@ -54,7 +50,7 @@ public class InRoomChat : Photon.MonoBehaviour {
         GUI.SetNextControlName ("");
         GUILayout.BeginArea (this.GuiRect);
 
-        scrollPos = GUILayout.BeginScrollView (scrollPos, messageScrollViewStyle);
+        scrollPos = GUILayout.BeginScrollView (scrollPos, messageScrollViewStyle, GUIStyle.none);
         GUILayout.FlexibleSpace ();
         for (int i = 0; i < messages.Count; i++) {
             GUILayout.Label (messages[i], messageLabelStyle);
