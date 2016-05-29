@@ -132,7 +132,13 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
 
         GUILayout.BeginHorizontal ();
         GUILayout.Label ("Room Name:", GUILayout.Width (150.0f));
+
+        GUI.SetNextControlName ("Room Name");
         roomName = GUILayout.TextField (roomName);
+        if (roomName == "") {
+            GUI.FocusControl ("Room Name");
+        }
+
         GUILayout.EndHorizontal ();
 
         selectedMapId = GUILayout.Toolbar (selectedMapId, mapNames);
@@ -157,13 +163,24 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
                 ));
 
         GUILayout.BeginHorizontal ();
+
         GUILayout.Label ("Player Name:", GUILayout.Width (100.0f));
+
+        GUI.SetNextControlName ("Player Name");
         playerName = GUILayout.TextField (playerName);
+        if (playerName == "") {
+            GUI.FocusControl ("Player Name");
+        }
+
         GUILayout.EndHorizontal ();
 
         if (playerName == "") {
             promptMessage = "Player name can't be empty";
         } else {
+            if (promptMessage == "Player name can't be empty") {
+                promptMessage = "";
+            }
+
             if (GUILayout.Button ("Create Room")) {
                 PhotonNetwork.player.name = playerName;
                 isCreatingRoom = true;
@@ -187,10 +204,6 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         isInLobby = true;
     }
 
-    public override void OnPhotonRandomJoinFailed (object[] codeAndMsg) {
-        promptMessage = "No rooms can be joined right now"; // TO FIX: This message is not shown
-    }
-
     void CreateRoom () {
         RoomOptions roomOptions = new RoomOptions ();
         roomOptions.isOpen = true;
@@ -202,20 +215,22 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         roomOptions.customRoomPropertiesForLobby = new string[] { "map" };
 
         PhotonNetwork.CreateRoom (roomName, roomOptions, TypedLobby.Default);
-
-        PhotonNetwork.LoadLevel (1); // Load Room scene
     }
 
     void JoinRandomRoom () {
         PhotonNetwork.JoinRandomRoom ();
+    }
 
-        PhotonNetwork.LoadLevel (1); // Load Room scene
+    public override void OnPhotonRandomJoinFailed (object[] codeAndMsg) {
+        promptMessage = "No rooms can be joined right now";
     }
 
     void JoinRoom (string roomName) {
         PhotonNetwork.JoinRoom (roomName);
+    }
 
-        PhotonNetwork.LoadLevel (1); // Load Room scene
+    public override void OnJoinedRoom () {
+        PhotonNetwork.LoadLevel (1); // Load room scene
     }
 
 }
