@@ -28,10 +28,12 @@ public class PlayerController : Photon.MonoBehaviour {
     private Rigidbody2D rigidBody;
     private GameObject staminaBar;
     private GameObject jumpForceBar;
+    private PhotonTransformView photonTransformView;
 
 	// Use this for initialization
 	void Start () {
         rigidBody = GetComponent<Rigidbody2D> ();
+        photonTransformView = GetComponent<PhotonTransformView> ();
 
         jumpForce = 0.0f;
         currentStamina = maxStamina;
@@ -65,7 +67,9 @@ public class PlayerController : Photon.MonoBehaviour {
 
         // Handle passive routines
         RecoverStamina ();
-	}
+
+        photonTransformView.SetSynchronizedValues (rigidBody.velocity, rigidBody.angularVelocity);
+    }
 
     void FixedUpdate () {
         Move ();
