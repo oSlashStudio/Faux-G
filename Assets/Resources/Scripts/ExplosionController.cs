@@ -7,9 +7,10 @@ public class ExplosionController : MonoBehaviour {
     public AudioClip explosionSoundClip;
 
     // Explosion related variables
-    public bool hasExplosionDamage = false;
-    public float explosionArea = 3.0f;
-    public float explosionDamage = 1.0f;
+    public bool hasExplosionEffect;
+    public float explosionArea;
+    public float explosionHeal;
+    public float explosionDamage;
     private float explosionDuration; // Explosion duration (directly taken from particle emitter duration)
     public float explosionDurationOffset; // The offset from explosion duration, useful for slowly fading emitter
 
@@ -39,7 +40,7 @@ public class ExplosionController : MonoBehaviour {
 
         explosionDuration = GetComponent<ParticleSystem> ().duration;
         explosionDuration += explosionDurationOffset;
-        if (hasExplosionDamage) {
+        if (hasExplosionEffect) {
             DamagePlayersInArea ();
         }
     }
@@ -58,8 +59,10 @@ public class ExplosionController : MonoBehaviour {
             HealthController targetHealthController = currentCollider.gameObject.GetComponent<HealthController> ();
             if (targetHealthController != null) { // If target has health component
                 if (isPlayerInstantiated) {
+                    targetHealthController.Heal (explosionHeal, currentCollider.transform.position);
                     targetHealthController.Damage (explosionDamage, instantiatorId, currentCollider.transform.position);
                 } else {
+                    targetHealthController.Heal (explosionHeal, currentCollider.transform.position);
                     targetHealthController.Damage (explosionDamage, currentCollider.transform.position);
                 }
             }
