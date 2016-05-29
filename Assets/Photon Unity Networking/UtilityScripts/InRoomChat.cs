@@ -7,15 +7,18 @@ public class InRoomChat : Photon.MonoBehaviour {
     public Rect GuiRect = new Rect (0, 0, 250, 300);
     public bool IsVisible = true;
     public bool AlignBottom = false;
+    public bool HasScrollbar = false;
     public List<string> messages = new List<string> ();
     private string inputLine = "";
     private Vector2 scrollPos = Vector2.zero;
 
     public static readonly string ChatRPC = "Chat";
 
+    private bool isFocused;
+
     // Cached components
-    GUIStyle messageScrollViewStyle;
-    GUIStyle messageLabelStyle;
+    private GUIStyle messageScrollViewStyle;
+    private GUIStyle messageLabelStyle;
 
     public void Start () {
 
@@ -40,21 +43,31 @@ public class InRoomChat : Photon.MonoBehaviour {
             if (!string.IsNullOrEmpty (this.inputLine)) {
                 this.photonView.RPC ("Chat", PhotonTargets.All, this.inputLine);
                 this.inputLine = "";
+                isFocused = false;
                 GUI.FocusControl ("");
                 return; // printing the now modified list would result in an error. to avoid this, we just skip this single frame
             } else {
-                GUI.FocusControl ("ChatInput");
+                if (!isFocused) {
+                    isFocused = true;
+                    GUI.FocusControl ("ChatInput");
+                } else {
+                    isFocused = false;
+                    GUI.FocusControl ("");
+                }
             }
         }
 
         GUI.SetNextControlName ("");
         GUILayout.BeginArea (this.GuiRect);
-
-        scrollPos = GUILayout.BeginScrollView (scrollPos, messageScrollViewStyle, GUIStyle.none);
+        
+        if (HasScrollbar) {
+            scrollPos = GUILayout.BeginScrollView (scrollPos, messageScrollViewStyle);
+        } else {
+            scrollPos = GUILayout.BeginScrollView (scrollPos, messageScrollViewStyle, GUIStyle.none);
+        }
         GUILayout.FlexibleSpace ();
         for (int i = 0; i < messages.Count; i++) {
             GUILayout.Label (messages[i], messageLabelStyle);
-            scrollPos += new Vector2 (scrollPos.x, scrollPos.y + messageLabelStyle.CalcHeight (GUIContent.none, GuiRect.width));
         }
         GUILayout.EndScrollView ();
 
@@ -62,8 +75,11 @@ public class InRoomChat : Photon.MonoBehaviour {
         GUI.SetNextControlName ("ChatInput");
         inputLine = GUILayout.TextField (inputLine);
         if (GUILayout.Button ("Send", GUILayout.ExpandWidth (false))) {
-            this.photonView.RPC ("Chat", PhotonTargets.All, this.inputLine);
-            this.inputLine = "";
+            if (!string.IsNullOrEmpty (this.inputLine)) {
+                this.photonView.RPC ("Chat", PhotonTargets.All, this.inputLine);
+                this.inputLine = "";
+            }
+            isFocused = false;
             GUI.FocusControl ("");
         }
         GUILayout.EndHorizontal ();
@@ -83,6 +99,7 @@ public class InRoomChat : Photon.MonoBehaviour {
         }
 
         this.messages.Add (senderName + ": " + newLine);
+        scrollPos += new Vector2 (0.0f, 2 * messageLabelStyle.CalcHeight (GUIContent.none, GuiRect.width));
     }
 
     public void AddLine (string newLine) {
