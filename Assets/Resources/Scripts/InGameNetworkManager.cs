@@ -35,7 +35,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     // Broadcast message related variables
     private string broadcastMessage;
-    public float defaultBroadcastTimer = 5.0f;
+    public float defaultBroadcastTimer = 10.0f;
     private float broadcastTimer;
 
     public bool IsDead {
