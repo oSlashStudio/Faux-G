@@ -7,6 +7,9 @@ public class Weapon : MonoBehaviour {
     public GameObject projectilePrefab;
     public AudioClip fireSoundClip;
 
+    public int defaultAmmo; // The number of ammo on full load
+    public float reloadTime;
+
     // Throw related variables
     public bool isThrowable;
     public float maxThrowForce;

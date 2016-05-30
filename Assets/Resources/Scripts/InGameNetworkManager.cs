@@ -145,7 +145,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         GUILayout.EndArea ();
 
         if (isDead) {
-            GUILayout.BeginArea (RelativeRect (560, 340, 800, 400));
+            GUILayout.BeginArea (RelativeRect (160, 340, 1600, 400));
             RespawnGUI ();
             GUILayout.EndArea ();
         }
@@ -154,10 +154,6 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         ChatBoxGUI ();
         ChatKeyListener ();
         ChatFieldGUI ();
-        GUILayout.EndArea ();
-
-        GUILayout.BeginArea (RelativeRect (576, 864, 768, 216));
-        StatusBarGUI ();
         GUILayout.EndArea ();
 
         GUILayout.BeginArea (RelativeRect (1344, 756, 576, 324));
@@ -260,10 +256,6 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         }
         
         chatMessages.Add (senderName + ": " + chatMessage);
-    }
-
-    void StatusBarGUI () {
-
     }
 
     void PlayerDataGUI () {

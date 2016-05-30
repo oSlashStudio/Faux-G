@@ -12,8 +12,15 @@ public class WeaponController : Photon.MonoBehaviour {
     public int currentWeapon; // Id of the currently active weapon
 
     private List<float> fireDelays;
+    private List<int> ammo;
+
+    // Throwing related variables
     public bool isThrowing;
     public float throwForce;
+
+    // Reload related variables
+    private bool isReloading;
+    private float reloadTimer;
 
     // Cached components
     private GameObject player; // The player associated with this weapon
@@ -32,7 +39,7 @@ public class WeaponController : Photon.MonoBehaviour {
 	void Start () {
         player = transform.parent.gameObject;
         playerController = player.GetComponent<PlayerController> ();
-        InitializeFireDelays ();
+        InitializeWeapons ();
         audioSource = gameObject.GetComponent<AudioSource> ();
 
         if (!photonView.isMine) {
@@ -65,10 +72,12 @@ public class WeaponController : Photon.MonoBehaviour {
         throwForceBar.transform.localRotation = Quaternion.Euler (new Vector3 (0.0f, 270.0f, 270.0f));
     }
 
-    void InitializeFireDelays () {
+    void InitializeWeapons () {
         fireDelays = new List<float> ();
+        ammo = new List<int> ();
         for (int i = 0; i < weapons.Length; i++) {
             fireDelays.Add (0.0f);
+            ammo.Add (weapons[i].defaultAmmo);
         }
     }
 	
@@ -89,6 +98,16 @@ public class WeaponController : Photon.MonoBehaviour {
         InputChangeWeapon ();
         InputToggle ();
         InputAim ();
+        InputReload ();
+
+        if (isReloading) {
+            reloadTimer -= Time.deltaTime;
+
+            if (reloadTimer <= 0.0f) {
+                isReloading = false;
+                ammo[currentWeapon] = weapons[currentWeapon].defaultAmmo;
+            }
+        }
     }
 
     /*
@@ -119,9 +138,10 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void CheckThrow () {
-        if (fireDelays[currentWeapon] <= 0.0f) {
+        if (fireDelays[currentWeapon] <= 0.0f && ammo[currentWeapon] > 0 && !isReloading) {
             StartChargeThrow ();
             fireDelays[currentWeapon] = weapons[currentWeapon].defaultFireDelay;
+            ammo[currentWeapon] -= 1;
         }
     }
 
@@ -170,13 +190,14 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void CheckFire () {
-        if (fireDelays[currentWeapon] <= 0.0f) {
+        if (fireDelays[currentWeapon] <= 0.0f && ammo[currentWeapon] > 0 && !isReloading) {
             if (weapons[currentWeapon].isHoming) { // Weapon has homing capabilities
                 FireHoming ();
             } else {
                 Fire ();
             }
             fireDelays[currentWeapon] = weapons[currentWeapon].defaultFireDelay;
+            ammo[currentWeapon] -= 1;
         }
     }
 
@@ -293,11 +314,17 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void CheckChangeWeapon (int weaponId) {
-        if (playerController.isAiming || isThrowing) {
-            return; // Can't change weapon while aiming or throwing
+        if (isThrowing) {
+            return; // Can't change weapon when throwing
         }
 
         if ((0 <= weaponId) && (weaponId < weapons.Length)) { // Check for weapon id validity
+            if (playerController.isAiming) {
+                ToggleAim (); // Reset aiming status upon weapon change
+            }
+            if (isReloading) {
+                isReloading = false;
+            }
             ChangeWeapon (weaponId);
         }
     }
@@ -361,11 +388,73 @@ public class WeaponController : Photon.MonoBehaviour {
         }
     }
 
+    void InputReload () {
+        if (Input.GetKeyDown (KeyCode.R)) { // R button for reload
+            isReloading = true;
+            reloadTimer = weapons[currentWeapon].reloadTime;
+        }
+    }
+
     void OnDestroy () {
         Destroy (mainCamera);
         Destroy (crosshair);
         Destroy (aimCamera);
         Destroy (throwForceBar);
+    }
+
+    /*
+     * Get a rectangle relative to full HD 1920:1080 screen
+     */
+    Rect RelativeRect (float x, float y, float w, float h) {
+        float relativeX = Screen.width * x / 1920;
+        float relativeY = Screen.height * y / 1080;
+        float relativeW = Screen.width * w / 1920;
+        float relativeH = Screen.height * h / 1080;
+
+        return new Rect (relativeX, relativeY, relativeW, relativeH);
+    }
+
+    float RelativeWidth (float w) {
+        float relativeW = Screen.width * w / 1920;
+
+        return relativeW;
+    }
+
+    float RelativeHeight (float h) {
+        float relativeH = Screen.height * h / 1080;
+
+        return relativeH;
+    }
+
+    void OnGUI () {
+        if (isReloading) {
+            GUILayout.BeginArea (RelativeRect (576, 764, 768, 100));
+
+            GUIStyle centeredLabel = new GUIStyle (GUI.skin.label);
+            centeredLabel.alignment = TextAnchor.MiddleCenter;
+            GUILayout.Label ("Reloading finishes in " + reloadTimer.ToString("0") + " seconds", centeredLabel);
+
+            GUILayout.EndArea ();
+        }
+        
+        GUILayout.BeginArea (RelativeRect (576, 980, 768, 100));
+        StatusBarGUI ();
+        GUILayout.EndArea ();
+    }
+
+    void StatusBarGUI () {
+        GUILayout.BeginHorizontal (GUILayout.Width (RelativeWidth (768)), GUILayout.Height (RelativeHeight (100)));
+        for (int i = 0; i < weapons.Length; i++) {
+            GUIStyle labelStyle = new GUIStyle (GUI.skin.label);
+            labelStyle.alignment = TextAnchor.MiddleCenter;
+
+            if (i == currentWeapon) { // If this is the current weapon
+                labelStyle.fontStyle = FontStyle.Bold;
+            }
+
+            GUILayout.Label (ammo[i] + " / " + weapons[i].defaultAmmo, labelStyle);
+        }
+        GUILayout.EndHorizontal ();
     }
 
 }
