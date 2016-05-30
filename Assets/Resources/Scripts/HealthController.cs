@@ -30,11 +30,37 @@ public class HealthController : Photon.MonoBehaviour {
                 // Handle player respawn
                 networkManager.IsDead = true;
                 networkManager.KillerId = lastDamagerId;
+                // Only add death data if dying object is a player
+                networkManager.AddDeathData (PhotonNetwork.player.ID);
             }
+
+            if (PhotonPlayer.Find (lastDamagerId) != null) {
+                // Only add kill data if killing object is a player
+                networkManager.AddKillData (lastDamagerId);
+            }
+
             PhotonNetwork.Destroy (gameObject);
         }
 	}
 
+    /*
+     * This function handles heal from player.
+     */
+    public void Heal (float healAmount, int healingPlayerId, Vector2 healPoint) {
+        if (!photonView.isMine) {
+            return;
+        }
+        if (healAmount == 0.0f) { // Ignore 0 heal
+            return;
+        }
+        photonView.RPC ("RpcHeal", PhotonTargets.All, healAmount, healPoint);
+
+        networkManager.AddHealData (healingPlayerId, healAmount);
+    }
+
+    /*
+     * This function handles heal from enemy / unknown sources.
+     */
     public void Heal (float healAmount, Vector2 healPoint) {
         if (!photonView.isMine) {
             return;
@@ -76,6 +102,8 @@ public class HealthController : Photon.MonoBehaviour {
         }
         photonView.RPC ("RpcDamage", PhotonTargets.All, damageAmount, damagePoint);
         lastDamagerId = damagingPlayerId;
+
+        networkManager.AddDamageData (damagingPlayerId, damageAmount);
     }
 
     /*

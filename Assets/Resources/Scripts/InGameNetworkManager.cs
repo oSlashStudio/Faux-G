@@ -6,6 +6,8 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     public GameObject[] spawnLocations;
 
+    private Dictionary<int, PlayerData> playerData = new Dictionary<int, PlayerData> ();
+
     private ExitGames.Client.Photon.Hashtable classHashtable;
     private int selectedClassId;
     private string[] classNames = new string[] {
@@ -155,6 +157,29 @@ public class InGameNetworkManager : Photon.PunBehaviour {
                 1.0f
                 );
         }
+
+        GUILayout.BeginArea (new Rect (Screen.width - 250.0f, Screen.height - 150.0f, 250.0f, 150.0f));
+        GUILayout.BeginVertical ();
+        // Row #1
+        GUILayout.BeginHorizontal (GUILayout.Height (25.0f));
+        GUILayout.Label ("Name", GUILayout.Width (50.0f));
+        GUILayout.Label ("K", GUILayout.Width (25.0f));
+        GUILayout.Label ("D", GUILayout.Width (25.0f));
+        GUILayout.Label ("Dmg", GUILayout.Width (50.0f));
+        GUILayout.Label ("Heal", GUILayout.Width (50.0f));
+        GUILayout.EndHorizontal ();
+        // Row #2 ~ #N
+        foreach (KeyValuePair<int, PlayerData> data in playerData) {
+            GUILayout.BeginHorizontal (GUILayout.Height (25.0f));
+            GUILayout.Label (data.Value.playerName, GUILayout.Width (50.0f));
+            GUILayout.Label (data.Value.kill.ToString (), GUILayout.Width (25.0f));
+            GUILayout.Label (data.Value.death.ToString (), GUILayout.Width (25.0f));
+            GUILayout.Label (data.Value.damage.ToString ("0"), GUILayout.Width (50.0f));
+            GUILayout.Label (data.Value.heal.ToString ("0"), GUILayout.Width (50.0f));
+            GUILayout.EndHorizontal ();
+        }
+        GUILayout.EndVertical ();
+        GUILayout.EndArea ();
     }
 
     void OnLevelWasLoaded () {
@@ -165,6 +190,8 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         classHashtable = PhotonNetwork.player.customProperties;
         selectedClassId = (byte) classHashtable["class"];
         SpawnPlayer ();
+
+        RegisterPlayer (PhotonNetwork.player);
     }
 
     void SpawnPlayer () {
@@ -188,6 +215,51 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     void RpcBroadcast (string message) {
         broadcastMessage = message;
         broadcastTimer = defaultBroadcastTimer;
+    }
+
+    void RegisterPlayer (PhotonPlayer player) {
+        photonView.RPC ("RpcRegisterPlayer", PhotonTargets.AllBuffered, player.ID, player.name);
+    }
+
+    [PunRPC]
+    void RpcRegisterPlayer (int playerId, string playerName) {
+        playerData[playerId] = new PlayerData (playerName);
+    }
+
+    public void AddKillData (int killingPlayerId) {
+        photonView.RPC ("RpcAddKillData", PhotonTargets.All, killingPlayerId);
+    }
+
+    [PunRPC]
+    void RpcAddKillData (int killingPlayerId) {
+        playerData[killingPlayerId].AddKill ();
+    }
+
+    public void AddDeathData (int dyingPlayerId) {
+        photonView.RPC ("RpcAddDeathData", PhotonTargets.All, dyingPlayerId);
+    }
+
+    [PunRPC]
+    void RpcAddDeathData (int dyingPlayerId) {
+        playerData[dyingPlayerId].AddDeath ();
+    }
+
+    public void AddDamageData (int damagingPlayerId, float damage) {
+        photonView.RPC ("RpcAddDamageData", PhotonTargets.All, damagingPlayerId, damage);
+    }
+
+    [PunRPC]
+    void RpcAddDamageData (int damagingPlayerId, float damage) {
+        playerData[damagingPlayerId].AddDamage (damage);
+    }
+
+    public void AddHealData (int healingPlayerId, float heal) {
+        photonView.RPC ("RpcAddHealData", PhotonTargets.All, healingPlayerId, heal);
+    }
+
+    [PunRPC]
+    void RpcAddHealData (int healingPlayerId, float heal) {
+        playerData[healingPlayerId].AddHeal (heal);
     }
 
 }

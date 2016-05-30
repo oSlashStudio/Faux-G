@@ -46,9 +46,9 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         } else {
             GUILayout.BeginArea (new Rect (
                     Screen.width / 2.0f - 200.0f,
-                    Screen.height / 2.0f - 100.0f,
+                    Screen.height / 2.0f - 200.0f,
                     400.0f,
-                    200.0f
+                    400.0f
                     ), GUI.skin.box);
 
             GUILayout.Label (PhotonNetwork.room.name + " (" + PhotonNetwork.room.playerCount + "/" + PhotonNetwork.room.maxPlayers + ")");
