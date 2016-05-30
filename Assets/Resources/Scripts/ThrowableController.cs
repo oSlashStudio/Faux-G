@@ -4,7 +4,7 @@ using System.Collections.Generic;
 public class ThrowableController : MonoBehaviour {
 
     public GameObject explosionPrefab;
-    
+
     public float throwableLifetime;
     public bool isExplodingOnCollision;
 
@@ -38,9 +38,9 @@ public class ThrowableController : MonoBehaviour {
     void Start () {
         halo = GetComponent ("Halo");
     }
-	
-	// Update is called once per frame
-	void Update () {
+
+    // Update is called once per frame
+    void Update () {
         throwableLifetime -= Time.deltaTime;
         if (throwableLifetime <= 0.0f) {
             GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, Quaternion.identity);
@@ -61,7 +61,7 @@ public class ThrowableController : MonoBehaviour {
             ToggleHalo ();
             haloBlinkDelay = throwableLifetime / 6.0f;
         }
-	}
+    }
 
     void ToggleHalo () {
         isHaloEnabled = !isHaloEnabled;
@@ -87,21 +87,14 @@ public class ThrowableController : MonoBehaviour {
     }
 
     void InstantiateClusters () {
+        Quaternion centralRotation = Quaternion.LookRotation (transform.up);
         Random.seed = Mathf.RoundToInt ((float) PhotonNetwork.time); // This syncs randomization throughout the network
         List<GameObject> instantiatedClusters = new List<GameObject> ();
 
-        if (numClusters % 2 == 1) { // Odd number of clusters
-            for (int i = -numClusters / 2; i <= numClusters / 2; i++) {
-                Quaternion instantiateRotation = Quaternion.Euler (new Vector3 (0.0f, 0.0f, Random.Range (0.0f, 360.0f)));
-                Vector3 instantiatePosition = transform.position;
-                InstantiateCluster (instantiatePosition, instantiateRotation, ref instantiatedClusters);
-            }
-        } else { // Even number of clusters
-            for (float i = -numClusters / 2 + 0.5f; i <= numClusters / 2 - 0.5f; i += 1.0f) {
-                Quaternion instantiateRotation = Quaternion.Euler (new Vector3 (0.0f, 0.0f, Random.Range (0.0f, 360.0f)));
-                Vector3 instantiatePosition = transform.position;
-                InstantiateCluster (instantiatePosition, instantiateRotation, ref instantiatedClusters);
-            }
+        for (int i = 0; i < numClusters; i++) {
+            Quaternion instantiateRotation = Quaternion.Euler (centralRotation.eulerAngles + new Vector3 (Random.Range (-45.0f, 45.0f), 0.0f, 0.0f));
+            Vector3 instantiatePosition = transform.position;
+            InstantiateCluster (instantiatePosition, instantiateRotation, ref instantiatedClusters);
         }
     }
 
@@ -121,7 +114,7 @@ public class ThrowableController : MonoBehaviour {
         }
         instantiatedClusters.Add (cluster); // Add as instantiated cluster
 
-        cluster.GetComponent<Rigidbody2D> ().AddForce (instantiateRotation * Vector3.right * clusteringForce);
+        cluster.GetComponent<Rigidbody2D> ().AddForce (instantiateRotation * Vector3.forward * clusteringForce);
     }
 
 }
