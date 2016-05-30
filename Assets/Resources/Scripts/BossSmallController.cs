@@ -59,19 +59,19 @@ public class BossSmallController : Photon.MonoBehaviour {
     }
 
     void Fire () {
+        photonView.RPC ("RpcFire", PhotonTargets.All, transform.position);
+    }
+
+    [PunRPC]
+    void RpcFire (Vector3 position) {
         for (int i = 0; i < numBulletsSpawned; i++) {
             Vector3 angle = new Vector3 (0.0f, 0.0f, i * 360.0f / numBulletsSpawned);
             Vector3 positionShift = Quaternion.Euler (angle) * Vector3.right * 1.0f;
 
-            photonView.RPC ("RpcFire", PhotonTargets.All, transform.position + positionShift, Quaternion.LookRotation (positionShift));
+            GameObject projectile = (GameObject) Instantiate (bulletPrefab, position + positionShift, Quaternion.LookRotation (positionShift));
+
+            Physics2D.IgnoreCollision (projectile.GetComponent<Collider2D> (), gameObject.GetComponent<Collider2D> ());
         }
-    }
-
-    [PunRPC]
-    void RpcFire (Vector3 projectilePosition, Quaternion projectileRotation) {
-        GameObject projectile = (GameObject) Instantiate (bulletPrefab, projectilePosition, projectileRotation);
-
-        Physics2D.IgnoreCollision (projectile.GetComponent<Collider2D> (), gameObject.GetComponent<Collider2D> ());
     }
 
     void SpawnMinion () {
