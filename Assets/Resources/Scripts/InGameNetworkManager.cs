@@ -40,6 +40,11 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     public float defaultBroadcastTimer = 10.0f;
     private float broadcastTimer;
 
+    // Chat related variables
+    private Vector2 chatScrollPos = new Vector2 (0.0f, Mathf.Infinity);
+    private string chatInput = "";
+    private List<string> chatMessages = new List<string> ();
+
     public bool IsDead {
         get {
             return isDead;
@@ -106,80 +111,182 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         }
     }
 
+    /*
+     * Get a rectangle relative to full HD 1920:1080 screen
+     */
+    Rect RelativeRect (float x, float y, float w, float h) {
+        float relativeX = Screen.width * x / 1920;
+        float relativeY = Screen.height * y / 1080;
+        float relativeW = Screen.width * w / 1920;
+        float relativeH = Screen.height * h / 1080;
+
+        return new Rect (relativeX, relativeY, relativeW, relativeH);
+    }
+
+    float RelativeWidth (float w) {
+        float relativeW = Screen.width * w / 1920;
+
+        return relativeW;
+    }
+
+    float RelativeHeight (float h) {
+        float relativeH = Screen.height * h / 1080;
+
+        return relativeH;
+    }
+
     void OnGUI () {
-        GUILayout.Label (PhotonNetwork.GetPing ().ToString () + " ms");
         if (!isInGame) { // Not in game yet
             return;
         }
 
-        if (isDead) { // Player is currently dead
-            GUILayout.BeginArea (new Rect (
-                Screen.width / 2.0f - 200.0f,
-                Screen.height / 2.0f - 100.0f,
-                400.0f,
-                200.0f
-                ));
+        GUILayout.BeginArea (RelativeRect (0, 0, 400, 100));
+        BroadcastGUI ();
+        GUILayout.EndArea ();
 
-            GUIStyle respawnLabelStyle = GUI.skin.label;
-            respawnLabelStyle.alignment = TextAnchor.MiddleCenter;
-            GUILayout.Label ("Killed by " + killerName + ", respawning in " + respawnTimer.ToString ("0") + "...", respawnLabelStyle);
-            GUILayout.Label ("Spectate other players by moving this spectate camera around.", respawnLabelStyle);
-
-            // Class selection window
-            GUILayout.Label ("Select Class:");
-            selectedClassId = GUILayout.SelectionGrid (selectedClassId, classNames, 4);
-            classHashtable["class"] = (byte) selectedClassId;
-            PhotonNetwork.player.SetCustomProperties (classHashtable);
-
+        if (isDead) {
+            GUILayout.BeginArea (RelativeRect (560, 340, 800, 400));
+            RespawnGUI ();
             GUILayout.EndArea ();
         }
 
-        if (!string.IsNullOrEmpty (broadcastMessage) && broadcastTimer >= 0.0f) {
-            GUIStyle broadcastStyle = GUI.skin.label;
-            broadcastStyle.alignment = TextAnchor.UpperCenter;
-            broadcastStyle.richText = true;
-            broadcastStyle.normal.textColor = new Color (
-                broadcastStyle.normal.textColor.r,
-                broadcastStyle.normal.textColor.g,
-                broadcastStyle.normal.textColor.b,
-                broadcastTimer / defaultBroadcastTimer
-                );
+        GUILayout.BeginArea (RelativeRect (0, 756, 576, 324));
+        ChatBoxGUI ();
+        ChatKeyListener ();
+        ChatFieldGUI ();
+        GUILayout.EndArea ();
 
-            GUILayout.BeginArea (new Rect (Screen.width / 2.0f - 100.0f, 0.0f, 200.0f, 50.0f));
-            GUILayout.Label (broadcastMessage, broadcastStyle);
-            GUILayout.EndArea ();
+        GUILayout.BeginArea (RelativeRect (576, 864, 768, 216));
+        StatusBarGUI ();
+        GUILayout.EndArea ();
 
-            // Reset style (without this reset, other GUI components will be affected)
-            broadcastStyle.normal.textColor = new Color (
-                broadcastStyle.normal.textColor.r,
-                broadcastStyle.normal.textColor.g,
-                broadcastStyle.normal.textColor.b,
-                1.0f
-                );
+        GUILayout.BeginArea (RelativeRect (1344, 756, 576, 324));
+        PlayerDataGUI ();
+        GUILayout.EndArea ();
+    }
+
+    void BroadcastGUI () {
+        GUI.skin.label.normal.textColor = new Color (
+            GUI.skin.label.normal.textColor.r,
+            GUI.skin.label.normal.textColor.g,
+            GUI.skin.label.normal.textColor.b,
+            broadcastTimer / defaultBroadcastTimer
+            );
+
+        GUILayout.Label (broadcastMessage);
+
+        GUI.skin.label.normal.textColor = new Color (
+            GUI.skin.label.normal.textColor.r,
+            GUI.skin.label.normal.textColor.g,
+            GUI.skin.label.normal.textColor.b,
+            1.0f
+            );
+    }
+
+    void RespawnGUI () {
+        GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+
+        GUILayout.Label ("Killed by " + killerName + ", respawning in " + respawnTimer.ToString ("0") + "...");
+        GUILayout.Label ("Spectate other players by moving this spectate camera around.");
+
+        // Class selection window
+        GUILayout.Label ("Select Class:");
+        selectedClassId = GUILayout.SelectionGrid (selectedClassId, classNames, 4);
+        classHashtable["class"] = (byte) selectedClassId;
+        PhotonNetwork.player.SetCustomProperties (classHashtable);
+
+        GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+    }
+
+    void ChatBoxGUI () {
+        GUI.SetNextControlName ("ChatBox");
+        chatScrollPos = GUILayout.BeginScrollView (chatScrollPos, GUIStyle.none, GUIStyle.none);
+        GUILayout.FlexibleSpace ();
+        foreach (string message in chatMessages) {
+            GUILayout.Label (message);
         }
+        // Auto scrolling
+        chatScrollPos = new Vector2 (0.0f, Mathf.Infinity);
+        GUILayout.EndScrollView ();
+    }
 
-        GUILayout.BeginArea (new Rect (Screen.width - 250.0f, Screen.height - 150.0f, 250.0f, 150.0f));
+    void ChatKeyListener () {
+        // Handle enter key press
+        if ((Event.current.type == EventType.KeyDown) && (Event.current.keyCode == KeyCode.KeypadEnter || Event.current.keyCode == KeyCode.Return)) {
+            if (string.IsNullOrEmpty (chatInput)) { // Empty chat input
+                ToggleFocus ("ChatField");
+            } else { // Non-empty chat input
+                if (IsSafeForWork (chatInput)) { // Chat filter
+                    photonView.RPC ("RpcSendChatInput", PhotonTargets.All, chatInput);
+                    chatInput = "";
+                    ToggleFocus ("ChatField");
+                }
+            }
+        }
+    }
+
+    void ChatFieldGUI () {
+        GUI.SetNextControlName ("ChatField");
+        chatInput = GUILayout.TextField (chatInput);
+    }
+
+    void ToggleFocus (string focusTarget) {
+        if (GUI.GetNameOfFocusedControl () == focusTarget) { // Currently focused
+            GUI.FocusControl ("");
+        } else { // Currently not focused
+            GUI.FocusControl (focusTarget);
+        }
+    }
+
+    /*
+     * This method handles message filtering.
+     */
+    bool IsSafeForWork (string chatInput) {
+        return true;
+    }
+
+    [PunRPC]
+    void RpcSendChatInput (string chatMessage, PhotonMessageInfo info) {
+        string senderName;
+
+        if (info == null || info.sender == null) { // Empty message info
+            senderName = "Anonymous";
+        } else {
+            if (string.IsNullOrEmpty (info.sender.name.Trim (' '))) { // Empty player name
+                senderName = "Player " + info.sender.ID;
+            } else { // Normal case, player has a name
+                senderName = info.sender.name;
+            }
+        }
+        
+        chatMessages.Add (senderName + ": " + chatMessage);
+    }
+
+    void StatusBarGUI () {
+
+    }
+
+    void PlayerDataGUI () {
         GUILayout.BeginVertical ();
         // Row #1
-        GUILayout.BeginHorizontal (GUILayout.Height (25.0f));
-        GUILayout.Label ("Name", GUILayout.Width (50.0f));
-        GUILayout.Label ("K", GUILayout.Width (25.0f));
-        GUILayout.Label ("D", GUILayout.Width (25.0f));
-        GUILayout.Label ("Dmg", GUILayout.Width (50.0f));
-        GUILayout.Label ("Heal", GUILayout.Width (50.0f));
+        GUILayout.BeginHorizontal ();
+        GUILayout.Label ("Name");
+        GUILayout.Label ("K", GUILayout.Width (RelativeWidth (100)));
+        GUILayout.Label ("D", GUILayout.Width (RelativeWidth (100)));
+        GUILayout.Label ("Dmg", GUILayout.Width (RelativeWidth (100)));
+        GUILayout.Label ("Heal", GUILayout.Width (RelativeWidth (100)));
         GUILayout.EndHorizontal ();
         // Row #2 ~ #N
         foreach (KeyValuePair<int, PlayerData> data in playerData) {
-            GUILayout.BeginHorizontal (GUILayout.Height (25.0f));
-            GUILayout.Label (data.Value.playerName, GUILayout.Width (50.0f));
-            GUILayout.Label (data.Value.kill.ToString (), GUILayout.Width (25.0f));
-            GUILayout.Label (data.Value.death.ToString (), GUILayout.Width (25.0f));
-            GUILayout.Label (data.Value.damage.ToString ("0"), GUILayout.Width (50.0f));
-            GUILayout.Label (data.Value.heal.ToString ("0"), GUILayout.Width (50.0f));
+            GUILayout.BeginHorizontal ();
+            GUILayout.Label (data.Value.playerName);
+            GUILayout.Label (data.Value.kill.ToString (), GUILayout.Width (RelativeWidth (100)));
+            GUILayout.Label (data.Value.death.ToString (), GUILayout.Width (RelativeWidth (100)));
+            GUILayout.Label (data.Value.damage.ToString ("0"), GUILayout.Width (RelativeWidth (100)));
+            GUILayout.Label (data.Value.heal.ToString ("0"), GUILayout.Width (RelativeWidth (100)));
             GUILayout.EndHorizontal ();
         }
         GUILayout.EndVertical ();
-        GUILayout.EndArea ();
     }
 
     void OnLevelWasLoaded () {
