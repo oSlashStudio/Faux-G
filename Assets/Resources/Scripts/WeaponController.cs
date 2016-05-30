@@ -427,6 +427,10 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void OnGUI () {
+        if (!photonView.isMine) {
+            return;
+        }
+
         if (isReloading) {
             GUILayout.BeginArea (RelativeRect (576, 764, 768, 100));
 
