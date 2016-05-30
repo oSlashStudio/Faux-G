@@ -1,7 +1,7 @@
 using UnityEngine;
 using System.Collections;
 
-public class PlayerData : MonoBehaviour {
+public class PlayerData {
 
     public string playerName;
     public int kill;
