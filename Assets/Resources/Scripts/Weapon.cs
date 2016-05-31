@@ -9,6 +9,7 @@ public class Weapon : MonoBehaviour {
 
     public int defaultAmmo; // The number of ammo on full load
     public float reloadTime;
+    public int defaultMagazine; // The default number of magazines
 
     // Throw related variables
     public bool isThrowable;

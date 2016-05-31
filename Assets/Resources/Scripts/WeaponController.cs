@@ -140,8 +140,6 @@ public class WeaponController : Photon.MonoBehaviour {
     void CheckThrow () {
         if (fireDelays[currentWeapon] <= 0.0f && ammo[currentWeapon] > 0 && !isReloading) {
             StartChargeThrow ();
-            fireDelays[currentWeapon] = weapons[currentWeapon].defaultFireDelay;
-            ammo[currentWeapon] -= 1;
         }
     }
 
@@ -159,6 +157,10 @@ public class WeaponController : Photon.MonoBehaviour {
         Vector3 throwDirection = (crosshair.transform.position - transform.position).normalized;
         Vector2 throwDirectionalForce = throwDirection * throwForce;
         photonView.RPC ("RpcThrow", PhotonTargets.All, transform.position, throwDirectionalForce);
+
+        // Set fire delay and reduce ammo
+        fireDelays[currentWeapon] = weapons[currentWeapon].defaultFireDelay;
+        ammo[currentWeapon] -= 1;
         // Reset throw related variables
         isThrowing = false;
         throwForce = 0.0f;
@@ -389,10 +391,19 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void InputReload () {
-        if (Input.GetKeyDown (KeyCode.R)) { // R button for reload
-            isReloading = true;
-            reloadTimer = weapons[currentWeapon].reloadTime;
+        if (isReloading) {
+            return; // Can't reload while reloading
         }
+        if (Input.GetKeyDown (KeyCode.R)) { // R button for manual reload
+            Reload ();
+        } else if (ammo[currentWeapon] == 0) { // Auto reload when bullet reaches 0
+            Reload ();
+        }
+    }
+
+    void Reload () {
+        isReloading = true;
+        reloadTimer = weapons[currentWeapon].reloadTime;
     }
 
     void OnDestroy () {
@@ -432,22 +443,32 @@ public class WeaponController : Photon.MonoBehaviour {
         }
 
         if (isReloading) {
-            GUILayout.BeginArea (RelativeRect (576, 764, 768, 100));
+            GUILayout.BeginArea (RelativeRect (576, 780, 768, 200));
 
-            GUIStyle centeredLabel = new GUIStyle (GUI.skin.label);
-            centeredLabel.alignment = TextAnchor.MiddleCenter;
-            GUILayout.Label ("Reloading finishes in " + reloadTimer.ToString("0") + " seconds", centeredLabel);
+            GUILayout.BeginHorizontal ();
+            GUILayout.FlexibleSpace ();
+            GUILayout.Label ("Reloading finishes in " + reloadTimer.ToString("0") + " seconds");
+            GUILayout.FlexibleSpace ();
+            GUILayout.EndHorizontal ();
+
+            GUILayout.BeginHorizontal ();
+            GUILayout.FlexibleSpace ();
+            GUILayout.HorizontalScrollbar (weapons[currentWeapon].reloadTime - reloadTimer, 0.1f, 0, weapons[currentWeapon].reloadTime, 
+                GUILayout.Width (RelativeWidth (512)));
+            GUILayout.FlexibleSpace ();
+            GUILayout.EndHorizontal ();
 
             GUILayout.EndArea ();
         }
         
         GUILayout.BeginArea (RelativeRect (576, 980, 768, 100));
+        GUILayout.FlexibleSpace ();
         StatusBarGUI ();
         GUILayout.EndArea ();
     }
 
     void StatusBarGUI () {
-        GUILayout.BeginHorizontal (GUILayout.Width (RelativeWidth (768)), GUILayout.Height (RelativeHeight (100)));
+        GUILayout.BeginHorizontal ();
         for (int i = 0; i < weapons.Length; i++) {
             GUIStyle labelStyle = new GUIStyle (GUI.skin.label);
             labelStyle.alignment = TextAnchor.MiddleCenter;
