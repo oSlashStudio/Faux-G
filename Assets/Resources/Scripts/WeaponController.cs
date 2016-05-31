@@ -13,6 +13,7 @@ public class WeaponController : Photon.MonoBehaviour {
 
     private List<float> fireDelays;
     private List<int> ammo;
+    private List<int> stock;
 
     // Throwing related variables
     public bool isThrowing;
@@ -75,9 +76,11 @@ public class WeaponController : Photon.MonoBehaviour {
     void InitializeWeapons () {
         fireDelays = new List<float> ();
         ammo = new List<int> ();
+        stock = new List<int> ();
         for (int i = 0; i < weapons.Length; i++) {
             fireDelays.Add (0.0f);
             ammo.Add (weapons[i].defaultAmmo);
+            stock.Add (weapons[i].defaultStock - 1); // 1 is used for the initial ammo
         }
     }
 	
@@ -106,6 +109,7 @@ public class WeaponController : Photon.MonoBehaviour {
             if (reloadTimer <= 0.0f) {
                 isReloading = false;
                 ammo[currentWeapon] = weapons[currentWeapon].defaultAmmo;
+                stock[currentWeapon] -= 1;
             }
         }
     }
@@ -394,9 +398,14 @@ public class WeaponController : Photon.MonoBehaviour {
         if (isReloading) {
             return; // Can't reload while reloading
         }
+        
+        if (stock[currentWeapon] <= 0) {
+            return; // Out of stock
+        }
+
         if (Input.GetKeyDown (KeyCode.R)) { // R button for manual reload
             Reload ();
-        } else if (ammo[currentWeapon] == 0) { // Auto reload when bullet reaches 0
+        } else if (ammo[currentWeapon] <= 0) { // Auto reload when bullet reaches 0
             Reload ();
         }
     }
@@ -443,7 +452,7 @@ public class WeaponController : Photon.MonoBehaviour {
         }
 
         if (isReloading) {
-            GUILayout.BeginArea (RelativeRect (576, 780, 768, 200));
+            GUILayout.BeginArea (RelativeRect (576, 680, 768, 200));
 
             GUILayout.BeginHorizontal ();
             GUILayout.FlexibleSpace ();
@@ -461,23 +470,32 @@ public class WeaponController : Photon.MonoBehaviour {
             GUILayout.EndArea ();
         }
         
-        GUILayout.BeginArea (RelativeRect (576, 980, 768, 100));
+        GUILayout.BeginArea (RelativeRect (576, 880, 768, 200));
         GUILayout.FlexibleSpace ();
         StatusBarGUI ();
         GUILayout.EndArea ();
     }
 
     void StatusBarGUI () {
+        WeaponsGUI ();
+    }
+
+    void WeaponsGUI () {
         GUILayout.BeginHorizontal ();
+
+        GUIStyle boxStyle = new GUIStyle (GUI.skin.box);
+        boxStyle.alignment = TextAnchor.MiddleCenter;
+        GUIStyle labelStyle = new GUIStyle (GUI.skin.label);
+        labelStyle.alignment = TextAnchor.MiddleCenter;
+
         for (int i = 0; i < weapons.Length; i++) {
-            GUIStyle labelStyle = new GUIStyle (GUI.skin.label);
-            labelStyle.alignment = TextAnchor.MiddleCenter;
-
+            GUILayout.BeginVertical ();
             if (i == currentWeapon) { // If this is the current weapon
-                labelStyle.fontStyle = FontStyle.Bold;
+                GUILayout.Box (ammo[i] + " / " + weapons[i].defaultAmmo + "\n" + stock[i], boxStyle);
+            } else {
+                GUILayout.Label (ammo[i] + " / " + weapons[i].defaultAmmo + "\n" + stock[i], labelStyle);
             }
-
-            GUILayout.Label (ammo[i] + " / " + weapons[i].defaultAmmo, labelStyle);
+            GUILayout.EndVertical ();
         }
         GUILayout.EndHorizontal ();
     }
