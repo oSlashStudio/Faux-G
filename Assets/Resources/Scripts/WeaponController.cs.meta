@@ -1,10 +1,15 @@
 fileFormatVersion: 2
 guid: 98fdd1d2a2f73524da1a392993c415ff
-timeCreated: 1464078118
+timeCreated: 1464699139
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - mainCameraPrefab: {instanceID: 0}
+  - crosshairPrefab: {instanceID: 0}
+  - aimCameraPrefab: {instanceID: 0}
+  - throwForceBarPrefab: {instanceID: 0}
+  - reloadBarGUISkin: {fileID: 11400000, guid: df7e30fa515b4054a898aa178cf1467e, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

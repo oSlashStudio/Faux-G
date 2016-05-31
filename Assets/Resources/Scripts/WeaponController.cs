@@ -23,6 +23,8 @@ public class WeaponController : Photon.MonoBehaviour {
     private bool isReloading;
     private float reloadTimer;
 
+    public GUISkin customSkin;
+
     // Cached components
     private GameObject player; // The player associated with this weapon
     private PlayerController playerController;
@@ -452,7 +454,7 @@ public class WeaponController : Photon.MonoBehaviour {
         }
 
         if (isReloading) {
-            GUILayout.BeginArea (RelativeRect (576, 680, 768, 200));
+            GUILayout.BeginArea (RelativeRect (576, 780, 768, 100));
 
             GUILayout.BeginHorizontal ();
             GUILayout.FlexibleSpace ();
@@ -462,22 +464,25 @@ public class WeaponController : Photon.MonoBehaviour {
 
             GUILayout.BeginHorizontal ();
             GUILayout.FlexibleSpace ();
-            GUILayout.HorizontalScrollbar (weapons[currentWeapon].reloadTime - reloadTimer, 0.1f, 0, weapons[currentWeapon].reloadTime, 
-                GUILayout.Width (RelativeWidth (512)));
+
+            GUILayout.BeginHorizontal (GUILayout.Width (RelativeWidth (512)));
+            GUI.skin = customSkin;
+            GUILayout.Label ("", "Green",
+                GUILayout.Width (RelativeWidth (512.0f * (1.0f - reloadTimer / weapons[currentWeapon].reloadTime))));
+            GUILayout.Label ("", "Red");
+            GUI.skin = null;
+            GUILayout.EndHorizontal ();
+
             GUILayout.FlexibleSpace ();
             GUILayout.EndHorizontal ();
 
             GUILayout.EndArea ();
         }
         
-        GUILayout.BeginArea (RelativeRect (576, 880, 768, 200));
+        GUILayout.BeginArea (RelativeRect (576, 980, 768, 100));
         GUILayout.FlexibleSpace ();
-        StatusBarGUI ();
-        GUILayout.EndArea ();
-    }
-
-    void StatusBarGUI () {
         WeaponsGUI ();
+        GUILayout.EndArea ();
     }
 
     void WeaponsGUI () {

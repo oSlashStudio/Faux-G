@@ -21,6 +21,8 @@ public class PlayerController : Photon.MonoBehaviour {
     public float staminaRecoveryRate = 10.0f; // The amount of stamina recovered per second
     public float currentStamina;
 
+    public GUISkin customSkin;
+
     // State related variables
     public bool isAiming = false;
 
@@ -28,11 +30,13 @@ public class PlayerController : Photon.MonoBehaviour {
     private Rigidbody2D rigidBody;
     private GameObject staminaBar;
     private GameObject jumpForceBar;
+    private HealthController healthController;
     private PhotonTransformView photonTransformView;
 
 	// Use this for initialization
 	void Start () {
         rigidBody = GetComponent<Rigidbody2D> ();
+        healthController = GetComponent<HealthController> ();
         photonTransformView = GetComponent<PhotonTransformView> ();
 
         jumpForce = 0.0f;
@@ -160,6 +164,61 @@ public class PlayerController : Photon.MonoBehaviour {
     void OnDestroy () {
         Destroy (staminaBar);
         Destroy (jumpForceBar);
+    }
+
+    /*
+     * Get a rectangle relative to full HD 1920:1080 screen
+     */
+    Rect RelativeRect (float x, float y, float w, float h) {
+        float relativeX = Screen.width * x / 1920;
+        float relativeY = Screen.height * y / 1080;
+        float relativeW = Screen.width * w / 1920;
+        float relativeH = Screen.height * h / 1080;
+
+        return new Rect (relativeX, relativeY, relativeW, relativeH);
+    }
+
+    float RelativeWidth (float w) {
+        float relativeW = Screen.width * w / 1920;
+
+        return relativeW;
+    }
+
+    float RelativeHeight (float h) {
+        float relativeH = Screen.height * h / 1080;
+
+        return relativeH;
+    }
+
+    void OnGUI () {
+        GUILayout.BeginArea (RelativeRect (576, 880, 768, 100));
+        GUILayout.FlexibleSpace ();
+        StatusGUI ();
+        GUILayout.EndArea ();
+    }
+
+    void StatusGUI () {
+        GUILayout.BeginHorizontal ();
+
+        GUILayout.BeginHorizontal (GUILayout.Width (RelativeWidth (300)));
+        GUI.skin = customSkin;
+        GUILayout.Label ("", "Green", 
+            GUILayout.Width (RelativeWidth (300.0f * healthController.currentHealth / healthController.maxHealth)));
+        GUILayout.Label ("", "Red");
+        GUI.skin = null;
+        GUILayout.EndHorizontal ();
+
+        GUILayout.FlexibleSpace ();
+
+        GUILayout.BeginHorizontal (GUILayout.Width (RelativeWidth (300)));
+        GUI.skin = customSkin;
+        GUILayout.Label ("", "Cyan",
+            GUILayout.Width (RelativeWidth (300.0f * currentStamina / maxStamina)));
+        GUILayout.Label ("", "White");
+        GUI.skin = null;
+        GUILayout.EndHorizontal ();
+
+        GUILayout.EndHorizontal ();
     }
 
 }
