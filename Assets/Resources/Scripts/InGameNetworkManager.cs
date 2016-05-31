@@ -100,6 +100,9 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         if (isDead) {
             respawnTimer -= Time.deltaTime;
             if (respawnTimer <= 0.0f) {
+                // Update selected class information
+                classHashtable["class"] = (byte) selectedClassId;
+                PhotonNetwork.player.SetCustomProperties (classHashtable);
                 isDead = false;
                 SpawnPlayer ();
             }
@@ -188,8 +191,6 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         // Class selection window
         GUILayout.Label ("Select Class:");
         selectedClassId = GUILayout.SelectionGrid (selectedClassId, classNames, 4);
-        classHashtable["class"] = (byte) selectedClassId;
-        PhotonNetwork.player.SetCustomProperties (classHashtable);
 
         GUI.skin.label.alignment = TextAnchor.MiddleLeft;
     }

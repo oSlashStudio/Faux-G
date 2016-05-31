@@ -33,8 +33,8 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         }
 
         PhotonNetwork.ConnectUsingSettings ("v0.1");
-        PhotonNetwork.sendRate = 15;
-        PhotonNetwork.sendRateOnSerialize = 15;
+        PhotonNetwork.sendRate = 10;
+        PhotonNetwork.sendRateOnSerialize = 10;
     }
 
     // Update is called once per frame

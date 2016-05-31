@@ -73,8 +73,6 @@ public class RoomNetworkManager : Photon.PunBehaviour {
 
             GUILayout.Label ("Select Class:");
             selectedClassId = GUILayout.SelectionGrid (selectedClassId, classNames, 4);
-            classHashtable["class"] = (byte) selectedClassId;
-            PhotonNetwork.player.SetCustomProperties (classHashtable);
 
             if (PhotonNetwork.isMasterClient) {
                 if (GUILayout.Button ("Start Game")) {
@@ -100,6 +98,9 @@ public class RoomNetworkManager : Photon.PunBehaviour {
 
     [PunRPC]
     void RpcLoadLevel () {
+        // Set class
+        classHashtable["class"] = (byte) selectedClassId;
+        PhotonNetwork.player.SetCustomProperties (classHashtable);
         // Temporarily pause message queue, to be resumed when the in-game scene loads
         PhotonNetwork.isMessageQueueRunning = false;
         // 2 is the offset taking lobby and room scenes into account
