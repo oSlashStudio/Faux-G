@@ -7,6 +7,7 @@ public class ThrowableController : MonoBehaviour {
 
     public float throwableLifetime;
     public bool isExplodingOnCollision;
+    public bool isLatchingOnCollision;
 
     // Clustering related variables
     public bool isClustered;
@@ -33,10 +34,12 @@ public class ThrowableController : MonoBehaviour {
 
     // Cached components
     private Component halo;
+    private Rigidbody2D rigidBody;
 
     // Use this for initialization
     void Start () {
         halo = GetComponent ("Halo");
+        rigidBody = GetComponent<Rigidbody2D> ();
     }
 
     // Update is called once per frame
@@ -69,6 +72,14 @@ public class ThrowableController : MonoBehaviour {
     }
 
     void OnCollisionEnter2D (Collision2D collision) {
+        if (isLatchingOnCollision) {
+            // Only latches onto players and enemies
+            if (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Enemy") {
+                transform.parent = collision.transform;
+                rigidBody.isKinematic = true;
+            }
+        }
+
         if (!isExplodingOnCollision) { // Not exploding on collision, ignore collision event
             return;
         }
