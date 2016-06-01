@@ -24,7 +24,7 @@ public class RotatingLaserController : Photon.MonoBehaviour {
     void FixedUpdate () {
         if (photonView.isMine) { // Only master client modifies rotation
             transform.rotation = Quaternion.Euler (
-                transform.rotation.eulerAngles + new Vector3 (0.0f, 0.0f, angularVelocity * Time.deltaTime)
+                transform.rotation.eulerAngles + new Vector3 (0.0f, 0.0f, angularVelocity * Time.fixedDeltaTime)
                 );
         }
         RaycastHit2D raycastHit = Physics2D.Raycast (transform.position, transform.rotation * Vector3.up);

@@ -417,6 +417,10 @@ public class WeaponController : Photon.MonoBehaviour {
         reloadTimer = weapons[currentWeapon].reloadTime;
     }
 
+    public void AddStock (int targetWeaponId, int numStock) {
+        stock[targetWeaponId] += numStock;
+    }
+
     void OnDestroy () {
         Destroy (mainCamera);
         Destroy (crosshair);
