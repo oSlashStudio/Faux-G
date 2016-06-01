@@ -418,6 +418,11 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     public void AddStock (int targetWeaponId, int numStock) {
+        photonView.RPC ("RpcAddStock", photonView.owner, targetWeaponId, numStock);
+    }
+
+    [PunRPC]
+    void RpcAddStock (int targetWeaponId, int numStock) {
         stock[targetWeaponId] += numStock;
     }
 

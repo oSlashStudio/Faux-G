@@ -92,8 +92,18 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         }
     }
 
+    // Sound clips
+    public AudioClip doubleKillSoundClip;
+    public AudioClip killingSpreeSoundClip;
+    public AudioClip dominatingSoundClip;
+    public AudioClip godlikeSoundClip;
+
+    // Cached components
+    private AudioSource audioSource;
+
     // Use this for initialization
     void Start () {
+        audioSource = GetComponent<AudioSource> ();
         broadcasts = new Broadcast[3];
         for (int i = 0; i < 3; i++) {
             broadcasts[i] = new Broadcast ();
@@ -102,10 +112,6 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     // Update is called once per frame
     void Update () {
-        if (Input.GetKeyDown (KeyCode.B)) {
-            Broadcast (PhotonNetwork.time.ToString ("0.0"));
-        }
-
         if (isDead) {
             respawnTimer -= Time.deltaTime;
             if (respawnTimer <= 0.0f) {
@@ -365,6 +371,27 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     [PunRPC]
     void RpcAddKillData (int killingPlayerId) {
         playerData[killingPlayerId].AddKill ();
+
+        switch (playerData[killingPlayerId].killStreak) {
+            case 1:
+                break;
+            case 2:
+                RpcBroadcast ("<b>" + playerData[killingPlayerId].playerName  + "</b> got a Double Kill!");
+                audioSource.PlayOneShot (doubleKillSoundClip);
+                break;
+            case 3:
+                RpcBroadcast ("<b>" + playerData[killingPlayerId].playerName + "</b> is on a Killing Spree!");
+                audioSource.PlayOneShot (killingSpreeSoundClip);
+                break;
+            case 4:
+                RpcBroadcast ("<b>" + playerData[killingPlayerId].playerName + "</b> is Dominating!");
+                audioSource.PlayOneShot (dominatingSoundClip);
+                break;
+            default: // More than or equals to 5
+                RpcBroadcast ("<b>" + playerData[killingPlayerId].playerName + "</b> is GODLIKE!");
+                audioSource.PlayOneShot (godlikeSoundClip);
+                break;
+        }
     }
 
     public void AddDeathData (int dyingPlayerId) {

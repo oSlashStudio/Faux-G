@@ -8,6 +8,8 @@ public class PlayerData {
     public int death;
     public float damage;
     public float heal;
+    public int killStreak;
+    public int deathStreak;
 
     public PlayerData (string name) {
         this.playerName = name;
@@ -15,14 +17,20 @@ public class PlayerData {
         death = 0;
         damage = 0.0f;
         heal = 0.0f;
+        killStreak = 0;
+        deathStreak = 0;
     }
 
     public void AddKill () {
         kill++;
+        killStreak++;
+        deathStreak = 0;
     }
 
     public void AddDeath () {
         death++;
+        deathStreak++;
+        killStreak = 0;
     }
 
     public void AddDamage (float damage) {
