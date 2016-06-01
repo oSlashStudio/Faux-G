@@ -7,15 +7,15 @@ public class AmmoPodController : Photon.MonoBehaviour {
     public float defaultSpawnDelay;
 
     private float spawnDelay;
-    private bool hasAmmoPack;
+    private bool hasAmmoPack = true;
 
     // Cached components
-    private Component halo;
+    private Light halo;
     private GameObject ammoPack;
 
     // Use this for initialization
     void Start () {
-        halo = GetComponent ("Halo");
+        halo = GetComponent<Light> ();
         spawnDelay = defaultSpawnDelay;
 	}
 	
@@ -33,12 +33,9 @@ public class AmmoPodController : Photon.MonoBehaviour {
             }
         }
 
-        if (!hasAmmoPack && ammoPack != null) {
-            hasAmmoPack = true;
-            photonView.RPC ("RpcSetHalo", PhotonTargets.All, true);
-        } else if (hasAmmoPack && ammoPack == null) {
+        if (hasAmmoPack && ammoPack == null) {
             hasAmmoPack = false;
-            photonView.RPC ("RpcSetHalo", PhotonTargets.All, false);
+            photonView.RPC ("RpcSetHalo", PhotonTargets.All, false, 0f, 0f, 0f);
         }
 	}
 
@@ -46,11 +43,33 @@ public class AmmoPodController : Photon.MonoBehaviour {
         int spawnedAmmoId = Random.Range (0, ammoPrefabs.Length);
         ammoPack = PhotonNetwork.InstantiateSceneObject (ammoPrefabs[spawnedAmmoId].name, 
             transform.position + transform.up, transform.rotation, 0, null);
+
+        hasAmmoPack = true;
+
+        Color haloColor;
+        switch (spawnedAmmoId) {
+            case 0:
+                haloColor = new Color (255, 0, 0);
+                break;
+            case 1:
+                haloColor = new Color (0, 255, 255);
+                break;
+            case 2:
+                haloColor = new Color (255, 255, 0);
+                break;
+            default:
+                haloColor = new Color (255, 255, 255);
+                break;
+        }
+        photonView.RPC ("RpcSetHalo", PhotonTargets.All, true, haloColor.r, haloColor.g, haloColor.b);
     }
 
     [PunRPC]
-    void RpcSetHalo (bool flag) {
-        halo.GetType ().GetProperty ("enabled").SetValue (halo, flag, null);
+    void RpcSetHalo (bool flag, float r, float g, float b) {
+        halo.enabled = flag;
+        if (halo.enabled) {
+            halo.color = new Color (r, g, b);
+        }
     }
 
 }
