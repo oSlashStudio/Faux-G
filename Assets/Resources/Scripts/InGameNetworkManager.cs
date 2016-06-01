@@ -214,7 +214,9 @@ public class InGameNetworkManager : Photon.PunBehaviour {
             if (string.IsNullOrEmpty (chatInput)) { // Empty chat input
                 ToggleFocus ("ChatField");
             } else { // Non-empty chat input
-                if (IsSafeForWork (chatInput)) { // Chat filter
+                if (GUI.GetNameOfFocusedControl () != "ChatField") { // Not focused yet
+                    ToggleFocus ("ChatField");
+                } else if (IsSafeForWork (chatInput)) { // Chat filter
                     photonView.RPC ("RpcSendChatInput", PhotonTargets.All, chatInput);
                     chatInput = "";
                     ToggleFocus ("ChatField");
