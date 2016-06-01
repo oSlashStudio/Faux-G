@@ -14,9 +14,7 @@ public class AmmoPackController : Photon.MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        transform.rotation = Quaternion.Euler (
-            transform.rotation.eulerAngles + new Vector3 (0.0f, rotationalSpeed * Time.deltaTime, 0.0f)
-            );
+        transform.Rotate (transform.up, rotationalSpeed * Time.deltaTime, Space.World);
 	}
 
     void OnTriggerEnter2D (Collider2D collider) {
