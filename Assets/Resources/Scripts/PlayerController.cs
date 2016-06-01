@@ -191,6 +191,10 @@ public class PlayerController : Photon.MonoBehaviour {
     }
 
     void OnGUI () {
+        if (!photonView.isMine) {
+            return;
+        }
+
         GUILayout.BeginArea (RelativeRect (576, 880, 768, 100));
         GUILayout.FlexibleSpace ();
         StatusGUI ();
