@@ -8,6 +8,7 @@ public class ThrowableController : MonoBehaviour {
     public float throwableLifetime;
     public bool isExplodingOnCollision;
     public bool isLatchingOnCollision;
+    public bool isExplodingOnLatch;
 
     // Clustering related variables
     public bool isClustered;
@@ -46,17 +47,7 @@ public class ThrowableController : MonoBehaviour {
     void Update () {
         throwableLifetime -= Time.deltaTime;
         if (throwableLifetime <= 0.0f) {
-            GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, Quaternion.identity);
-
-            if (isPlayerInstantiated) {
-                explosion.GetComponent<ExplosionController> ().InstantiatorId = instantiatorId;
-            }
-
-            if (isClustered) {
-                InstantiateClusters ();
-            }
-
-            Destroy (gameObject);
+            Explode ();
         }
 
         haloBlinkDelay -= Time.deltaTime;
@@ -77,13 +68,19 @@ public class ThrowableController : MonoBehaviour {
             if (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Enemy") {
                 transform.parent = collision.transform;
                 rigidBody.isKinematic = true;
+
+                if (isExplodingOnLatch) {
+                    Explode ();
+                }
             }
         }
 
-        if (!isExplodingOnCollision) { // Not exploding on collision, ignore collision event
-            return;
+        if (isExplodingOnCollision) { // Exploding on collision
+            Explode ();
         }
-
+    }
+    
+    void Explode () {
         GameObject explosion = (GameObject) Instantiate (explosionPrefab, transform.position, Quaternion.identity);
 
         if (isPlayerInstantiated) {
