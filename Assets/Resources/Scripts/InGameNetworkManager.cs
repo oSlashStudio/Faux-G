@@ -37,9 +37,10 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     private bool isSpectating;
 
     // Broadcast message related variables
-    private string broadcastMessage;
+    private Broadcast[] broadcasts; // Broadcast circular buffer
+    private int broadcastHead = 0;
+    private int broadcastSize = 0;
     public float defaultBroadcastTimer = 10.0f;
-    private float broadcastTimer;
 
     // Chat related variables
     private Vector2 chatScrollPos = new Vector2 (0.0f, Mathf.Infinity);
@@ -93,11 +94,18 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     // Use this for initialization
     void Start () {
-
+        broadcasts = new Broadcast[3];
+        for (int i = 0; i < 3; i++) {
+            broadcasts[i] = new Broadcast ();
+        }
     }
 
     // Update is called once per frame
     void Update () {
+        if (Input.GetKeyDown (KeyCode.B)) {
+            Broadcast (PhotonNetwork.time.ToString ("0.0"));
+        }
+
         if (isDead) {
             respawnTimer -= Time.deltaTime;
             if (respawnTimer <= 0.0f) {
@@ -108,10 +116,16 @@ public class InGameNetworkManager : Photon.PunBehaviour {
                 SpawnPlayer ();
             }
         }
-
-        broadcastTimer -= Time.deltaTime;
-        if (broadcastTimer <= 0.0f) {
-            broadcastMessage = "";
+        
+        int size = broadcastSize;
+        int head = broadcastHead;
+        while (size > 0) {
+            head = (head - 1 + broadcasts.Length) % broadcasts.Length;
+            broadcasts[head].time -= Time.deltaTime;
+            if (broadcasts[head].time <= 0.0f) {
+                broadcastSize--;
+            }
+            size--;
         }
     }
 
@@ -144,8 +158,9 @@ public class InGameNetworkManager : Photon.PunBehaviour {
             return;
         }
 
-        GUILayout.BeginArea (RelativeRect (0, 0, 400, 100));
+        GUILayout.BeginArea (RelativeRect (0, 0, 1920, 300));
         BroadcastGUI ();
+        GUILayout.FlexibleSpace ();
         GUILayout.EndArea ();
 
         if (isDead) {
@@ -166,21 +181,27 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     }
 
     void BroadcastGUI () {
-        GUI.skin.label.normal.textColor = new Color (
-            GUI.skin.label.normal.textColor.r,
-            GUI.skin.label.normal.textColor.g,
-            GUI.skin.label.normal.textColor.b,
-            broadcastTimer / defaultBroadcastTimer
-            );
+        int size = broadcastSize;
+        int head = broadcastHead;
+        while (size > 0) {
+            head = (head - 1 + broadcasts.Length) % broadcasts.Length;
+            GUI.skin.label.normal.textColor = new Color (
+                GUI.skin.label.normal.textColor.r,
+                GUI.skin.label.normal.textColor.g,
+                GUI.skin.label.normal.textColor.b,
+                broadcasts[head].time / defaultBroadcastTimer
+                );
 
-        GUILayout.Label (broadcastMessage);
+            GUILayout.Label (broadcasts[head].message);
 
-        GUI.skin.label.normal.textColor = new Color (
-            GUI.skin.label.normal.textColor.r,
-            GUI.skin.label.normal.textColor.g,
-            GUI.skin.label.normal.textColor.b,
-            1.0f
-            );
+            GUI.skin.label.normal.textColor = new Color (
+                GUI.skin.label.normal.textColor.r,
+                GUI.skin.label.normal.textColor.g,
+                GUI.skin.label.normal.textColor.b,
+                1.0f
+                );
+            size--;
+        }
     }
 
     void RespawnGUI () {
@@ -316,8 +337,16 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     [PunRPC]
     void RpcBroadcast (string message) {
-        broadcastMessage = message;
-        broadcastTimer = defaultBroadcastTimer;
+        PushBroadcast (message, defaultBroadcastTimer);
+    }
+
+    void PushBroadcast (string message, float time) {
+        broadcasts[broadcastHead].message = message;
+        broadcasts[broadcastHead].time = time;
+        broadcastHead = (broadcastHead + 1) % broadcasts.Length;
+        if (broadcastSize < broadcasts.Length) {
+            broadcastSize++;
+        }
     }
 
     void RegisterPlayer (PhotonPlayer player) {
