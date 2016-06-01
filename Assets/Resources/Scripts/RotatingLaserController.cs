@@ -32,7 +32,10 @@ public class RotatingLaserController : Photon.MonoBehaviour {
         Instantiate (hitEffect, raycastHit.point, transform.rotation);
 
         // Handle damage
-        if (raycastHit.rigidbody == null) {
+        if (raycastHit.rigidbody == null) { // Not a target
+            return;
+        }
+        if (raycastHit.rigidbody.gameObject.tag == "Enemy") { // Ignore damage to enemy
             return;
         }
         HealthController targetHealthController = raycastHit.rigidbody.gameObject.GetComponent<HealthController> ();
