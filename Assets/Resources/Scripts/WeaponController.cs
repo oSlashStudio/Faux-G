@@ -53,7 +53,7 @@ public class WeaponController : Photon.MonoBehaviour {
         // Instantiate main camera
         mainCamera = (GameObject) Instantiate (mainCameraPrefab, Vector3.zero, Quaternion.identity);
         mainCameraComponent = mainCamera.GetComponent<Camera> ();
-        mainCamera.GetComponent<CameraController> ().player = gameObject;
+        mainCamera.GetComponent<CameraController> ().player = player;
 
         // Instantiate crosshair
         crosshair = (GameObject) Instantiate (crosshairPrefab, Vector3.zero, Quaternion.identity);

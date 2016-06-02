@@ -18,6 +18,7 @@ public class CameraController : MonoBehaviour {
         }
         // Update position based on current player position
         transform.position = player.transform.position + new Vector3 (0.0f, 0.0f, zOffset);
+        transform.rotation = player.transform.rotation;
 	}
 
 }
