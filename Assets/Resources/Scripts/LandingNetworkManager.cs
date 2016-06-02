@@ -48,6 +48,8 @@ public class LandingNetworkManager : Photon.PunBehaviour {
     }
 
     void OnGUI () {
+        LoginKeyListener ();
+
         GUILayout.BeginArea (RelativeRect (560, 240, 800, 600));
 
         GUILayout.FlexibleSpace ();
@@ -84,6 +86,12 @@ public class LandingNetworkManager : Photon.PunBehaviour {
         GUILayout.FlexibleSpace ();
 
         GUILayout.EndArea ();
+    }
+
+    void LoginKeyListener () {
+        if (Event.current.type == EventType.KeyDown && (Event.current.keyCode == KeyCode.KeypadEnter || Event.current.keyCode == KeyCode.Return)) {
+            Login ();
+        }
     }
 
     void Login () {
