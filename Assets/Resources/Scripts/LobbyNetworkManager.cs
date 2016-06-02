@@ -29,12 +29,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
             if (PhotonNetwork.player.name != null) { // If already has a name
                 playerName = PhotonNetwork.player.name;
             }
-            return; // Already connected, skip reconnection
         }
-
-        PhotonNetwork.ConnectUsingSettings ("v0.1");
-        PhotonNetwork.sendRate = 15;
-        PhotonNetwork.sendRateOnSerialize = 15;
     }
 
     // Update is called once per frame
@@ -230,7 +225,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
     }
 
     public override void OnJoinedRoom () {
-        PhotonNetwork.LoadLevel (1); // Load room scene
+        PhotonNetwork.LoadLevel (2); // Load room scene
     }
 
 }

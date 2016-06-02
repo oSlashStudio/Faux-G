@@ -86,7 +86,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
     }
 
     public override void OnLeftRoom () {
-        PhotonNetwork.LoadLevel (0);
+        PhotonNetwork.LoadLevel (1);
     }
 
     void StartGame () {
@@ -105,7 +105,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         // Temporarily pause message queue, to be resumed when the in-game scene loads
         PhotonNetwork.isMessageQueueRunning = false;
         // 2 is the offset taking lobby and room scenes into account
-        PhotonNetwork.LoadLevel ((byte) PhotonNetwork.room.customProperties ["map"] + 2);
+        PhotonNetwork.LoadLevel ((byte) PhotonNetwork.room.customProperties ["map"] + 3);
     }
 
 }
