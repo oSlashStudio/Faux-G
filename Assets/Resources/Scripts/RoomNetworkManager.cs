@@ -5,15 +5,15 @@ public class RoomNetworkManager : Photon.PunBehaviour {
 
     private int selectedClassId = 0;
     private string[] classNames = new string[] {
-        "Assaulter",
-        "Recon", 
-        "Light", 
-        "Demolitionist", 
-        "Heatseeker", 
-        "Sieger", 
-        "Heavy", 
-        "Healer",
-        "Explosive Master"
+        "Mercenary",
+        "Virtuoso",
+        "The Maniac",
+        "NASA Fanboy",
+        "Spinal Holler",
+        "R.O.B.O.T",
+        "Gargantuan",
+        "Crazy Shaman",
+        "Heavy Bomber"
     };
     private ExitGames.Client.Photon.Hashtable classHashtable = new ExitGames.Client.Photon.Hashtable ();
 

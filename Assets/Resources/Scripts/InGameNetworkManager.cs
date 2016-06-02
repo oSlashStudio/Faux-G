@@ -11,15 +11,15 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     private ExitGames.Client.Photon.Hashtable classHashtable;
     private int selectedClassId;
     private string[] classNames = new string[] {
-        "Assaulter",
-        "Recon",
-        "Light",
-        "Demolitionist",
-        "Heatseeker",
-        "Sieger",
-        "Heavy",
-        "Healer", 
-        "Explosive Master"
+        "Mercenary",
+        "Virtuoso",
+        "The Maniac",
+        "NASA Fanboy",
+        "Spinal Holler",
+        "R.O.B.O.T",
+        "Gargantuan",
+        "Crazy Shaman", 
+        "Heavy Bomber"
     };
 
     // Current state related variables
