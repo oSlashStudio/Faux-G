@@ -11,7 +11,7 @@ public class LandingNetworkManager : Photon.PunBehaviour {
     private string inputUsername = "";
     private string inputPassword = "";
 
-    private string errorMessage = "";
+    private string displayMessage = "";
 
 	// Use this for initialization
 	void Start () {
@@ -50,21 +50,29 @@ public class LandingNetworkManager : Photon.PunBehaviour {
     void OnGUI () {
         LoginKeyListener ();
 
-        GUILayout.BeginArea (RelativeRect (560, 240, 800, 600));
+        GUILayout.BeginArea (RelativeRect (0, 0, 1920, 1080));
 
-        GUILayout.FlexibleSpace ();
+        GUILayout.BeginHorizontal ();
+        GUILayout.FlexibleSpace (); // Left padding
+
+        GUILayout.BeginVertical (GUILayout.Width (RelativeWidth (800)));
+        GUILayout.FlexibleSpace (); // Top padding
 
         GUIStyle leftAlignedLabel = new GUIStyle (GUI.skin.label);
         leftAlignedLabel.alignment = TextAnchor.MiddleLeft;
 
         GUILayout.BeginHorizontal ();
-        GUILayout.Label ("Username:", leftAlignedLabel, GUILayout.Width (RelativeWidth (300)));
-        inputUsername = GUILayout.TextField (inputUsername);
+        GUILayout.Label ("Username:", leftAlignedLabel);
+        GUI.SetNextControlName ("inputUsername");
+        inputUsername = GUILayout.TextField (inputUsername, 32, GUILayout.Width (RelativeWidth (600)));
+        if (inputUsername == "") {
+            GUI.FocusControl ("inputUsername"); // Focus while empty
+        }
         GUILayout.EndHorizontal ();
 
         GUILayout.BeginHorizontal ();
-        GUILayout.Label ("Password:", leftAlignedLabel, GUILayout.Width (RelativeWidth (300)));
-        inputPassword = GUILayout.PasswordField (inputPassword, '*');
+        GUILayout.Label ("Password:", leftAlignedLabel);
+        inputPassword = GUILayout.PasswordField (inputPassword, '*', 32, GUILayout.Width (RelativeWidth (600)));
         GUILayout.EndHorizontal ();
 
         GUILayout.BeginHorizontal ();
@@ -79,11 +87,15 @@ public class LandingNetworkManager : Photon.PunBehaviour {
 
         GUILayout.BeginHorizontal ();
         GUILayout.FlexibleSpace ();
-        GUILayout.Label (errorMessage);
+        GUILayout.Label (displayMessage);
         GUILayout.FlexibleSpace ();
         GUILayout.EndHorizontal ();
 
-        GUILayout.FlexibleSpace ();
+        GUILayout.FlexibleSpace (); // Bottom padding
+        GUILayout.EndVertical ();
+
+        GUILayout.FlexibleSpace (); // Right padding
+        GUILayout.EndHorizontal ();
 
         GUILayout.EndArea ();
     }
@@ -95,6 +107,8 @@ public class LandingNetworkManager : Photon.PunBehaviour {
     }
 
     void Login () {
+        displayMessage = "Logging in...";
+
         PhotonNetwork.AuthValues = new AuthenticationValues ();
         PhotonNetwork.AuthValues.AuthType = CustomAuthenticationType.Custom;
 
@@ -124,11 +138,12 @@ public class LandingNetworkManager : Photon.PunBehaviour {
 
     // Failed to log in
     public override void OnCustomAuthenticationFailed (string debugMessage) {
-        errorMessage = debugMessage;
+        displayMessage = debugMessage;
     }
 
     // Successfully logged in
     public override void OnCustomAuthenticationResponse (Dictionary<string, object> data) {
+        displayMessage = "Logged in successfully";
         PhotonNetwork.player.name = (string) data["username"];
         // Proceed to lobby
         PhotonNetwork.LoadLevel (1);

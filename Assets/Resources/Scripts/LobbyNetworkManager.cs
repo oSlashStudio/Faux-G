@@ -13,14 +13,15 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
 
     private int selectedMapId = 0;
     private string[] mapNames = new string[] {
-        "Boss Small", 
-        "FFA Small", 
+        "Boss Small",
+        "FFA Small",
         "Practice"
     };
 
     private Vector2 scrollPos = Vector2.zero;
 
     private GUIStyle centeredLabel;
+    private GUIStyle leftAlignedLabel;
     private GUIStyle topScrollView;
 
     // Use this for initialization
@@ -37,13 +38,42 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
 
     }
 
+    /*
+     * Get a rectangle relative to full HD 1920:1080 screen
+     */
+    Rect RelativeRect (float x, float y, float w, float h) {
+        float relativeX = Screen.width * x / 1920;
+        float relativeY = Screen.height * y / 1080;
+        float relativeW = Screen.width * w / 1920;
+        float relativeH = Screen.height * h / 1080;
+
+        return new Rect (relativeX, relativeY, relativeW, relativeH);
+    }
+
+    float RelativeWidth (float w) {
+        float relativeW = Screen.width * w / 1920;
+
+        return relativeW;
+    }
+
+    float RelativeHeight (float h) {
+        float relativeH = Screen.height * h / 1080;
+
+        return relativeH;
+    }
+
     void OnGUI () {
+        // Initialize GUI Styles
         if (centeredLabel == null) {
-            centeredLabel = GUI.skin.label;
+            centeredLabel = new GUIStyle (GUI.skin.label);
             centeredLabel.alignment = TextAnchor.MiddleCenter;
         }
+        if (leftAlignedLabel == null) {
+            leftAlignedLabel = new GUIStyle (GUI.skin.label);
+            leftAlignedLabel.alignment = TextAnchor.MiddleLeft;
+        }
         if (topScrollView == null) {
-            topScrollView = GUI.skin.scrollView;
+            topScrollView = new GUIStyle (GUI.skin.scrollView);
             topScrollView.alignment = TextAnchor.UpperCenter;
         }
 
@@ -59,51 +89,57 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
     }
 
     void ConnectingGUI () {
-        GUILayout.BeginArea (new Rect (
-                Screen.width / 2.0f - 100.0f,
-                Screen.height / 2.0f - 50.0f,
-                200.0f,
-                100.0f
-                ));
+        GUILayout.BeginArea (RelativeRect (0, 0, 1920, 1080));
 
+        GUILayout.BeginHorizontal ();
+        GUILayout.FlexibleSpace (); // Left padding
 
-        GUILayout.Label ("Connecting to Photon Cloud", centeredLabel);
+        GUILayout.BeginVertical ();
+        GUILayout.FlexibleSpace (); // Top padding
+
+        GUILayout.Label ("Connecting to server", centeredLabel);
         GUILayout.Label ("Please wait...", centeredLabel);
+
+        GUILayout.FlexibleSpace (); // Bottom padding
+        GUILayout.EndVertical ();
+
+        GUILayout.FlexibleSpace (); // Right padding
+        GUILayout.EndHorizontal ();
 
         GUILayout.EndArea ();
     }
 
     void FindRoomGUI () {
-        if (GUILayout.Button ("Back")) {
-            isFindingRoom = false;
-        }
-        GUILayout.BeginArea (new Rect (
-            Screen.width / 2.0f - 200.0f,
-            Screen.height / 2.0f - 200.0f,
-            400.0f,
-            400.0f
-            ));
+        GUILayout.BeginArea (RelativeRect (0, 0, 1920, 1080));
 
-        scrollPos = GUILayout.BeginScrollView (scrollPos, topScrollView, GUILayout.Width (400), GUILayout.Height (400));
+        GUILayout.BeginHorizontal ();
+        GUILayout.FlexibleSpace (); // Left padding
 
+        GUILayout.BeginVertical ();
+        GUILayout.FlexibleSpace (); // Top padding
+
+        scrollPos = GUILayout.BeginScrollView (scrollPos, topScrollView, GUILayout.Height (RelativeHeight (800)));
         RoomInfo[] rooms = PhotonNetwork.GetRoomList ();
+        if (rooms.Length == 0) { // No rooms
+            GUILayout.Label ("No rooms are available right now");
+        }
         foreach (RoomInfo room in rooms) {
             GUILayout.BeginHorizontal ();
-            GUILayout.Label (room.name + " (" + room.playerCount + "/" + room.maxPlayers + ")", GUILayout.Width (150));
+            GUILayout.Label (room.name + " (" + room.playerCount + " / " + room.maxPlayers + ")");
             // Room's currently selected map
             byte selectedMapId = (byte) room.customProperties["map"];
             switch (selectedMapId) {
                 case 0:
-                    GUILayout.Label ("Boss Small", GUILayout.Width (150.0f));
+                    GUILayout.Label ("Boss Small");
                     break;
                 case 1:
-                    GUILayout.Label ("FFA Small", GUILayout.Width (150.0f));
+                    GUILayout.Label ("FFA Small");
                     break;
                 case 2:
-                    GUILayout.Label ("Practice", GUILayout.Width (150.0f));
+                    GUILayout.Label ("Practice");
                     break;
                 default:
-                    GUILayout.Label ("Unknown", GUILayout.Width (150.0f));
+                    GUILayout.Label ("Unknown");
                     break;
             }
             if (GUILayout.Button ("Join")) { // Join button
@@ -111,25 +147,39 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
             }
             GUILayout.EndHorizontal ();
         }
-
         GUILayout.EndScrollView ();
+
+        GUILayout.BeginHorizontal ();
+        GUILayout.FlexibleSpace (); // Left padding for back button
+        if (GUILayout.Button ("Back")) { // Back button
+            isFindingRoom = false;
+        }
+        GUILayout.EndHorizontal ();
+
+        GUILayout.FlexibleSpace (); // Bottom padding
+        GUILayout.EndVertical ();
+
+        GUILayout.FlexibleSpace (); // Right padding
+        GUILayout.EndHorizontal ();
 
         GUILayout.EndArea ();
     }
 
     void CreateRoomGUI () {
-        GUILayout.BeginArea (new Rect (
-                Screen.width / 2.0f - 200.0f,
-                Screen.height / 2.0f - 100.0f,
-                400.0f,
-                200.0f
-                ));
+        GUILayout.BeginArea (RelativeRect (0, 0, 1920, 1080));
 
         GUILayout.BeginHorizontal ();
-        GUILayout.Label ("Room Name:", GUILayout.Width (150.0f));
+        GUILayout.FlexibleSpace (); // Left padding
+
+        GUILayout.BeginVertical ();
+        GUILayout.FlexibleSpace (); // Top padding
+
+        GUILayout.BeginHorizontal ();
+
+        GUILayout.Label ("Room Name:", leftAlignedLabel);
 
         GUI.SetNextControlName ("Room Name");
-        roomName = GUILayout.TextField (roomName);
+        roomName = GUILayout.TextField (roomName, 32, GUILayout.Width (RelativeWidth (600)));
         if (roomName == "") {
             GUI.FocusControl ("Room Name");
         }
@@ -146,51 +196,64 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
             isCreatingRoom = false;
         }
 
+        GUILayout.FlexibleSpace (); // Bottom padding
+        GUILayout.EndVertical ();
+
+        GUILayout.FlexibleSpace (); // Right padding
+        GUILayout.EndHorizontal ();
+
         GUILayout.EndArea ();
     }
 
     void LobbyGUI () {
-        GUILayout.BeginArea (new Rect (
-                Screen.width / 2.0f - 100.0f,
-                Screen.height / 2.0f - 100.0f,
-                200.0f,
-                200.0f
-                ));
+        GUILayout.BeginArea (RelativeRect (0, 0, 1920, 1080));
 
         GUILayout.BeginHorizontal ();
+        GUILayout.FlexibleSpace (); // Left padding
 
-        GUILayout.Label ("Player Name:", GUILayout.Width (100.0f));
+        GUILayout.BeginVertical ();
+        GUILayout.FlexibleSpace (); // Top padding
 
+        GUILayout.BeginHorizontal ();
+        GUILayout.Label ("Player Name:");
         GUI.SetNextControlName ("Player Name");
-        playerName = GUILayout.TextField (playerName);
+        playerName = GUILayout.TextField (playerName, 32, GUILayout.Width (RelativeWidth (600)));
         if (playerName == "") {
-            GUI.FocusControl ("Player Name");
+            GUI.FocusControl ("Player Name"); // Focus while empty
         }
-
         GUILayout.EndHorizontal ();
 
-        if (playerName == "") {
-            promptMessage = "Player name can't be empty";
-        } else {
-            if (promptMessage == "Player name can't be empty") {
-                promptMessage = "";
-            }
-
-            if (GUILayout.Button ("Create Room")) {
+        if (GUILayout.Button ("Create Room")) {
+            if (playerName == "") {
+                promptMessage = "Player name can't be empty";
+            } else {
                 PhotonNetwork.player.name = playerName;
                 isCreatingRoom = true;
             }
-            if (GUILayout.Button ("Join Random Room")) {
+        }
+        if (GUILayout.Button ("Join Random Room")) {
+            if (playerName == "") {
+                promptMessage = "Player name can't be empty";
+            } else {
                 PhotonNetwork.player.name = playerName;
                 JoinRandomRoom ();
             }
-            if (GUILayout.Button ("Find Room")) {
+        }
+        if (GUILayout.Button ("Find Room")) {
+            if (playerName == "") {
+                promptMessage = "Player name can't be empty";
+            } else {
                 PhotonNetwork.player.name = playerName;
                 isFindingRoom = true;
             }
         }
-
         GUILayout.Label (promptMessage, centeredLabel);
+
+        GUILayout.FlexibleSpace (); // Bottom padding
+        GUILayout.EndVertical ();
+
+        GUILayout.FlexibleSpace (); // Right padding
+        GUILayout.EndHorizontal ();
 
         GUILayout.EndArea ();
     }

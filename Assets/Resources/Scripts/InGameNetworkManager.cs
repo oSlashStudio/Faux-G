@@ -100,6 +100,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     // Cached components
     private AudioSource audioSource;
+    private GUIStyle centeredLabel;
 
     // Use this for initialization
     void Start () {
@@ -164,14 +165,24 @@ public class InGameNetworkManager : Photon.PunBehaviour {
             return;
         }
 
+        // Initialize GUI Styles
+        if (centeredLabel == null) {
+            centeredLabel = new GUIStyle (GUI.skin.label);
+            centeredLabel.alignment = TextAnchor.MiddleCenter;
+        }
+
         GUILayout.BeginArea (RelativeRect (0, 0, 1920, 300));
         BroadcastGUI ();
         GUILayout.FlexibleSpace ();
         GUILayout.EndArea ();
 
         if (isDead) {
-            GUILayout.BeginArea (RelativeRect (160, 340, 1600, 400));
+            GUILayout.BeginArea (RelativeRect (0, 240, 1920, 600));
+            GUILayout.BeginHorizontal ();
+            GUILayout.FlexibleSpace ();
             RespawnGUI ();
+            GUILayout.FlexibleSpace ();
+            GUILayout.EndHorizontal ();
             GUILayout.EndArea ();
         }
 
@@ -211,16 +222,18 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     }
 
     void RespawnGUI () {
-        GUI.skin.label.alignment = TextAnchor.MiddleCenter;
+        GUILayout.BeginVertical ();
+        GUILayout.FlexibleSpace ();
 
-        GUILayout.Label ("Killed by " + killerName + ", respawning in " + respawnTimer.ToString ("0") + "...");
-        GUILayout.Label ("Spectate other players by moving this spectate camera around.");
+        GUILayout.Label ("Killed by " + killerName + ", respawning in " + respawnTimer.ToString ("0") + "...", centeredLabel);
+        GUILayout.Label ("Spectate other players by moving this spectate camera around.", centeredLabel);
 
         // Class selection window
-        GUILayout.Label ("Select Class:");
-        selectedClassId = GUILayout.SelectionGrid (selectedClassId, classNames, 4);
-
-        GUI.skin.label.alignment = TextAnchor.MiddleLeft;
+        GUILayout.Label ("Select Class:", centeredLabel);
+        selectedClassId = GUILayout.SelectionGrid (selectedClassId, classNames, 3);
+        
+        GUILayout.FlexibleSpace ();
+        GUILayout.EndVertical ();
     }
 
     void ChatBoxGUI () {
