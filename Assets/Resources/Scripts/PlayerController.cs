@@ -5,6 +5,7 @@ public class PlayerController : Photon.MonoBehaviour {
 
     public GameObject staminaBarPrefab;
     public GameObject jumpForceBarPrefab;
+    public GameObject sprintTrailPrefab;
 
     // Move related variables
     public float walkSpeed = 15.0f; // The movement speed of this player
@@ -12,8 +13,8 @@ public class PlayerController : Photon.MonoBehaviour {
     private float moveSpeed;
 
     // Sprint related variables
-    public float sprintSpeed = 25.0f;
-    public float staminaPerSprintSecond = 30.0f;
+    public float sprintSpeed = 30.0f;
+    public float staminaPerSprintSecond = 35.0f;
     private bool isSprinting;
 
     // Jump related variables
@@ -38,6 +39,7 @@ public class PlayerController : Photon.MonoBehaviour {
     private GameObject jumpForceBar;
     private HealthController healthController;
     private PhotonTransformView photonTransformView;
+    private GameObject sprintTrail;
 
 	// Use this for initialization
 	void Start () {
@@ -108,11 +110,15 @@ public class PlayerController : Photon.MonoBehaviour {
 
     void InputSprint () {
         if (Input.GetKeyUp (KeyCode.LeftShift)) {
-            isSprinting = false;
-            moveSpeed = walkSpeed;
+            if (isSprinting) {
+                isSprinting = false;
+                moveSpeed = walkSpeed;
+                photonView.RPC ("RpcSprint", PhotonTargets.All, false);
+            }
         } else if (Input.GetKeyDown (KeyCode.LeftShift)) {
             isSprinting = true;
             moveSpeed = sprintSpeed;
+            photonView.RPC ("RpcSprint", PhotonTargets.All, true);
         }
 
         if (isSprinting) {
@@ -120,9 +126,20 @@ public class PlayerController : Photon.MonoBehaviour {
             if (currentStamina < staminaRequired) { // Special case: not enough stamina
                 isSprinting = false; // Stop sprinting
                 moveSpeed = walkSpeed;
+                photonView.RPC ("RpcSprint", PhotonTargets.All, false);
             } else {
                 currentStamina -= staminaPerSprintSecond * Time.deltaTime;
             }
+        }
+    }
+
+    [PunRPC]
+    void RpcSprint (bool flag) {
+        if (flag) {
+            sprintTrail = (GameObject) Instantiate (sprintTrailPrefab, transform.position, transform.rotation);
+            sprintTrail.transform.parent = transform;
+        } else {
+            sprintTrail.transform.parent = null;
         }
     }
 
