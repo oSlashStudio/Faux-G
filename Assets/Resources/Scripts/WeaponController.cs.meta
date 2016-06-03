@@ -1,15 +1,18 @@
 fileFormatVersion: 2
 guid: 98fdd1d2a2f73524da1a392993c415ff
-timeCreated: 1464699139
+timeCreated: 1464931975
 licenseType: Free
 MonoImporter:
   serializedVersion: 2
   defaultReferences:
-  - mainCameraPrefab: {instanceID: 0}
-  - crosshairPrefab: {instanceID: 0}
-  - aimCameraPrefab: {instanceID: 0}
-  - throwForceBarPrefab: {instanceID: 0}
-  - reloadBarGUISkin: {fileID: 11400000, guid: df7e30fa515b4054a898aa178cf1467e, type: 2}
+  - mainCameraPrefab: {fileID: 159108, guid: 68a3db372da72974c8358c891dc084cf, type: 2}
+  - crosshairPrefab: {fileID: 103828, guid: 7f26d8889904a404187808d5ab8c7cd6, type: 2}
+  - aimCameraPrefab: {fileID: 150462, guid: cc94995b8450c5944bae946f71b858d4, type: 2}
+  - throwForceBarPrefab: {fileID: 121142, guid: 1eb929c734a024a479e9d2eb5ea0e222,
+      type: 2}
+  - minimapCameraPrefab: {fileID: 175402, guid: ecd07836d23f1e1429e3dcacefce4ee1,
+      type: 2}
+  - customSkin: {fileID: 11400000, guid: 0b9484809ab2f254f8ba5651df309296, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

@@ -8,6 +8,7 @@ public class WeaponController : Photon.MonoBehaviour {
     public GameObject crosshairPrefab;
     public GameObject aimCameraPrefab;
     public GameObject throwForceBarPrefab;
+    public GameObject minimapCameraPrefab;
 
     public int currentWeapon; // Id of the currently active weapon
 
@@ -37,6 +38,7 @@ public class WeaponController : Photon.MonoBehaviour {
     private Camera aimCameraComponent;
     private GameObject throwForceBar;
     private AudioSource audioSource;
+    private GameObject minimapCamera;
 
 	// Use this for initialization
 	void Start () {
@@ -73,6 +75,10 @@ public class WeaponController : Photon.MonoBehaviour {
         throwForceBar.transform.parent = transform;
         throwForceBar.transform.localPosition = -throwForceBar.transform.parent.right * 1.0f;
         throwForceBar.transform.localRotation = Quaternion.Euler (new Vector3 (0.0f, 270.0f, 270.0f));
+
+        // Instantiate minimap camera
+        minimapCamera = (GameObject) Instantiate (minimapCameraPrefab, Vector3.zero, Quaternion.identity);
+        minimapCamera.GetComponent<CameraController> ().player = player;
     }
 
     void InitializeWeapons () {
@@ -431,6 +437,7 @@ public class WeaponController : Photon.MonoBehaviour {
         Destroy (crosshair);
         Destroy (aimCamera);
         Destroy (throwForceBar);
+        Destroy (minimapCamera);
     }
 
     /*
