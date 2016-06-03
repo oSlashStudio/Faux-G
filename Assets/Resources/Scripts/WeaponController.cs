@@ -169,7 +169,7 @@ public class WeaponController : Photon.MonoBehaviour {
 
         Vector3 throwDirection = (crosshair.transform.position - transform.position).normalized;
         Vector2 throwDirectionalForce = throwDirection * throwForce;
-        photonView.RPC ("RpcThrow", PhotonTargets.All, transform.position, throwDirectionalForce);
+        photonView.RPC ("RpcThrow", PhotonTargets.AllViaServer, transform.position, throwDirectionalForce);
 
         // Set fire delay and reduce ammo
         fireDelays[currentWeapon] = weapons[currentWeapon].defaultFireDelay;
@@ -227,7 +227,7 @@ public class WeaponController : Photon.MonoBehaviour {
         // Convert back into quaternion rotation
         rotation = Quaternion.Euler (rotationVector);
 
-        photonView.RPC ("RpcFire", PhotonTargets.All, transform.position, rotation);
+        photonView.RPC ("RpcFire", PhotonTargets.AllViaServer, transform.position, rotation);
 
         // Firing after-effects
         IntroduceRecoil ();
@@ -255,7 +255,7 @@ public class WeaponController : Photon.MonoBehaviour {
 
         int targetViewId = AcquireHomingTarget ();
 
-        photonView.RPC ("RpcFireHoming", PhotonTargets.All, transform.position, rotation, targetViewId);
+        photonView.RPC ("RpcFireHoming", PhotonTargets.AllViaServer, transform.position, rotation, targetViewId);
 
         // Firing after-effects
         IntroduceRecoil ();
