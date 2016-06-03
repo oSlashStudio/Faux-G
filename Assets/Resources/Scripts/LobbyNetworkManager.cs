@@ -179,7 +179,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         GUILayout.Label ("Room Name:", leftAlignedLabel);
 
         GUI.SetNextControlName ("Room Name");
-        roomName = GUILayout.TextField (roomName, 32, GUILayout.Width (RelativeWidth (600)));
+        roomName = GUILayout.TextField (roomName, 32, GUILayout.Width (RelativeWidth (400)));
         if (roomName == "") {
             GUI.FocusControl ("Room Name");
         }
@@ -217,7 +217,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         GUILayout.BeginHorizontal ();
         GUILayout.Label ("Player Name:");
         GUI.SetNextControlName ("Player Name");
-        playerName = GUILayout.TextField (playerName, 32, GUILayout.Width (RelativeWidth (600)));
+        playerName = GUILayout.TextField (playerName, 32, GUILayout.Width (RelativeWidth (400)));
         if (playerName == "") {
             GUI.FocusControl ("Player Name"); // Focus while empty
         }

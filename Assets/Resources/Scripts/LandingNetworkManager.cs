@@ -64,7 +64,7 @@ public class LandingNetworkManager : Photon.PunBehaviour {
         GUILayout.BeginHorizontal ();
         GUILayout.Label ("Username:", leftAlignedLabel);
         GUI.SetNextControlName ("inputUsername");
-        inputUsername = GUILayout.TextField (inputUsername, 32, GUILayout.Width (RelativeWidth (600)));
+        inputUsername = GUILayout.TextField (inputUsername, 32, GUILayout.Width (RelativeWidth (400)));
         if (inputUsername == "") {
             GUI.FocusControl ("inputUsername"); // Focus while empty
         }
@@ -72,7 +72,7 @@ public class LandingNetworkManager : Photon.PunBehaviour {
 
         GUILayout.BeginHorizontal ();
         GUILayout.Label ("Password:", leftAlignedLabel);
-        inputPassword = GUILayout.PasswordField (inputPassword, '*', 32, GUILayout.Width (RelativeWidth (600)));
+        inputPassword = GUILayout.PasswordField (inputPassword, '*', 32, GUILayout.Width (RelativeWidth (400)));
         GUILayout.EndHorizontal ();
 
         GUILayout.BeginHorizontal ();
