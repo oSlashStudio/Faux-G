@@ -67,6 +67,7 @@ public class WeaponController : Photon.MonoBehaviour {
         aimCamera = (GameObject) Instantiate (aimCameraPrefab, Vector3.zero, Quaternion.identity);
         aimCameraComponent = aimCamera.GetComponent<Camera> ();
         aimCamera.GetComponent<AimCameraController> ().crosshair = crosshair;
+        aimCamera.GetComponent<AimCameraController> ().mainCamera = mainCamera;
 
         ChangeWeapon (0); // Initialize equipped weapon (weapon 0 by default)
 

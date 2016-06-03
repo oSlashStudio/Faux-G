@@ -4,6 +4,7 @@ using System.Collections;
 public class AimCameraController : MonoBehaviour {
 
     public GameObject crosshair;
+    public GameObject mainCamera;
 
     private Camera aimCameraComponent;
 
@@ -18,5 +19,6 @@ public class AimCameraController : MonoBehaviour {
             return;
         }
         transform.position = crosshair.transform.position + new Vector3 (0.0f, 0.0f, -8.0f);
+        transform.rotation = mainCamera.transform.rotation;
 	}
 }

@@ -29,6 +29,9 @@ public class CrosshairController : MonoBehaviour {
         UpdateCrosshairScale ();
         UpdateCrosshairColor ();
         UpdateCrosshairPosition ();
+        if (referenceCamera != null) {
+            transform.rotation = referenceCamera.transform.rotation;
+        }
     }
 
     void OnDestroy () {
