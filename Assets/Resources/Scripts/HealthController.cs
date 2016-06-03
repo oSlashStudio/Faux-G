@@ -85,7 +85,7 @@ public class HealthController : Photon.MonoBehaviour {
 
     void InstantiateHealCallout (float healAmount, Vector2 healPoint) {
         Vector3 calloutPosition = new Vector3 (healPoint.x, healPoint.y, -2.0f);
-        GameObject callout = (GameObject) Instantiate (calloutPrefab, calloutPosition, Quaternion.identity);
+        GameObject callout = (GameObject) Instantiate (calloutPrefab, calloutPosition, transform.rotation);
         callout.GetComponent<TextMesh> ().text = "+" + healAmount.ToString ("0");
         callout.GetComponent<TextMesh> ().color = Color.green;
     }
@@ -134,7 +134,7 @@ public class HealthController : Photon.MonoBehaviour {
 
     void InstantiateDamageCallout (float damageAmount, Vector2 damagePoint) {
         Vector3 calloutPosition = new Vector3 (damagePoint.x, damagePoint.y, -2.0f);
-        GameObject callout = (GameObject) Instantiate (calloutPrefab, calloutPosition, Quaternion.identity);
+        GameObject callout = (GameObject) Instantiate (calloutPrefab, calloutPosition, transform.rotation);
         callout.GetComponent<TextMesh> ().text = "-" + damageAmount.ToString ("0");
         callout.GetComponent<TextMesh> ().color = Color.red;
     }
