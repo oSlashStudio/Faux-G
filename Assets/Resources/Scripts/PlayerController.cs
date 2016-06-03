@@ -7,8 +7,14 @@ public class PlayerController : Photon.MonoBehaviour {
     public GameObject jumpForceBarPrefab;
 
     // Move related variables
-    public float moveSpeed = 15.0f; // The movement speed of this player
+    public float walkSpeed = 15.0f; // The movement speed of this player
     private Vector3 moveDirection;
+    private float moveSpeed;
+
+    // Sprint related variables
+    public float sprintSpeed = 25.0f;
+    public float staminaPerSprintSecond = 30.0f;
+    private bool isSprinting;
 
     // Jump related variables
     public float maxJumpForce = 1500.0f; // The maximum jump force of this player
@@ -39,6 +45,7 @@ public class PlayerController : Photon.MonoBehaviour {
         healthController = GetComponent<HealthController> ();
         photonTransformView = GetComponent<PhotonTransformView> ();
 
+        moveSpeed = walkSpeed;
         jumpForce = 0.0f;
         currentStamina = maxStamina;
 
@@ -67,6 +74,7 @@ public class PlayerController : Photon.MonoBehaviour {
 
         // Handle movement related routines
         InputMove ();
+        InputSprint ();
         InputJump ();
 
         // Handle passive routines
@@ -96,6 +104,26 @@ public class PlayerController : Photon.MonoBehaviour {
         Vector3 movementVector = transform.TransformDirection (moveDirection) * moveSpeed * Time.fixedDeltaTime;
         // Apply velocity to player
         rigidBody.velocity += (Vector2) movementVector;
+    }
+
+    void InputSprint () {
+        if (Input.GetKeyUp (KeyCode.LeftShift)) {
+            isSprinting = false;
+            moveSpeed = walkSpeed;
+        } else if (Input.GetKeyDown (KeyCode.LeftShift)) {
+            isSprinting = true;
+            moveSpeed = sprintSpeed;
+        }
+
+        if (isSprinting) {
+            float staminaRequired = staminaPerSprintSecond * Time.deltaTime;
+            if (currentStamina < staminaRequired) { // Special case: not enough stamina
+                isSprinting = false; // Stop sprinting
+                moveSpeed = walkSpeed;
+            } else {
+                currentStamina -= staminaPerSprintSecond * Time.deltaTime;
+            }
+        }
     }
 
     /*
