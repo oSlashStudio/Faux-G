@@ -48,6 +48,9 @@ public class Weapon : MonoBehaviour {
 
         // Set projectile owner
         projectile.GetComponent<ProjectileController> ().InstantiatorId = instantiatorId;
+
+        // Set projectile color
+        projectile.GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<MeshRenderer> ().material.color);
     }
 
     public virtual void FireHoming (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId, int targetViewId) {
@@ -60,6 +63,9 @@ public class Weapon : MonoBehaviour {
 
         // Set projectile owner
         projectile.GetComponent<HomingProjectileController> ().InstantiatorId = instantiatorId;
+
+        // Set projectile color
+        projectile.GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<MeshRenderer> ().material.color);
     }
 
 }

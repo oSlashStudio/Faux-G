@@ -57,6 +57,13 @@ public class PlayerController : Photon.MonoBehaviour {
         }
         // Client specific instantiation begins here
 
+        // Synchronize color to instances over the network
+        photonView.RPC ("RpcChangeColor", PhotonTargets.Others,
+            GetComponent<MeshRenderer> ().material.color.r,
+            GetComponent<MeshRenderer> ().material.color.g,
+            GetComponent<MeshRenderer> ().material.color.b
+            );
+
         // Instantiate stamina bar
         staminaBar = (GameObject) Instantiate (staminaBarPrefab, Vector3.zero, Quaternion.identity);
         staminaBar.transform.parent = transform;
@@ -67,7 +74,7 @@ public class PlayerController : Photon.MonoBehaviour {
         jumpForceBar.transform.parent = transform;
         jumpForceBar.transform.localPosition = new Vector3 (0.0f, 1.6f, -1.0f);
 	}
-	
+
 	// Update is called once per frame
 	void Update () {
 	    if (!photonView.isMine) { // Unable to control other players
@@ -87,6 +94,11 @@ public class PlayerController : Photon.MonoBehaviour {
 
     void FixedUpdate () {
         Move ();
+    }
+
+    [PunRPC]
+    void RpcChangeColor (float rColor, float gColor, float bColor) {
+        GetComponent<MeshRenderer> ().material.color = new Color (rColor, gColor, bColor);
     }
 
     /*
@@ -137,6 +149,7 @@ public class PlayerController : Photon.MonoBehaviour {
     void RpcSprint (bool flag) {
         if (flag) {
             sprintTrail = (GameObject) Instantiate (sprintTrailPrefab, transform.position, transform.rotation);
+            sprintTrail.GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", GetComponent<MeshRenderer> ().material.color);
             sprintTrail.transform.parent = transform;
         } else {
             sprintTrail.transform.parent = null;

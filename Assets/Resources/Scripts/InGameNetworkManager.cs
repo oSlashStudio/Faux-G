@@ -343,7 +343,12 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         int spawnLocationId = Random.Range (0, spawnLocations.Length);
 
         string className = GetClassName ((byte) PhotonNetwork.player.customProperties["class"]);
-        PhotonNetwork.Instantiate ("Classes/" + className, spawnLocations[spawnLocationId].transform.position, Quaternion.identity, 0);
+        GameObject player = PhotonNetwork.Instantiate ("Classes/" + className, spawnLocations[spawnLocationId].transform.position, Quaternion.identity, 0);
+
+        byte rColor = (byte) PhotonNetwork.player.customProperties["rColor"];
+        byte gColor = (byte) PhotonNetwork.player.customProperties["gColor"];
+        byte bColor = (byte) PhotonNetwork.player.customProperties["bColor"];
+        player.GetComponent<MeshRenderer> ().material.color = new Color (rColor, gColor, bColor);
     }
 
     string GetClassName (byte classId) {

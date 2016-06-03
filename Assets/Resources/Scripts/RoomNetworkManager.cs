@@ -3,6 +3,19 @@ using System.Collections;
 
 public class RoomNetworkManager : Photon.PunBehaviour {
 
+    private int selectedColorId = 0;
+    private Color[] playerColors = new Color[] {
+        new Color (1, 1, 1),  // White
+        new Color (1, 0, 0), // Red
+        new Color (0, 1, 0), // Green
+        new Color (0, 0, 1), // Blue
+        new Color (1, 1, 0), // Yellow
+        new Color (1, 0, 1), // Pink
+        new Color (0, 1, 1), // Cyan
+        new Color (0, 0, 0) // Black
+    };
+    public Texture2D[] colorTextures;
+
     private int selectedClassId = 0;
     private string[] classNames = new string[] {
         "Mercenary",
@@ -15,7 +28,6 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         "Crazy Shaman",
         "Heavy Bomber"
     };
-    private ExitGames.Client.Photon.Hashtable classHashtable = new ExitGames.Client.Photon.Hashtable ();
 
     // Cached component
     private GUIStyle centeredLabel;
@@ -106,6 +118,9 @@ public class RoomNetworkManager : Photon.PunBehaviour {
             GUILayout.Label (player.name); // Player name label
 
             if (player.isLocal) { // Local player
+                if (GUILayout.Button (colorTextures[selectedColorId], GUILayout.Width (RelativeWidth (200)))) {
+                    selectedColorId = (selectedColorId + 1) % playerColors.Length;
+                }
                 if (GUILayout.Button ("Leave")) { // Leave button
                     PhotonNetwork.LeaveRoom ();
                 }
@@ -150,9 +165,13 @@ public class RoomNetworkManager : Photon.PunBehaviour {
 
     [PunRPC]
     void RpcLoadLevel () {
-        // Set class
-        classHashtable["class"] = (byte) selectedClassId;
-        PhotonNetwork.player.SetCustomProperties (classHashtable);
+        // Set color and class
+        ExitGames.Client.Photon.Hashtable playerHashTable = new ExitGames.Client.Photon.Hashtable ();
+        playerHashTable["rColor"] = (byte) playerColors[selectedColorId].r;
+        playerHashTable["gColor"] = (byte) playerColors[selectedColorId].g;
+        playerHashTable["bColor"] = (byte) playerColors[selectedColorId].b;
+        playerHashTable["class"] = (byte) selectedClassId;
+        PhotonNetwork.player.SetCustomProperties (playerHashTable);
         // Temporarily pause message queue, to be resumed when the in-game scene loads
         PhotonNetwork.isMessageQueueRunning = false;
         // 2 is the offset taking lobby and room scenes into account
