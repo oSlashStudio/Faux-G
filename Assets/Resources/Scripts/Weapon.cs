@@ -146,6 +146,9 @@ public class Weapon : MonoBehaviour {
         if (stock <= 0) {
             return false;
         }
+        if (ammo == defaultAmmo) { // Ammo is maxed out, can't reload
+            return false;
+        }
         return true;
     }
 

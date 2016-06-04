@@ -394,9 +394,6 @@ public class WeaponController : Photon.MonoBehaviour {
         if (isReloading) { // Already reloading, don't reload
             return false;
         }
-        if (weapons[currentWeapon].ammo == weapons[currentWeapon].defaultAmmo) { // Ammo is maxed out, can't reload
-            return false;
-        }
         return weapons[currentWeapon].CanReload ();
     }
 
