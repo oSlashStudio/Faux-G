@@ -31,24 +31,16 @@ public class Rifle : Weapon {
 
     IEnumerator BurstFire (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId) {
         base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
-        yield return new WaitForSeconds (burstFireDelay);
-        base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
-        yield return new WaitForSeconds (burstFireDelay);
-        base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
-    }
-
-    public override bool CanFire () {
-        if (toggled) {
-            if (fireDelay > 0.0f) { // Cooling down, can't fire
-                return false;
-            }
-            if (ammo < 3) { // Not enough ammo, can't fire
-                return false;
-            }
-            return true;
-        } else {
-            return base.CanFire ();
+        if (ammo == 0) {
+            yield break;
         }
+        yield return new WaitForSeconds (burstFireDelay);
+        base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
+        if (ammo == 0) {
+            yield break;
+        }
+        yield return new WaitForSeconds (burstFireDelay);
+        base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
     }
 
     void Swap<T> (ref T lhs, ref T rhs) {
