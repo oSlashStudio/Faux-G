@@ -2,8 +2,7 @@ using UnityEngine;
 using System.Collections;
 
 public class PlayerController : Photon.MonoBehaviour {
-
-    public GameObject staminaBarPrefab;
+    
     public GameObject jumpForceBarPrefab;
     public GameObject sprintTrailPrefab;
 
@@ -24,12 +23,6 @@ public class PlayerController : Photon.MonoBehaviour {
     [HideInInspector]
     public float jumpForce;
 
-    // Stamina related variables
-    public float maxStamina;
-    public float staminaRecoveryRate; // The amount of stamina recovered per second
-    [HideInInspector]
-    public float currentStamina;
-
     public GUISkin customSkin;
 
     // State related variables
@@ -38,9 +31,9 @@ public class PlayerController : Photon.MonoBehaviour {
 
     // Cached components
     private Rigidbody2D rigidBody;
-    private GameObject staminaBar;
     private GameObject jumpForceBar;
     private HealthController healthController;
+    private StaminaController staminaController;
     private PhotonTransformView photonTransformView;
     private GameObject sprintTrail;
 
@@ -48,11 +41,11 @@ public class PlayerController : Photon.MonoBehaviour {
 	void Start () {
         rigidBody = GetComponent<Rigidbody2D> ();
         healthController = GetComponent<HealthController> ();
+        staminaController = GetComponent<StaminaController> ();
         photonTransformView = GetComponent<PhotonTransformView> ();
 
         moveSpeed = walkSpeed;
         jumpForce = 0.0f;
-        currentStamina = maxStamina;
 
         if (!photonView.isMine) {
             rigidBody.isKinematic = true; // If this client can't control, set isKinematic to true
@@ -67,16 +60,9 @@ public class PlayerController : Photon.MonoBehaviour {
             GetComponent<MeshRenderer> ().material.color.g,
             GetComponent<MeshRenderer> ().material.color.b
             );
-
-        InstantiateStaminaBar ();
+        
         InstantiateJumpForceBar ();
 	}
-
-    void InstantiateStaminaBar () {
-        staminaBar = (GameObject) Instantiate (staminaBarPrefab, Vector3.zero, Quaternion.identity);
-        staminaBar.transform.parent = transform;
-        staminaBar.transform.localPosition = new Vector3 (0.0f, 1.4f, -1.0f);
-    }
 
     void InstantiateJumpForceBar () {
         jumpForceBar = (GameObject) Instantiate (jumpForceBarPrefab, Vector3.zero, Quaternion.identity);
@@ -94,9 +80,6 @@ public class PlayerController : Photon.MonoBehaviour {
         InputMove ();
         InputSprint ();
         InputJump ();
-
-        // Handle passive routines
-        RecoverStamina ();
 
         photonTransformView.SetSynchronizedValues (rigidBody.velocity, rigidBody.angularVelocity);
     }
@@ -144,12 +127,12 @@ public class PlayerController : Photon.MonoBehaviour {
 
         if (isSprinting) {
             float staminaRequired = staminaPerSprintSecond * Time.deltaTime;
-            if (currentStamina < staminaRequired) { // Special case: not enough stamina
+            if (staminaController.currentStamina < staminaRequired) { // Special case: not enough stamina
                 isSprinting = false; // Stop sprinting
                 moveSpeed = walkSpeed;
                 photonView.RPC ("RpcSprint", PhotonTargets.All, false);
             } else {
-                currentStamina -= staminaPerSprintSecond * Time.deltaTime;
+                staminaController.currentStamina -= staminaPerSprintSecond * Time.deltaTime;
             }
         }
     }
@@ -200,36 +183,19 @@ public class PlayerController : Photon.MonoBehaviour {
         float staminaRequired = jumpForceIncrease * staminaPerJumpForce; // Calculate stamina required based on increase in jump force
 
         // Special case #2: not enough stamina
-        if (currentStamina < staminaRequired) {
-            jumpForceIncrease = currentStamina / staminaPerJumpForce; // Maximum increase in jump force with current stamina
+        if (staminaController.currentStamina < staminaRequired) {
+            jumpForceIncrease = staminaController.currentStamina / staminaPerJumpForce; // Maximum increase in jump force with current stamina
             jumpForce += jumpForceIncrease;
-            currentStamina = 0.0f; // Stamina is drained entirely in this case
+            staminaController.currentStamina = 0.0f; // Stamina is drained entirely in this case
             return;
         }
 
         // Normal case
         jumpForce += jumpForceIncrease;
-        currentStamina -= staminaRequired;
-    }
-
-    /*
-     * This method handles the stamina recovery of player on each frame.
-     */
-    void RecoverStamina () {
-        float staminaRecovered = staminaRecoveryRate * Time.deltaTime;
-
-        // Special case #1: stamina exceeds max stamina after increase
-        if (currentStamina + staminaRecovered > maxStamina) {
-            currentStamina = maxStamina;
-            return;
-        }
-
-        // Normal case
-        currentStamina += staminaRecovered;
+        staminaController.currentStamina -= staminaRequired;
     }
 
     void OnDestroy () {
-        Destroy (staminaBar);
         Destroy (jumpForceBar);
     }
 
@@ -284,7 +250,7 @@ public class PlayerController : Photon.MonoBehaviour {
         GUILayout.BeginHorizontal (GUILayout.Width (RelativeWidth (300)));
         GUI.skin = customSkin;
         GUILayout.Label ("", "Cyan",
-            GUILayout.Width (RelativeWidth (300.0f * currentStamina / maxStamina)));
+            GUILayout.Width (RelativeWidth (300.0f * staminaController.currentStamina / staminaController.maxStamina)));
         GUILayout.Label ("", "White");
         GUI.skin = null;
         GUILayout.EndHorizontal ();

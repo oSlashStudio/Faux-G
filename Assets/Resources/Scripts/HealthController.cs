@@ -58,6 +58,15 @@ public class HealthController : Photon.MonoBehaviour {
         networkManager.AddHealData (healingPlayerId, healAmount);
     }
 
+    [PunRPC]
+    public void RpcHealOwner (float healAmount, Vector2 healPoint) {
+        if (!photonView.isMine) { // Not owner, forward to owner
+            photonView.RPC ("RpcHealOwner", photonView.owner, healAmount, healPoint);
+        } else {
+            Heal (healAmount, healPoint);
+        }
+    }
+
     /*
      * This function handles heal from enemy / unknown sources.
      */

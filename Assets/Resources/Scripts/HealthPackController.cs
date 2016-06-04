@@ -23,7 +23,7 @@ public class HealthPackController : Photon.MonoBehaviour {
 
         if (collider.tag == "Player") {
             HealthController targetHealthController = collider.gameObject.GetComponent<HealthController> ();
-            targetHealthController.Heal (healAmount, targetHealthController.transform.position);
+            targetHealthController.RpcHealOwner (healAmount, targetHealthController.transform.position);
             PhotonNetwork.Destroy (gameObject);
         }
     }

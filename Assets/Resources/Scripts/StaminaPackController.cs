@@ -4,7 +4,7 @@ using System.Collections;
 public class StaminaPackController : Photon.MonoBehaviour {
 
     public float rotationalSpeed;
-    public float staminaAmount;
+    public float rejuvenateAmount;
 
     // Use this for initialization
     void Start () {
@@ -22,8 +22,8 @@ public class StaminaPackController : Photon.MonoBehaviour {
         }
 
         if (collider.tag == "Player") {
-            PlayerController targetPlayerController = collider.gameObject.GetComponent<PlayerController> ();
-            targetPlayerController.currentStamina = Mathf.Min (targetPlayerController.currentStamina + staminaAmount, targetPlayerController.maxStamina);
+            StaminaController targetStaminaController = collider.gameObject.GetComponent<StaminaController> ();
+            targetStaminaController.RpcRejuvenateOwner (rejuvenateAmount);
             PhotonNetwork.Destroy (gameObject);
         }
     }

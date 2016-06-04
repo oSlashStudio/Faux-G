@@ -3,19 +3,19 @@ using System.Collections;
 
 public class StaminaBarController : MonoBehaviour {
 
-    private PlayerController playerController;
+    private StaminaController staminaController;
     private SpriteRenderer spriteRenderer;
 
     // Use this for initialization
     void Start () {
-        playerController = GetComponentInParent<PlayerController> ();
+        staminaController = GetComponentInParent<StaminaController> ();
         spriteRenderer = GetComponent<SpriteRenderer> ();
 	}
 	
 	// Update is called once per frame
 	void Update () {
-        float maxStamina = playerController.maxStamina;
-        float currentStamina = playerController.currentStamina;
+        float maxStamina = staminaController.maxStamina;
+        float currentStamina = staminaController.currentStamina;
         UpdateStaminaBarScale (currentStamina, maxStamina);
         UpdateStaminaBarColor (currentStamina, maxStamina);
     }
