@@ -9,22 +9,20 @@ public class WeaponController : Photon.MonoBehaviour {
     public GameObject aimCameraPrefab;
     public GameObject throwForceBarPrefab;
     public GameObject minimapCameraPrefab;
+    public GUISkin customSkin;
 
+    [HideInInspector]
     public int currentWeapon; // Id of the currently active weapon
 
-    private List<float> fireDelays;
-    private List<int> ammo;
-    private List<int> stock;
-
     // Throwing related variables
+    [HideInInspector]
     public bool isThrowing;
+    [HideInInspector]
     public float throwForce;
 
     // Reload related variables
     private bool isReloading;
     private float reloadTimer;
-
-    public GUISkin customSkin;
 
     // Cached components
     private GameObject player; // The player associated with this weapon
@@ -44,53 +42,64 @@ public class WeaponController : Photon.MonoBehaviour {
 	void Start () {
         player = transform.parent.gameObject;
         playerController = player.GetComponent<PlayerController> ();
-        InitializeWeapons ();
         audioSource = gameObject.GetComponent<AudioSource> ();
+
+        InitializeWeapons ();
 
         if (!photonView.isMine) {
             return;
         }
-        // Client specific instantiation begins here
 
-        // Instantiate main camera
+        // Client specific initialization begins here
+        InstantiateMainCamera ();
+        InstantiateCrosshair ();
+        InstantiateAimCamera ();
+        InstantiateThrowForceBar ();
+        InstantiateMinimapCamera ();
+
+        ChangeWeapon (0); // Initialize equipped weapon (weapon 0 by default)
+    }
+
+    void InitializeWeapons () {
+        for (int i = 0; i < weapons.Length; i++) {
+            // Make a gameobject of each weapon (otherwise they will still be prefabs)
+            Weapon currentWeapon = (Weapon) Instantiate (weapons[i], Vector3.zero, Quaternion.identity);
+            currentWeapon.transform.parent = transform;
+            currentWeapon.audioSource = audioSource;
+            weapons[i] = currentWeapon;
+        }
+    }
+
+    void InstantiateMainCamera () {
         mainCamera = (GameObject) Instantiate (mainCameraPrefab, Vector3.zero, Quaternion.identity);
         mainCameraComponent = mainCamera.GetComponent<Camera> ();
         mainCamera.GetComponent<CameraController> ().player = player;
+    }
 
-        // Instantiate crosshair
+    void InstantiateCrosshair () {
         crosshair = (GameObject) Instantiate (crosshairPrefab, Vector3.zero, Quaternion.identity);
         crosshairController = crosshair.GetComponent<CrosshairController> ();
         crosshairController.referenceCamera = mainCameraComponent;
         crosshairSpriteRenderer = crosshair.GetComponent<SpriteRenderer> ();
+    }
 
-        // Instantiate aim camera
+    void InstantiateAimCamera () {
         aimCamera = (GameObject) Instantiate (aimCameraPrefab, Vector3.zero, Quaternion.identity);
         aimCameraComponent = aimCamera.GetComponent<Camera> ();
         aimCamera.GetComponent<AimCameraController> ().crosshair = crosshair;
         aimCamera.GetComponent<AimCameraController> ().mainCamera = mainCamera;
+    }
 
-        ChangeWeapon (0); // Initialize equipped weapon (weapon 0 by default)
-
-        // Instantiate throw force bar
+    void InstantiateThrowForceBar () {
         throwForceBar = (GameObject) Instantiate (throwForceBarPrefab, Vector3.zero, Quaternion.identity);
         throwForceBar.transform.parent = transform;
         throwForceBar.transform.localPosition = -throwForceBar.transform.parent.right * 1.0f;
         throwForceBar.transform.localRotation = Quaternion.Euler (new Vector3 (0.0f, 270.0f, 270.0f));
-
-        // Instantiate minimap camera
-        minimapCamera = (GameObject) Instantiate (minimapCameraPrefab, Vector3.zero, Quaternion.identity);
-        minimapCamera.GetComponent<CameraController> ().player = player;
     }
 
-    void InitializeWeapons () {
-        fireDelays = new List<float> ();
-        ammo = new List<int> ();
-        stock = new List<int> ();
-        for (int i = 0; i < weapons.Length; i++) {
-            fireDelays.Add (0.0f);
-            ammo.Add (weapons[i].defaultAmmo);
-            stock.Add (weapons[i].defaultStock - 1); // 1 is used for the initial ammo
-        }
+    void InstantiateMinimapCamera () {
+        minimapCamera = (GameObject) Instantiate (minimapCameraPrefab, Vector3.zero, Quaternion.identity);
+        minimapCamera.GetComponent<CameraController> ().player = player;
     }
 	
 	// Update is called once per frame
@@ -100,7 +109,6 @@ public class WeaponController : Photon.MonoBehaviour {
         }
 
         UpdateWeaponDirection ();
-        UpdateFireDelays ();
 
         if (weapons[currentWeapon].isThrowable) {
             InputThrow ();
@@ -111,16 +119,8 @@ public class WeaponController : Photon.MonoBehaviour {
         InputToggle ();
         InputAim ();
         InputReload ();
-
-        if (isReloading) {
-            reloadTimer -= Time.deltaTime;
-
-            if (reloadTimer <= 0.0f) {
-                isReloading = false;
-                ammo[currentWeapon] = weapons[currentWeapon].defaultAmmo;
-                stock[currentWeapon] -= 1;
-            }
-        }
+        AutoReload ();
+        UpdateReload ();
     }
 
     /*
@@ -131,18 +131,11 @@ public class WeaponController : Photon.MonoBehaviour {
         transform.Rotate (new Vector3 (-90.0f, 0.0f, 0.0f));
     }
 
-    /*
-     * This method updates the firing delay of all weapons.
-     */
-    void UpdateFireDelays () {
-        for (int i = 0; i < fireDelays.Count; i++) {
-            fireDelays[i] -= Time.deltaTime;
-        }
-    }
-
     void InputThrow () {
         if (Input.GetMouseButtonDown (0)) { // On mouse down, start charging
-            CheckThrow ();
+            if (CanThrow ()) {
+                StartChargeThrow ();
+            }
         } else if (Input.GetMouseButtonUp (0)) { // On mouse release, throw
             Throw ();
         } else if (Input.GetMouseButton (0)) { // On mouse still down, continue charging
@@ -150,14 +143,14 @@ public class WeaponController : Photon.MonoBehaviour {
         }
     }
 
-    void CheckThrow () {
-        if (fireDelays[currentWeapon] <= 0.0f && ammo[currentWeapon] > 0 && !isReloading) {
-            StartChargeThrow ();
+    bool CanThrow () {
+        if (isReloading) { // Reloading, can't throw
+            return false;
         }
+        return weapons[currentWeapon].CanThrow ();
     }
 
     void StartChargeThrow () {
-        // Initialize throw related variables
         isThrowing = true;
         throwForce = 0.0f;
     }
@@ -169,11 +162,8 @@ public class WeaponController : Photon.MonoBehaviour {
 
         Vector3 throwDirection = (crosshair.transform.position - transform.position).normalized;
         Vector2 throwDirectionalForce = throwDirection * throwForce;
-        photonView.RPC ("RpcThrow", PhotonTargets.AllViaServer, transform.position, throwDirectionalForce);
-
-        // Set fire delay and reduce ammo
-        fireDelays[currentWeapon] = weapons[currentWeapon].defaultFireDelay;
-        ammo[currentWeapon] -= 1;
+        photonView.RPC ("RpcThrow", PhotonTargets.All, transform.position, throwDirectionalForce);
+        
         // Reset throw related variables
         isThrowing = false;
         throwForce = 0.0f;
@@ -200,62 +190,30 @@ public class WeaponController : Photon.MonoBehaviour {
 
     void InputFire () {
         if (Input.GetMouseButton (0)) { // On left click
-            CheckFire ();
-        }
-    }
-
-    void CheckFire () {
-        if (fireDelays[currentWeapon] <= 0.0f && ammo[currentWeapon] > 0 && !isReloading) {
-            if (weapons[currentWeapon].isHoming) { // Weapon has homing capabilities
-                FireHoming ();
-            } else {
-                Fire ();
+            if (CanFire ()) {
+                if (weapons[currentWeapon].isHoming) {
+                    FireHoming (); // Weapon has homing capabilities
+                } else {
+                    Fire (); // Normal fire
+                }
             }
-            fireDelays[currentWeapon] = weapons[currentWeapon].defaultFireDelay;
-            ammo[currentWeapon] -= 1;
         }
     }
 
-    void Fire () {
-        Vector3 directionVector = (crosshair.transform.position - transform.position).normalized;
-        directionVector.z = 0.0f; // Z-coordinate of bullet is always 0
-
-        Quaternion rotation = Quaternion.LookRotation (directionVector);
-        Vector3 rotationVector = rotation.eulerAngles;
-        // Introduce spread due to recoil
-        rotationVector.x += Random.Range (-1.0f, 1.0f) * weapons[currentWeapon].maxSpreadAngle * (1.0f - crosshairController.accuracy);
-        // Convert back into quaternion rotation
-        rotation = Quaternion.Euler (rotationVector);
-
-        photonView.RPC ("RpcFire", PhotonTargets.AllViaServer, transform.position, rotation);
-
-        // Firing after-effects
-        IntroduceRecoil ();
-        IntroduceKnockback (-directionVector);
-    }
-
-    [PunRPC]
-    void RpcFire (Vector3 projectilePosition, Quaternion projectileRotation) {
-        weapons[currentWeapon].Fire (projectilePosition, projectileRotation, player, photonView.owner.ID);
-
-        // Networked effects
-        PlayFireSoundClip ();
+    bool CanFire () {
+        if (isReloading) { // Reloading, can't fire
+            return false;
+        }
+        return weapons[currentWeapon].CanFire ();
     }
 
     void FireHoming () {
-        Vector3 directionVector = (crosshair.transform.position - transform.position).normalized;
-        directionVector.z = 0.0f; // Z-coordinate of bullet is always 0
-
-        Quaternion rotation = Quaternion.LookRotation (directionVector);
-        Vector3 rotationVector = rotation.eulerAngles;
-        // Introduce spread due to recoil
-        rotationVector.x += Random.Range (-1.0f, 1.0f) * weapons[currentWeapon].maxSpreadAngle * (1.0f - crosshairController.accuracy);
-        // Convert back into quaternion rotation
-        rotation = Quaternion.Euler (rotationVector);
+        Vector3 directionVector = GetProjectileDirectionVector ();
+        Quaternion rotation = GetProjectileRotation (directionVector);
 
         int targetViewId = AcquireHomingTarget ();
 
-        photonView.RPC ("RpcFireHoming", PhotonTargets.AllViaServer, transform.position, rotation, targetViewId);
+        photonView.RPC ("RpcFireHoming", PhotonTargets.All, transform.position, rotation, targetViewId);
 
         // Firing after-effects
         IntroduceRecoil ();
@@ -265,9 +223,6 @@ public class WeaponController : Photon.MonoBehaviour {
     [PunRPC]
     void RpcFireHoming (Vector3 projectilePosition, Quaternion projectileRotation, int targetViewId) {
         weapons[currentWeapon].FireHoming (projectilePosition, projectileRotation, player, photonView.owner.ID, targetViewId);
-
-        // Networked effects
-        PlayFireSoundClip ();
     }
 
     /*
@@ -294,6 +249,40 @@ public class WeaponController : Photon.MonoBehaviour {
         return -1; // No targets with PhotonView in search radius is found, return -1
     }
 
+    void Fire () {
+        Vector3 directionVector = GetProjectileDirectionVector ();
+        Quaternion rotation = GetProjectileRotation (directionVector);
+
+        photonView.RPC ("RpcFire", PhotonTargets.All, transform.position, rotation);
+
+        // Firing after-effects
+        IntroduceRecoil ();
+        IntroduceKnockback (-directionVector);
+    }
+
+    [PunRPC]
+    void RpcFire (Vector3 projectilePosition, Quaternion projectileRotation) {
+        weapons[currentWeapon].Fire (projectilePosition, projectileRotation, player, photonView.owner.ID);
+    }
+
+    Vector3 GetProjectileDirectionVector () {
+        Vector3 directionVector = (crosshair.transform.position - transform.position).normalized;
+        directionVector.z = 0.0f; // Z-coordinate of bullet is always 0
+
+        return directionVector;
+    }
+
+    Quaternion GetProjectileRotation (Vector3 directionVector) {
+        Quaternion rotation = Quaternion.LookRotation (directionVector);
+        Vector3 rotationVector = rotation.eulerAngles;
+        // Introduce spread due to recoil
+        rotationVector.x += Random.Range (-1.0f, 1.0f) * weapons[currentWeapon].maxSpreadAngle * (1.0f - crosshairController.accuracy);
+        // Convert back into quaternion rotation
+        rotation = Quaternion.Euler (rotationVector);
+
+        return rotation;
+    }
+
     void IntroduceRecoil () {
         crosshairController.ReduceAccuracy (weapons[currentWeapon].recoil);
     }
@@ -302,49 +291,31 @@ public class WeaponController : Photon.MonoBehaviour {
         player.GetComponent<Rigidbody2D> ().AddForce (knockbackDirection * weapons[currentWeapon].knockbackForce);
     }
 
-    void PlayFireSoundClip () {
-        if (weapons[currentWeapon].fireSoundClip != null) { // If this weapon has sound clip attached
-            audioSource.PlayOneShot (weapons[currentWeapon].fireSoundClip);
-        }
-    }
-
     void InputChangeWeapon () {
-        if (Input.GetKeyDown (KeyCode.Alpha1)) {
-            CheckChangeWeapon (0);
-        } else if (Input.GetKeyDown (KeyCode.Alpha2)) {
-            CheckChangeWeapon (1);
-        } else if (Input.GetKeyDown (KeyCode.Alpha3)) {
-            CheckChangeWeapon (2);
-        } else if (Input.GetKeyDown (KeyCode.Alpha4)) {
-            CheckChangeWeapon (3);
-        } else if (Input.GetKeyDown (KeyCode.Alpha5)) {
-            CheckChangeWeapon (4);
-        } else if (Input.GetKeyDown (KeyCode.Alpha6)) {
-            CheckChangeWeapon (5);
-        } else if (Input.GetKeyDown (KeyCode.Alpha7)) {
-            CheckChangeWeapon (6);
-        } else if (Input.GetKeyDown (KeyCode.Alpha8)) {
-            CheckChangeWeapon (7);
+        for (int keyNum = 1; keyNum <= 3; keyNum++) {
+            if (Input.GetKeyDown (keyNum.ToString ())) {
+                if (CanChangeWeapon ()) {
+                    ChangeWeapon (keyNum - 1);
+                }
+            }
         }
     }
 
-    void CheckChangeWeapon (int weaponId) {
-        if (isThrowing) {
-            return; // Can't change weapon when throwing
+    bool CanChangeWeapon () {
+        if (isThrowing) { // Charging throw, can't change weapon
+            return false;
         }
-
-        if ((0 <= weaponId) && (weaponId < weapons.Length)) { // Check for weapon id validity
-            if (playerController.isAiming) {
-                ToggleAim (); // Reset aiming status upon weapon change
-            }
-            if (isReloading) {
-                isReloading = false;
-            }
-            ChangeWeapon (weaponId);
-        }
+        return true;
     }
 
     void ChangeWeapon (int weaponId) {
+        if (playerController.isAiming) {
+            ToggleAim (); // Reset aiming status upon weapon change
+        }
+        if (isReloading) {
+            isReloading = false; // Reset reloading upon weapon change
+        }
+
         // Change crosshair sprite
         crosshairSpriteRenderer.sprite = weapons[weaponId].crosshairSprite;
         // Call RpcChangeWeapon subroutine on all instances over the network
@@ -358,14 +329,14 @@ public class WeaponController : Photon.MonoBehaviour {
 
     void InputToggle () {
         if (Input.GetMouseButtonDown (1)) {
-            CheckToggle ();
+            if (CanToggle ()) {
+                ToggleWeapon ();
+            }
         }
     }
 
-    void CheckToggle () {
-        if (weapons[currentWeapon].canToggle) {
-            ToggleWeapon ();
-        }
+    bool CanToggle () {
+        return weapons[currentWeapon].canToggle;
     }
 
     void ToggleWeapon () {
@@ -379,14 +350,14 @@ public class WeaponController : Photon.MonoBehaviour {
 
     void InputAim () {
         if (Input.GetMouseButtonDown (1)) { // On right click
-            CheckAim ();
+            if (CanAim ()) {
+                ToggleAim ();
+            }
         }
     }
 
-    void CheckAim () {
-        if (weapons[currentWeapon].canAim) {
-            ToggleAim ();
-        }
+    bool CanAim () {
+        return weapons[currentWeapon].canAim;
     }
 
     void ToggleAim () {
@@ -404,24 +375,42 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void InputReload () {
-        if (isReloading) {
-            return; // Can't reload while reloading
-        }
-        
-        if (stock[currentWeapon] <= 0) {
-            return; // Out of stock
-        }
-
         if (Input.GetKeyDown (KeyCode.R)) { // R button for manual reload
-            Reload ();
-        } else if (ammo[currentWeapon] <= 0) { // Auto reload when bullet reaches 0
-            Reload ();
+            if (CanReload ()) {
+                Reload ();
+            }
         }
+    }
+
+    void AutoReload () {
+        if (weapons[currentWeapon].ammo <= 0) {
+            if (CanReload ()) {
+                Reload ();
+            }
+        }
+    }
+
+    bool CanReload () {
+        if (isReloading) { // Already reloading, don't reload
+            return false;
+        }
+        return weapons[currentWeapon].CanReload ();
     }
 
     void Reload () {
         isReloading = true;
         reloadTimer = weapons[currentWeapon].reloadTime;
+    }
+
+    void UpdateReload () {
+        if (isReloading) {
+            reloadTimer -= Time.deltaTime;
+
+            if (reloadTimer <= 0.0f) {
+                isReloading = false;
+                weapons[currentWeapon].Reload ();
+            }
+        }
     }
 
     public void AddStock (int targetWeaponId, int numStock) {
@@ -430,7 +419,7 @@ public class WeaponController : Photon.MonoBehaviour {
 
     [PunRPC]
     void RpcAddStock (int targetWeaponId, int numStock) {
-        stock[targetWeaponId] += numStock;
+        weapons[targetWeaponId].stock += numStock;
     }
 
     void OnDestroy () {
@@ -513,9 +502,9 @@ public class WeaponController : Photon.MonoBehaviour {
         for (int i = 0; i < weapons.Length; i++) {
             GUILayout.BeginVertical ();
             if (i == currentWeapon) { // If this is the current weapon
-                GUILayout.Box (ammo[i] + " / " + weapons[i].defaultAmmo + "\n" + stock[i], boxStyle);
+                GUILayout.Box (weapons[i].ammo + " / " + weapons[i].defaultAmmo + "\n" + weapons[i].stock, boxStyle);
             } else {
-                GUILayout.Label (ammo[i] + " / " + weapons[i].defaultAmmo + "\n" + stock[i], labelStyle);
+                GUILayout.Label (weapons[i].ammo + " / " + weapons[i].defaultAmmo + "\n" + weapons[i].stock, labelStyle);
             }
             GUILayout.EndVertical ();
         }
