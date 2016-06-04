@@ -8,29 +8,32 @@ public class PlayerController : Photon.MonoBehaviour {
     public GameObject sprintTrailPrefab;
 
     // Move related variables
-    public float walkSpeed = 15.0f; // The movement speed of this player
+    public float walkSpeed; // The movement speed of this player
     private Vector3 moveDirection;
     private float moveSpeed;
 
     // Sprint related variables
-    public float sprintSpeed = 30.0f;
-    public float staminaPerSprintSecond = 35.0f;
+    public float sprintSpeed;
+    public float staminaPerSprintSecond;
     private bool isSprinting;
 
     // Jump related variables
-    public float maxJumpForce = 1500.0f; // The maximum jump force of this player
-    public float jumpForceChargeRate = 1500.0f; // The increase in jump force per second when charged
-    public float staminaPerJumpForce = 0.05f; // The amount of stamina consumed per unit of jump force
+    public float maxJumpForce; // The maximum jump force of this player
+    public float jumpForceChargeRate; // The increase in jump force per second when charged
+    public float staminaPerJumpForce; // The amount of stamina consumed per unit of jump force
+    [HideInInspector]
     public float jumpForce;
 
     // Stamina related variables
-    public float maxStamina = 100.0f;
-    public float staminaRecoveryRate = 10.0f; // The amount of stamina recovered per second
+    public float maxStamina;
+    public float staminaRecoveryRate; // The amount of stamina recovered per second
+    [HideInInspector]
     public float currentStamina;
 
     public GUISkin customSkin;
 
     // State related variables
+    [HideInInspector]
     public bool isAiming = false;
 
     // Cached components
@@ -55,6 +58,7 @@ public class PlayerController : Photon.MonoBehaviour {
             rigidBody.isKinematic = true; // If this client can't control, set isKinematic to true
             return;
         }
+
         // Client specific instantiation begins here
 
         // Synchronize color to instances over the network
@@ -64,16 +68,21 @@ public class PlayerController : Photon.MonoBehaviour {
             GetComponent<MeshRenderer> ().material.color.b
             );
 
-        // Instantiate stamina bar
+        InstantiateStaminaBar ();
+        InstantiateJumpForceBar ();
+	}
+
+    void InstantiateStaminaBar () {
         staminaBar = (GameObject) Instantiate (staminaBarPrefab, Vector3.zero, Quaternion.identity);
         staminaBar.transform.parent = transform;
         staminaBar.transform.localPosition = new Vector3 (0.0f, 1.4f, -1.0f);
+    }
 
-        // Instantiate jump force bar
+    void InstantiateJumpForceBar () {
         jumpForceBar = (GameObject) Instantiate (jumpForceBarPrefab, Vector3.zero, Quaternion.identity);
         jumpForceBar.transform.parent = transform;
         jumpForceBar.transform.localPosition = new Vector3 (0.0f, 1.6f, -1.0f);
-	}
+    }
 
 	// Update is called once per frame
 	void Update () {
