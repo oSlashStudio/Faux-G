@@ -48,17 +48,23 @@ public class AmmoPodController : Photon.MonoBehaviour {
 
         Color haloColor;
         switch (spawnedAmmoId) {
-            case 0:
-                haloColor = new Color (255, 0, 0);
+            case 0: // Primary stock
+                haloColor = new Color (1, 0, 0);
                 break;
-            case 1:
-                haloColor = new Color (0, 255, 255);
+            case 1: // Secondary stock
+                haloColor = new Color (0, 1, 1);
                 break;
-            case 2:
-                haloColor = new Color (255, 255, 0);
+            case 2: // Incendiary stock
+                haloColor = new Color (1, 1, 0);
+                break;
+            case 3: // Health pack
+                haloColor = new Color (0, 1, 0);
+                break;
+            case 4: // Stamina pack
+                haloColor = new Color (0.5f, 0, 1);
                 break;
             default:
-                haloColor = new Color (255, 255, 255);
+                haloColor = new Color (1, 1, 1);
                 break;
         }
         photonView.RPC ("RpcSetHalo", PhotonTargets.All, true, haloColor.r, haloColor.g, haloColor.b);
