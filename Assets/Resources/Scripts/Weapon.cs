@@ -38,6 +38,10 @@ public class Weapon : MonoBehaviour {
     void Start () {
         // Initialize weapon data
         fireDelay = 0.0f;
+        InitializeAmmo ();
+    }
+
+    public virtual void InitializeAmmo () {
         ammo = defaultAmmo;
         stock = defaultStock - 1; // 1 stock is already used for the initial ammo
     }

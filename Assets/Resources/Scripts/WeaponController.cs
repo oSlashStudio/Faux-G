@@ -375,7 +375,7 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void InputReload () {
-        if (Input.GetKeyDown (KeyCode.R)) { // R button for manual reload
+        if (Input.GetKey (KeyCode.R)) { // R button for manual reload
             if (CanReload ()) {
                 Reload ();
             }
@@ -392,6 +392,9 @@ public class WeaponController : Photon.MonoBehaviour {
 
     bool CanReload () {
         if (isReloading) { // Already reloading, don't reload
+            return false;
+        }
+        if (weapons[currentWeapon].ammo == weapons[currentWeapon].defaultAmmo) { // Ammo is maxed out, can't reload
             return false;
         }
         return weapons[currentWeapon].CanReload ();

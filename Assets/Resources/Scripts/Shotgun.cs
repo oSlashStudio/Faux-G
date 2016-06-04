@@ -6,6 +6,16 @@ public class Shotgun : Weapon {
     public int numShrapnels = 4;
     public float separationAngle = 6; // The angle separating each pair of shrapnels
 
+    public override void InitializeAmmo () {
+        ammo = defaultAmmo;
+        stock = defaultStock - defaultAmmo;
+    }
+
+    public override void Reload () {
+        ammo += 1;
+        stock -= 1;
+    }
+
     public override void Fire (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId) {
         if (numShrapnels % 2 == 1) { // Odd number of shrapnels
             for (int i = -numShrapnels / 2; i <= numShrapnels / 2; i++) {
