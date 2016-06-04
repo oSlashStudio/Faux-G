@@ -2,12 +2,12 @@ using UnityEngine;
 using System.Collections;
 
 public class Glock : Weapon {
-
-    public float separationAngle = 6.0f;
+    
+    public float burstFireDelay = 0.1f;
 
     public float toggledFireDelay = 1.0f; // The fire delay when toggled, will be swapped with default fire delay on toggle
     public float toggledMaxSpreadAngle = 20.0f; // The max spread angle when toggled, will be swapped with max spread angle on toggle
-    public float toggledRecoil = 1.0f; // The recoil when toggled, will be swapped with recoil on toggle
+    public float toggledRecoil = 0.6f; // The recoil when toggled, will be swapped with recoil on toggle
 
     private bool toggled;
 
@@ -25,11 +25,29 @@ public class Glock : Weapon {
         if (!toggled) { // Semi-automatic mode
             base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
         } else { // Burst fire mode
-            for (int i = -1; i <= 1; i++) { // Fire 3 bullets
-                Quaternion instantiateRotation = Quaternion.Euler (projectileRotation.eulerAngles + new Vector3 (separationAngle * i, 0.0f, 0.0f));
-                Vector3 instantiatePosition = projectilePosition + instantiateRotation * Vector3.forward * 1.0f;
-                base.Fire (instantiatePosition, instantiateRotation, player, instantiatorId);
+            StartCoroutine (BurstFire (projectilePosition, projectileRotation, player, instantiatorId));
+        }
+    }
+
+    IEnumerator BurstFire (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId) {
+        base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
+        yield return new WaitForSeconds (burstFireDelay);
+        base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
+        yield return new WaitForSeconds (burstFireDelay);
+        base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
+    }
+
+    public override bool CanFire () {
+        if (toggled) {
+            if (fireDelay > 0.0f) { // Cooling down, can't fire
+                return false;
             }
+            if (ammo < 3) { // Not enough ammo, can't fire
+                return false;
+            }
+            return true;
+        } else {
+            return base.CanFire ();
         }
     }
 
