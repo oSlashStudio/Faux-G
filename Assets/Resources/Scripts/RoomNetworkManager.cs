@@ -2,6 +2,7 @@ using UnityEngine;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using PhotonPlayerExtension;
 
 public class RoomNetworkManager : Photon.PunBehaviour {
 
@@ -130,12 +131,10 @@ public class RoomNetworkManager : Photon.PunBehaviour {
 
             GUILayout.BeginHorizontal ();
             GUILayout.Label (teams[i].name);
-            if (CurrentTeamId () != i) { // Not in this team yet
+            if (PhotonNetwork.player.CurrentTeamId () != i) { // Not in this team yet
                 if (GUILayout.Button ("Join")) {
-                    if (CurrentTeamId () != -1) { // Currently in a team
-                        LeaveTeam (CurrentTeamId ()); // Leave old team
-                    }
-                    JoinTeam (i); // Join new team
+                    PhotonNetwork.player.LeaveTeam (); // Leave current team
+                    PhotonNetwork.player.JoinTeam (i); // Join new team
                 }
             } else {
                 GUI.enabled = false;
@@ -145,11 +144,10 @@ public class RoomNetworkManager : Photon.PunBehaviour {
             GUILayout.EndHorizontal ();
 
             foreach (PhotonPlayer player in PhotonNetwork.playerList) {
-                // Check if player is in this team
-                if (player.customProperties.ContainsKey ("team") && (byte) player.customProperties["team"] == i) {
+                if (player.CurrentTeamId () == i) { // Player is in this team
                     GUILayout.BeginHorizontal ();
 
-                    if (player.customProperties.ContainsKey ("ready") && (bool) player.customProperties["ready"]) {
+                    if (player.IsReady ()) { // Distinguish ready players
                         GUI.contentColor = Color.green;
                         GUILayout.Label (player.name);
                         GUI.contentColor = Color.white;
@@ -179,9 +177,9 @@ public class RoomNetworkManager : Photon.PunBehaviour {
     void UnassignedGUI () {
         GUILayout.BeginHorizontal ();
         GUILayout.Label ("Unassigned players:");
-        if (CurrentTeamId () != -1) { // Currently in a team
+        if (PhotonNetwork.player.IsInATeam ()) { // Currently in a team
             if (GUILayout.Button ("Join")) {
-                LeaveTeam (CurrentTeamId ());
+                PhotonNetwork.player.LeaveTeam ();
             }
         } else { // Not in a team
             GUI.enabled = false;
@@ -192,7 +190,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
 
         GUILayout.BeginVertical ();
         foreach (PhotonPlayer player in PhotonNetwork.playerList) {
-            if (!player.customProperties.ContainsKey ("team")) {
+            if (!player.IsInATeam ()) { // Not in a team yet
                 GUILayout.BeginHorizontal ();
                 GUILayout.Label (player.name);
                 if (PhotonNetwork.isMasterClient && !player.isLocal) {
@@ -217,7 +215,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
             LeaveRoom ();
         }
         if (PhotonNetwork.isMasterClient) {
-            if (AreEveryoneReady ()) {
+            if (IsEveryoneReady ()) {
                 if (GUILayout.Button ("Start Game")) { // Start game button
                     StartGame ();
                 }
@@ -227,14 +225,14 @@ public class RoomNetworkManager : Photon.PunBehaviour {
                 GUI.enabled = true;
             }
         } else {
-            if (CurrentTeamId () != -1) { // Currently in a team
-                if (!IsReady ()) {
+            if (PhotonNetwork.player.IsInATeam ()) { // Currently in a team
+                if (!PhotonNetwork.player.IsReady ()) { // Not ready yet
                     if (GUILayout.Button ("Ready")) {
-                        Ready ();
+                        PhotonNetwork.player.Ready ();
                     }
-                } else {
+                } else { // Currently ready
                     if (GUILayout.Button ("Unready")) {
-                        Unready ();
+                        PhotonNetwork.player.Unready ();
                     }
                 }
             } else {
@@ -246,65 +244,19 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         GUILayout.EndHorizontal ();
     }
 
-    /*
-     * This method fetches the current team id of this player, returns -1 if not in team yet.
-     */
-    int CurrentTeamId () {
-        if (!PhotonNetwork.player.customProperties.ContainsKey ("team")) {
-            return -1;
-        }
-        return (byte) PhotonNetwork.player.customProperties["team"];
-    }
-
-    void LeaveTeam (int teamId) {
-        Unready ();
-
-        ExitGames.Client.Photon.Hashtable teamHashtable = new ExitGames.Client.Photon.Hashtable ();
-        teamHashtable["team"] = null;
-        PhotonNetwork.player.SetCustomProperties (teamHashtable);
-    }
-
-    void JoinTeam (int teamId) {
-        ExitGames.Client.Photon.Hashtable teamHashtable = new ExitGames.Client.Photon.Hashtable ();
-        teamHashtable["team"] = (byte) teamId;
-        PhotonNetwork.player.SetCustomProperties (teamHashtable);
-    }
-
     void KickPlayer (PhotonPlayer kickedPlayer) {
         PhotonNetwork.CloseConnection (kickedPlayer);
     }
 
-    bool IsReady () {
-        if (!PhotonNetwork.player.customProperties.ContainsKey ("ready")) {
-            return false;
-        }
-        return (bool) PhotonNetwork.player.customProperties["ready"];
-    }
-
-    void Ready () {
-        ExitGames.Client.Photon.Hashtable readyHashTable = new ExitGames.Client.Photon.Hashtable ();
-        readyHashTable["ready"] = (bool) true;
-        PhotonNetwork.player.SetCustomProperties (readyHashTable);
-    }
-
-    void Unready () {
-        ExitGames.Client.Photon.Hashtable readyHashTable = new ExitGames.Client.Photon.Hashtable ();
-        readyHashTable["ready"] = (bool) false;
-        PhotonNetwork.player.SetCustomProperties (readyHashTable);
-    }
-
-    bool AreEveryoneReady () {
+    bool IsEveryoneReady () {
         foreach (PhotonPlayer player in PhotonNetwork.playerList) {
-            if (!player.customProperties.ContainsKey ("team")) {
+            if (!player.IsInATeam ()) { // This player is not in a team
                 return false;
             }
             if (player.isMasterClient) {
                 continue;
             }
-            if (!player.customProperties.ContainsKey ("ready")) {
-                return false;
-            }
-            if ((bool) player.customProperties["ready"] == false) {
+            if (!player.IsReady ()) { // This player is not ready yet
                 return false;
             }
         }
