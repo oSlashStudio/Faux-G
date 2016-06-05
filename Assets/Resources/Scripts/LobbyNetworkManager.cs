@@ -260,6 +260,15 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
 
     public override void OnJoinedLobby () {
         isInLobby = true;
+        // Clear player properties (this can only be done by nullifying the members)
+        ExitGames.Client.Photon.Hashtable playerHashTable = new ExitGames.Client.Photon.Hashtable ();
+        playerHashTable["team"] = null;
+        playerHashTable["ready"] = null;
+        playerHashTable["rColor"] = null;
+        playerHashTable["gColor"] = null;
+        playerHashTable["bColor"] = null;
+        playerHashTable["class"] = null;
+        PhotonNetwork.player.SetCustomProperties (playerHashTable);
     }
 
     void CreateRoom () {
