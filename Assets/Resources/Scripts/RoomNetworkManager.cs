@@ -77,129 +77,168 @@ public class RoomNetworkManager : Photon.PunBehaviour {
 
     void EnteringRoomGUI () {
         GUILayout.BeginArea (RelativeRect (0, 0, 1920, 1080));
-
-        GUILayout.BeginHorizontal ();
-        GUILayout.FlexibleSpace (); // Left padding
-
-        GUILayout.BeginVertical ();
-        GUILayout.FlexibleSpace (); // Top padding
-
-        GUILayout.Label ("Trying to enter room", centeredLabel);
-        GUILayout.Label ("Please wait...", centeredLabel);
-
-        GUILayout.FlexibleSpace (); // Bottom padding
-        GUILayout.EndVertical ();
-
-        GUILayout.FlexibleSpace (); // Right padding
-        GUILayout.EndHorizontal ();
-
+        {
+            GUILayout.BeginHorizontal ();
+            {
+                GUILayout.FlexibleSpace (); // Left padding
+                GUILayout.BeginVertical ();
+                {
+                    GUILayout.FlexibleSpace (); // Top padding
+                    GUILayout.Label ("Trying to enter room", centeredLabel);
+                    GUILayout.Label ("Please wait...", centeredLabel);
+                    GUILayout.FlexibleSpace (); // Bottom padding
+                }
+                GUILayout.EndVertical ();
+                GUILayout.FlexibleSpace (); // Right padding
+            }
+            GUILayout.EndHorizontal ();
+        }
         GUILayout.EndArea ();
     }
 
     void RoomGUI () {
         GUILayout.BeginArea (RelativeRect (0, 0, 1920, 1080));
-
-        GUILayout.BeginHorizontal ();
-        GUILayout.FlexibleSpace (); // Left padding
-
-        GUILayout.BeginVertical (GUILayout.Width (RelativeWidth (800)));
-        GUILayout.FlexibleSpace (); // Top padding
-
-        RoomInfoGUI ();
-        TeamsGUI ();
-        UnassignedGUI ();
-        ClassSelectionGUI ();
-        ControlGUI ();
-
-        GUILayout.FlexibleSpace (); // Bottom padding
-        GUILayout.EndVertical ();
-
-        GUILayout.FlexibleSpace (); // Right padding
-        GUILayout.EndHorizontal ();
-
+        {
+            GUILayout.BeginHorizontal ();
+            {
+                GUILayout.FlexibleSpace (); // Left padding
+                GUILayout.BeginVertical (GUILayout.Width (RelativeWidth (1280)));
+                {
+                    GUILayout.FlexibleSpace (); // Top padding
+                    RoomInfoGUI ();
+                    TeamsGUI ();
+                    UnassignedGUI ();
+                    ClassSelectionGUI ();
+                    ControlGUI ();
+                    GUILayout.FlexibleSpace (); // Bottom padding
+                }
+                GUILayout.EndVertical ();
+                GUILayout.FlexibleSpace (); // Right padding
+            }
+            GUILayout.EndHorizontal ();
+        }
         GUILayout.EndArea ();
     }
 
     void RoomInfoGUI () {
+        GUILayout.BeginHorizontal (GUI.skin.box);
         GUILayout.Label (PhotonNetwork.room.name + " (" + PhotonNetwork.room.playerCount + " / " + PhotonNetwork.room.maxPlayers + ")", centeredLabel);
+        GUILayout.EndHorizontal ();
     }
 
     void TeamsGUI () {
         GUILayout.BeginHorizontal ();
-        for (int i = 0; i < teams.Length; i++) {
-            GUILayout.BeginVertical (GUILayout.Width (RelativeWidth (800.0f / teams.Length)));
-
-            GUILayout.BeginHorizontal ();
-            GUILayout.Label (teams[i].name);
-            if (PhotonNetwork.player.CurrentTeamId () != i) { // Not in this team yet
-                if (GUILayout.Button ("Join")) {
-                    PhotonNetwork.player.LeaveTeam (); // Leave current team
-                    PhotonNetwork.player.JoinTeam (i); // Join new team
-                }
-            } else {
-                GUI.enabled = false;
-                GUILayout.Button ("Join");
-                GUI.enabled = true;
-            }
-            GUILayout.EndHorizontal ();
-
-            foreach (PhotonPlayer player in PhotonNetwork.playerList) {
-                if (player.CurrentTeamId () == i) { // Player is in this team
-                    GUILayout.BeginHorizontal ();
-
-                    if (player.IsReady ()) { // Distinguish ready players
-                        GUI.contentColor = Color.green;
-                        GUILayout.Label (player.name);
-                        GUI.contentColor = Color.white;
-                    } else {
-                        GUILayout.Label (player.name);
-                    }
-
-                    if (player.isLocal) { // Local player
-                        if (GUILayout.Button (colorTextures[selectedColorId], GUILayout.Width (RelativeWidth (200)))) {
-                            selectedColorId = (selectedColorId + 1) % playerColors.Length;
+        {
+            for (int i = 0; i < teams.Length; i++) {
+                GUILayout.BeginVertical (GUI.skin.box, GUILayout.Width (RelativeWidth (1280.0f / teams.Length)));
+                {
+                    GUILayout.BeginHorizontal (GUI.skin.box);
+                    {
+                        GUILayout.FlexibleSpace ();
+                        GUILayout.Label (teams[i].name);
+                        if (PhotonNetwork.player.CurrentTeamId () != i) { // Not in this team yet
+                            if (GUILayout.Button ("Join")) {
+                                PhotonNetwork.player.LeaveTeam (); // Leave current team
+                                PhotonNetwork.player.JoinTeam (i); // Join new team
+                            }
+                        } else {
+                            GUI.enabled = false;
+                            GUILayout.Button ("Join");
+                            GUI.enabled = true;
                         }
-                    } else if (PhotonNetwork.isMasterClient) {
-                        if (GUILayout.Button ("Kick")) { // Kick button
-                            KickPlayer (player);
-                        }
+                        GUILayout.FlexibleSpace ();
                     }
-
                     GUILayout.EndHorizontal ();
+
+                    foreach (PhotonPlayer player in PhotonNetwork.playerList) {
+                        if (player.CurrentTeamId () == i) { // Player is in this team
+                            GUILayout.BeginHorizontal ();
+                            {
+                                GUILayout.FlexibleSpace ();
+
+                                if (player.isMasterClient) {
+                                    GUI.contentColor = Color.yellow;
+                                    GUILayout.Label (player.name);
+                                    GUI.contentColor = Color.white;
+                                } else if (player.IsReady ()) { // Distinguish ready players
+                                    GUI.contentColor = Color.green;
+                                    GUILayout.Label (player.name);
+                                    GUI.contentColor = Color.white;
+                                } else {
+                                    GUILayout.Label (player.name);
+                                }
+
+                                if (player.isLocal) { // Local player
+                                    if (GUILayout.Button (colorTextures[selectedColorId], GUILayout.Width (RelativeWidth (200)))) {
+                                        selectedColorId = (selectedColorId + 1) % playerColors.Length;
+                                    }
+                                } else if (PhotonNetwork.isMasterClient) {
+                                    if (GUILayout.Button ("Kick")) { // Kick button
+                                        KickPlayer (player);
+                                    }
+                                }
+
+                                GUILayout.FlexibleSpace ();
+                            }
+                            GUILayout.EndHorizontal ();
+                        }
+                    }
                 }
+                GUILayout.EndVertical ();
             }
-            
-            GUILayout.EndVertical ();
         }
         GUILayout.EndHorizontal ();
     }
 
     void UnassignedGUI () {
-        GUILayout.BeginHorizontal ();
-        GUILayout.Label ("Unassigned players:");
-        if (PhotonNetwork.player.IsInATeam ()) { // Currently in a team
-            if (GUILayout.Button ("Join")) {
-                PhotonNetwork.player.LeaveTeam ();
+        GUILayout.BeginVertical (GUI.skin.box);
+        {
+            GUILayout.BeginHorizontal ();
+            {
+                GUILayout.Label ("Unassigned players:");
+                if (PhotonNetwork.player.IsInATeam ()) { // Currently in a team
+                    if (GUILayout.Button ("Join")) {
+                        PhotonNetwork.player.LeaveTeam ();
+                    }
+                } else { // Not in a team
+                    GUI.enabled = false;
+                    GUILayout.Button ("Join");
+                    GUI.enabled = true;
+                }
+                GUILayout.FlexibleSpace ();
             }
-        } else { // Not in a team
-            GUI.enabled = false;
-            GUILayout.Button ("Join");
-            GUI.enabled = true;
-        }
-        GUILayout.EndHorizontal ();
+            GUILayout.EndHorizontal ();
 
-        GUILayout.BeginVertical ();
-        foreach (PhotonPlayer player in PhotonNetwork.playerList) {
-            if (!player.IsInATeam ()) { // Not in a team yet
-                GUILayout.BeginHorizontal ();
-                GUILayout.Label (player.name);
-                if (PhotonNetwork.isMasterClient && !player.isLocal) {
-                    if (GUILayout.Button ("Kick")) { // Kick button
-                        KickPlayer (player);
+            GUILayout.BeginVertical ();
+            {
+                foreach (PhotonPlayer player in PhotonNetwork.playerList) {
+                    if (!player.IsInATeam ()) { // Not in a team yet
+                        GUILayout.BeginHorizontal ();
+                        {
+                            if (player.isMasterClient) {
+                                GUI.contentColor = Color.yellow;
+                                GUILayout.Label (player.name);
+                                GUI.contentColor = Color.white;
+                            } else {
+                                GUILayout.Label (player.name);
+                            }
+
+                            if (player.isLocal) { // Local player
+                                if (GUILayout.Button (colorTextures[selectedColorId], GUILayout.Width (RelativeWidth (200)))) {
+                                    selectedColorId = (selectedColorId + 1) % playerColors.Length;
+                                }
+                            } else if (PhotonNetwork.isMasterClient) {
+                                if (GUILayout.Button ("Kick")) { // Kick button
+                                    KickPlayer (player);
+                                }
+                            }
+                            GUILayout.FlexibleSpace ();
+                        }
+                        GUILayout.EndHorizontal ();
                     }
                 }
-                GUILayout.EndHorizontal ();
             }
+            GUILayout.EndVertical ();
         }
         GUILayout.EndVertical ();
     }
@@ -211,34 +250,36 @@ public class RoomNetworkManager : Photon.PunBehaviour {
 
     void ControlGUI () {
         GUILayout.BeginHorizontal ();
-        if (GUILayout.Button ("Leave Room")) { // Leave room button
-            LeaveRoom ();
-        }
-        if (PhotonNetwork.isMasterClient) {
-            if (IsEveryoneReady ()) {
-                if (GUILayout.Button ("Start Game")) { // Start game button
-                    StartGame ();
-                }
-            } else {
-                GUI.enabled = false;
-                GUILayout.Button ("Start Game");
-                GUI.enabled = true;
+        {
+            if (GUILayout.Button ("Leave Room")) { // Leave room button
+                LeaveRoom ();
             }
-        } else {
-            if (PhotonNetwork.player.IsInATeam ()) { // Currently in a team
-                if (!PhotonNetwork.player.IsReady ()) { // Not ready yet
-                    if (GUILayout.Button ("Ready")) {
-                        PhotonNetwork.player.Ready ();
+            if (PhotonNetwork.isMasterClient) {
+                if (IsEveryoneReady ()) {
+                    if (GUILayout.Button ("Start Game")) { // Start game button
+                        StartGame ();
                     }
-                } else { // Currently ready
-                    if (GUILayout.Button ("Unready")) {
-                        PhotonNetwork.player.Unready ();
-                    }
+                } else {
+                    GUI.enabled = false;
+                    GUILayout.Button ("Start Game");
+                    GUI.enabled = true;
                 }
             } else {
-                GUI.enabled = false;
-                GUILayout.Button ("Ready");
-                GUI.enabled = true;
+                if (PhotonNetwork.player.IsInATeam ()) { // Currently in a team
+                    if (!PhotonNetwork.player.IsReady ()) { // Not ready yet
+                        if (GUILayout.Button ("Ready")) {
+                            PhotonNetwork.player.Ready ();
+                        }
+                    } else { // Currently ready
+                        if (GUILayout.Button ("Unready")) {
+                            PhotonNetwork.player.Unready ();
+                        }
+                    }
+                } else {
+                    GUI.enabled = false;
+                    GUILayout.Button ("Ready");
+                    GUI.enabled = true;
+                }
             }
         }
         GUILayout.EndHorizontal ();
@@ -290,8 +331,8 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         PhotonNetwork.player.SetCustomProperties (playerHashTable);
         // Temporarily pause message queue, to be resumed when the in-game scene loads
         PhotonNetwork.isMessageQueueRunning = false;
-        // 2 is the offset taking lobby and room scenes into account
-        PhotonNetwork.LoadLevel ((byte) PhotonNetwork.room.customProperties ["map"] + 3);
+        // Load game scene
+        PhotonNetwork.LoadLevel ((byte) PhotonNetwork.room.customProperties["game"]);
     }
 
 }

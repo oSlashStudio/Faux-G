@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Linq;
 using System.Collections;
 
 public class LobbyNetworkManager : Photon.PunBehaviour {
@@ -12,11 +13,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
     private string roomName = "";
 
     private int selectedMapId = 0;
-    private string[] mapNames = new string[] {
-        "Boss Small",
-        "FFA Small",
-        "Practice"
-    };
+    public Map[] maps;
 
     private Vector2 scrollPos = Vector2.zero;
 
@@ -128,20 +125,8 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
             GUILayout.Label (room.name + " (" + room.playerCount + " / " + room.maxPlayers + ")");
             // Room's currently selected map
             byte selectedMapId = (byte) room.customProperties["map"];
-            switch (selectedMapId) {
-                case 0:
-                    GUILayout.Label ("Boss Small");
-                    break;
-                case 1:
-                    GUILayout.Label ("FFA Small");
-                    break;
-                case 2:
-                    GUILayout.Label ("Practice");
-                    break;
-                default:
-                    GUILayout.Label ("Unknown");
-                    break;
-            }
+            GUILayout.Label (maps[selectedMapId].name);
+
             if (GUILayout.Button ("Join")) { // Join button
                 JoinRoom (room.name);
             }
@@ -186,7 +171,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
 
         GUILayout.EndHorizontal ();
 
-        selectedMapId = GUILayout.Toolbar (selectedMapId, mapNames);
+        selectedMapId = GUILayout.Toolbar (selectedMapId, maps.Where (x => x != null).Select (x => x.ToString ()).ToArray ());
 
         if (GUILayout.Button ("Create")) {
             CreateRoom ();
@@ -279,7 +264,9 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         // Setup custom room properties (map, etc.)
         roomOptions.customRoomProperties = new ExitGames.Client.Photon.Hashtable ();
         roomOptions.customRoomProperties.Add ("map", (byte) selectedMapId);
-        roomOptions.customRoomPropertiesForLobby = new string[] { "map" };
+        roomOptions.customRoomProperties.Add ("room", (byte) maps[selectedMapId].roomSceneId);
+        roomOptions.customRoomProperties.Add ("game", (byte) maps[selectedMapId].gameSceneId);
+        roomOptions.customRoomPropertiesForLobby = new string[] { "map", "room", "game" };
 
         PhotonNetwork.CreateRoom (roomName, roomOptions, TypedLobby.Default);
     }
@@ -297,7 +284,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
     }
 
     public override void OnJoinedRoom () {
-        PhotonNetwork.LoadLevel (2); // Load room scene
+        PhotonNetwork.LoadLevel ((byte) PhotonNetwork.room.customProperties["room"]); // Load room scene
     }
 
 }
