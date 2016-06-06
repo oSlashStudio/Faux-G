@@ -144,6 +144,9 @@ public class PlayerController : Photon.MonoBehaviour {
             sprintTrail.GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", GetComponent<MeshRenderer> ().material.color);
             sprintTrail.transform.parent = transform;
         } else {
+            if (sprintTrail == null) {
+                return;
+            }
             sprintTrail.transform.parent = null;
         }
     }
