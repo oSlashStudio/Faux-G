@@ -95,7 +95,7 @@ public class PhotonTransformViewPositionControl
                 break;
 
             case PhotonTransformViewPositionModel.InterpolateOptions.SynchronizeValues:
-                if( m_SynchronizedSpeed.magnitude == 0 )
+                if( m_SynchronizedSpeed.magnitude <= 0.1f ) // Small enough speed
                 {
                     currentPosition = targetPosition;
                 }
