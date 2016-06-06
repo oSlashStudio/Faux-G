@@ -129,29 +129,29 @@ public class RoomNetworkManager : Photon.PunBehaviour {
     void TeamsGUI () {
         GUILayout.BeginHorizontal ();
         {
-            for (int i = 0; i < teams.Length; i++) {
+            foreach (Team currentTeam in teams) {
                 GUILayout.BeginVertical (GUI.skin.box, GUILayout.Width (RelativeWidth (1280.0f / teams.Length)));
                 {
                     GUILayout.BeginHorizontal (GUI.skin.box);
                     {
                         GUILayout.FlexibleSpace ();
-                        GUILayout.Label (teams[i].name);
-                        if (PhotonNetwork.player.CurrentTeamId () != i) { // Not in this team yet
-                            if (GUILayout.Button ("Join")) {
-                                PhotonNetwork.player.LeaveTeam (); // Leave current team
-                                PhotonNetwork.player.JoinTeam (i); // Join new team
-                            }
-                        } else {
+                        GUILayout.Label (currentTeam.name);
+                        if (currentTeam.IsFull () || PhotonNetwork.player.CurrentTeamId () == currentTeam.id) {
                             GUI.enabled = false;
                             GUILayout.Button ("Join");
                             GUI.enabled = true;
+                        } else {
+                            if (GUILayout.Button ("Join")) {
+                                PhotonNetwork.player.LeaveTeam (); // Leave current team
+                                PhotonNetwork.player.JoinTeam (currentTeam.id); // Join new team
+                            }
                         }
                         GUILayout.FlexibleSpace ();
                     }
                     GUILayout.EndHorizontal ();
 
                     foreach (PhotonPlayer player in PhotonNetwork.playerList) {
-                        if (player.CurrentTeamId () == i) { // Player is in this team
+                        if (player.CurrentTeamId () == currentTeam.id) { // Player is in this team
                             GUILayout.BeginHorizontal ();
                             {
                                 GUILayout.FlexibleSpace ();
