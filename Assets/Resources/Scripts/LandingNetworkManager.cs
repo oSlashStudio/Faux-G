@@ -145,6 +145,11 @@ public class LandingNetworkManager : Photon.PunBehaviour {
     public override void OnCustomAuthenticationResponse (Dictionary<string, object> data) {
         displayMessage = "Logged in successfully";
         PhotonNetwork.player.name = (string) data["username"];
+
+        ExitGames.Client.Photon.Hashtable sessionKeyHashtable = new ExitGames.Client.Photon.Hashtable ();
+        sessionKeyHashtable["sessionKey"] = (string) data["session_key"];
+        PhotonNetwork.player.SetCustomProperties (sessionKeyHashtable);
+
         // Proceed to lobby
         PhotonNetwork.LoadLevel (1);
     }
