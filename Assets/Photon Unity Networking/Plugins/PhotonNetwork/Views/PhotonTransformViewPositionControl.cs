@@ -97,7 +97,7 @@ public class PhotonTransformViewPositionControl
             case PhotonTransformViewPositionModel.InterpolateOptions.SynchronizeValues:
                 if( m_SynchronizedSpeed.magnitude <= 0.1f ) // Small enough speed
                 {
-                    currentPosition = targetPosition;
+                    currentPosition = Vector3.Lerp ( currentPosition, targetPosition, PhotonNetwork.sendRateOnSerialize * Time.deltaTime );
                 }
                 else
                 {
