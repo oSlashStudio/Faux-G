@@ -353,6 +353,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         playerHashTable["gColor"] = (byte) teamColors[teams[(byte) PhotonNetwork.player.customProperties["team"]].colorId].g;
         playerHashTable["bColor"] = (byte) teamColors[teams[(byte) PhotonNetwork.player.customProperties["team"]].colorId].b;
         playerHashTable["class"] = (byte) selectedClassId;
+        playerHashTable["teamName"] = (string) teams[(byte) PhotonNetwork.player.customProperties["team"]].name;
         PhotonNetwork.player.SetCustomProperties (playerHashTable);
         // Temporarily pause message queue, to be resumed when the in-game scene loads
         PhotonNetwork.isMessageQueueRunning = false;

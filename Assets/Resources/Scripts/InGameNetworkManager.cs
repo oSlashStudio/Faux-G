@@ -1,12 +1,14 @@
 using UnityEngine;
 using Photon;
 using System.Collections.Generic;
+using PhotonPlayerExtension;
 
 public class InGameNetworkManager : Photon.PunBehaviour {
 
     public GameObject[] spawnLocations;
 
-    private Dictionary<int, PlayerData> playerData = new Dictionary<int, PlayerData> ();
+    protected Dictionary<int, PlayerData> playerData = new Dictionary<int, PlayerData> ();
+    protected Dictionary<int, TeamData> teamData = new Dictionary<int, TeamData> ();
 
     private ExitGames.Client.Photon.Hashtable classHashtable;
     private int selectedClassId;
@@ -171,9 +173,13 @@ public class InGameNetworkManager : Photon.PunBehaviour {
             centeredLabel.alignment = TextAnchor.MiddleCenter;
         }
 
-        GUILayout.BeginArea (RelativeRect (0, 0, 1920, 300));
+        GUILayout.BeginArea (RelativeRect (0, 0, 640, 300));
         BroadcastGUI ();
         GUILayout.FlexibleSpace ();
+        GUILayout.EndArea ();
+
+        GUILayout.BeginArea (RelativeRect (660, 0, 600, 100));
+        TeamScoreGUI ();
         GUILayout.EndArea ();
 
         if (isDead) {
@@ -219,6 +225,23 @@ public class InGameNetworkManager : Photon.PunBehaviour {
                 );
             size--;
         }
+    }
+
+    void TeamScoreGUI () {
+        GUIStyle boxStyle = new GUIStyle (GUI.skin.box);
+
+        GUILayout.BeginHorizontal ();
+        GUILayout.FlexibleSpace ();
+        foreach (KeyValuePair<int, TeamData> entry in teamData) {
+            string name = entry.Value.name;
+            Color color = entry.Value.color;
+            float score = entry.Value.score;
+
+            boxStyle.normal.textColor = color;
+            GUILayout.Box (name + ": " + score.ToString ("0"), boxStyle);
+            GUILayout.FlexibleSpace ();
+        }
+        GUILayout.EndHorizontal ();
     }
 
     void RespawnGUI () {
@@ -286,7 +309,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     }
 
     [PunRPC]
-    void RpcSendChatInput (string chatMessage, PhotonMessageInfo info) {
+    protected virtual void RpcSendChatInput (string chatMessage, PhotonMessageInfo info) {
         string senderName;
 
         if (info == null || info.sender == null) { // Empty message info
@@ -360,7 +383,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     }
 
     [PunRPC]
-    void RpcBroadcast (string message) {
+    protected virtual void RpcBroadcast (string message) {
         PushBroadcast (message, defaultBroadcastTimer);
     }
 
@@ -378,16 +401,29 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     }
 
     [PunRPC]
-    void RpcRegisterPlayer (int playerId, string playerName) {
+    protected virtual void RpcRegisterPlayer (int playerId, string playerName) {
         playerData[playerId] = new PlayerData (playerName);
+
+        PhotonPlayer player = PhotonPlayer.Find (playerId);
+        int teamId = (byte) player.customProperties["team"];
+        if (!teamData.ContainsKey (teamId)) {
+            string teamName = (string) player.customProperties["teamName"];
+            Color teamColor = new Color (
+                (byte) player.customProperties["rColor"],
+                (byte) player.customProperties["gColor"],
+                (byte) player.customProperties["bColor"]
+                );
+            teamData[teamId] = new TeamData (teamId, teamName, teamColor);
+        }
+        teamData[teamId].AssignPlayer (player);
     }
 
-    public void AddKillData (int killingPlayerId) {
+    public virtual void AddKillData (int killingPlayerId) {
         photonView.RPC ("RpcAddKillData", PhotonTargets.All, killingPlayerId);
     }
 
     [PunRPC]
-    void RpcAddKillData (int killingPlayerId) {
+    protected virtual void RpcAddKillData (int killingPlayerId) {
         playerData[killingPlayerId].AddKill ();
 
         switch (playerData[killingPlayerId].killStreak) {
@@ -412,30 +448,30 @@ public class InGameNetworkManager : Photon.PunBehaviour {
         }
     }
 
-    public void AddDeathData (int dyingPlayerId) {
+    public virtual void AddDeathData (int dyingPlayerId) {
         photonView.RPC ("RpcAddDeathData", PhotonTargets.All, dyingPlayerId);
     }
 
     [PunRPC]
-    void RpcAddDeathData (int dyingPlayerId) {
+    protected virtual void RpcAddDeathData (int dyingPlayerId) {
         playerData[dyingPlayerId].AddDeath ();
     }
 
-    public void AddDamageData (int damagingPlayerId, float damage) {
+    public virtual void AddDamageData (int damagingPlayerId, float damage) {
         photonView.RPC ("RpcAddDamageData", PhotonTargets.All, damagingPlayerId, damage);
     }
 
     [PunRPC]
-    void RpcAddDamageData (int damagingPlayerId, float damage) {
+    protected virtual void RpcAddDamageData (int damagingPlayerId, float damage) {
         playerData[damagingPlayerId].AddDamage (damage);
     }
 
-    public void AddHealData (int healingPlayerId, float heal) {
+    public virtual void AddHealData (int healingPlayerId, float heal) {
         photonView.RPC ("RpcAddHealData", PhotonTargets.All, healingPlayerId, heal);
     }
 
     [PunRPC]
-    void RpcAddHealData (int healingPlayerId, float heal) {
+    protected virtual void RpcAddHealData (int healingPlayerId, float heal) {
         playerData[healingPlayerId].AddHeal (heal);
     }
 
