@@ -4,12 +4,14 @@ using System.Collections;
 public class InfluenceBarController : MonoBehaviour {
 
     // Cached components
+    private InGameNetworkManager networkManager;
     private OutpostController outpostController;
     private SpriteRenderer spriteRenderer;
     private Light lightComponent;
 
     // Use this for initialization
     void Start () {
+        networkManager = GameObject.FindObjectOfType<InGameNetworkManager> ();
         outpostController = GetComponentInParent<OutpostController> ();
         spriteRenderer = GetComponent<SpriteRenderer> ();
         lightComponent = GetComponentInParent<Light> ();
@@ -34,17 +36,14 @@ public class InfluenceBarController : MonoBehaviour {
             lightComponent.enabled = false;
         } else {
             lightComponent.enabled = true;
-            if (controllingTeamId == 0) {
-                lightComponent.color = Color.red;
-            } else if (controllingTeamId == 1) {
-                lightComponent.color = Color.cyan;
-            }
+            lightComponent.color = networkManager.teamData[controllingTeamId].color;
         }
 
-        if (controllingTeamId == 0) {
-            spriteRenderer.color = Color.red;
-        } else if (controllingTeamId == 1) {
-            spriteRenderer.color = Color.cyan;
+        if (controllingTeamId == -1) {
+            spriteRenderer.enabled = false;
+        } else {
+            spriteRenderer.enabled = true;
+            spriteRenderer.color = networkManager.teamData[controllingTeamId].color;
         }
     }
 

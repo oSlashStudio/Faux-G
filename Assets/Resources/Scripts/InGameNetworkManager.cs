@@ -7,8 +7,10 @@ public class InGameNetworkManager : Photon.PunBehaviour {
 
     public GameObject[] spawnLocations;
 
-    protected Dictionary<int, PlayerData> playerData = new Dictionary<int, PlayerData> ();
-    protected Dictionary<int, TeamData> teamData = new Dictionary<int, TeamData> ();
+    [HideInInspector]
+    public Dictionary<int, PlayerData> playerData = new Dictionary<int, PlayerData> ();
+    [HideInInspector]
+    public Dictionary<int, TeamData> teamData = new Dictionary<int, TeamData> ();
 
     private ExitGames.Client.Photon.Hashtable classHashtable;
     private int selectedClassId;
@@ -473,6 +475,15 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     [PunRPC]
     protected virtual void RpcAddHealData (int healingPlayerId, float heal) {
         playerData[healingPlayerId].AddHeal (heal);
+    }
+
+    public virtual void AddScore (int teamId, float scoreIncrease) {
+        photonView.RPC ("RpcAddScore", PhotonTargets.All, teamId, scoreIncrease);
+    }
+
+    [PunRPC]
+    protected virtual void RpcAddScore (int teamId, float scoreIncrease) {
+        teamData[teamId].score += scoreIncrease;
     }
 
 }

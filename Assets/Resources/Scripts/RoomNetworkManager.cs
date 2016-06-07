@@ -13,8 +13,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         new Color (0, 0, 1), // Blue
         new Color (1, 1, 0), // Yellow
         new Color (1, 0, 1), // Pink
-        new Color (0, 1, 1), // Cyan
-        new Color (0, 0, 0) // Black
+        new Color (0, 1, 1) // Cyan
     };
     public Texture2D[] colorTextures;
 

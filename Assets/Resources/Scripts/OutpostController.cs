@@ -6,20 +6,45 @@ public class OutpostController : Photon.MonoBehaviour {
 
     public float influenceRate;
     public float maxInfluence;
+    public float defaultTickDelay; // Delay between ticks
+    public float scorePerTick; // Score given to the controlling team per tick
 
-    //[HideInInspector]
+    private float tickDelay;
+
+    [HideInInspector]
     public bool isControlled;
-    //[HideInInspector]
+    [HideInInspector]
     public int controllingTeamId;
-    //[HideInInspector]
+    [HideInInspector]
     public float currentInfluence;
+
+    // Cached components
+    private InGameNetworkManager networkManager;
 
 	// Use this for initialization
 	void Start () {
+        networkManager = GameObject.FindObjectOfType<InGameNetworkManager> ();
+        tickDelay = defaultTickDelay;
         isControlled = false;
         controllingTeamId = -1;
         currentInfluence = 0.0f;
 	}
+
+    void Update () {
+        if (!photonView.isMine) {
+            return;
+        }
+        if (!isControlled) {
+            tickDelay = defaultTickDelay;
+            return;
+        }
+
+        tickDelay -= Time.deltaTime;
+        if (tickDelay <= 0.0f) {
+            networkManager.AddScore (controllingTeamId, scorePerTick);
+            tickDelay = defaultTickDelay;
+        }
+    }
 
     void OnTriggerStay2D (Collider2D collider) {
         if (!photonView.isMine) {
