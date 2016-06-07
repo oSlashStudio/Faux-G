@@ -5,9 +5,8 @@ using System.Collections.Generic;
 using PhotonPlayerExtension;
 
 public class RoomNetworkManager : Photon.PunBehaviour {
-
-    private int selectedColorId = 0;
-    private Color[] playerColors = new Color[] {
+    
+    private Color[] teamColors = new Color[] {
         new Color (1, 1, 1),  // White
         new Color (1, 0, 0), // Red
         new Color (0, 1, 0), // Green
@@ -134,19 +133,48 @@ public class RoomNetworkManager : Photon.PunBehaviour {
                 {
                     GUILayout.BeginHorizontal (GUI.skin.box);
                     {
-                        GUILayout.FlexibleSpace ();
-                        GUILayout.Label (currentTeam.name);
-                        if (currentTeam.IsFull () || PhotonNetwork.player.CurrentTeamId () == currentTeam.id) {
-                            GUI.enabled = false;
-                            GUILayout.Button ("Join");
-                            GUI.enabled = true;
-                        } else {
-                            if (GUILayout.Button ("Join")) {
-                                PhotonNetwork.player.LeaveTeam (); // Leave current team
-                                PhotonNetwork.player.JoinTeam (currentTeam.id); // Join new team
+                        GUILayout.BeginVertical ();
+                        {
+                            GUILayout.BeginHorizontal ();
+                            {
+                                GUILayout.FlexibleSpace ();
+                                GUILayout.Label (currentTeam.name);
+                                if (currentTeam.IsFull () || PhotonNetwork.player.CurrentTeamId () == currentTeam.id) {
+                                    GUI.enabled = false;
+                                    GUILayout.Button ("Join");
+                                    GUI.enabled = true;
+                                } else {
+                                    if (GUILayout.Button ("Join")) {
+                                        PhotonNetwork.player.LeaveTeam (); // Leave current team
+                                        PhotonNetwork.player.JoinTeam (currentTeam.id); // Join new team
+                                    }
+                                }
+                                GUILayout.FlexibleSpace ();
                             }
+                            GUILayout.EndHorizontal ();
+
+                            GUILayout.BeginHorizontal ();
+                            {
+                                GUIStyle buttonStyle = new GUIStyle (GUI.skin.button);
+                                buttonStyle.normal.background = colorTextures[currentTeam.colorId];
+                                buttonStyle.hover.background = colorTextures[currentTeam.colorId];
+                                buttonStyle.active.background = colorTextures[currentTeam.colorId];
+
+                                GUILayout.FlexibleSpace ();
+                                if (PhotonNetwork.player.CurrentTeamId () == currentTeam.id) {
+                                    if (GUILayout.Button ("", buttonStyle, GUILayout.Width (RelativeWidth (200)))) {
+                                        photonView.RPC ("RpcCycleTeamColor", PhotonTargets.AllBufferedViaServer, currentTeam.id);
+                                    }
+                                } else {
+                                    GUI.enabled = false;
+                                    GUILayout.Button ("", buttonStyle, GUILayout.Width (RelativeWidth (200)));
+                                    GUI.enabled = true;
+                                }
+                                GUILayout.FlexibleSpace ();
+                            }
+                            GUILayout.EndHorizontal ();
                         }
-                        GUILayout.FlexibleSpace ();
+                        GUILayout.EndVertical ();
                     }
                     GUILayout.EndHorizontal ();
 
@@ -168,11 +196,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
                                     GUILayout.Label (player.name);
                                 }
 
-                                if (player.isLocal) { // Local player
-                                    if (GUILayout.Button (colorTextures[selectedColorId], GUILayout.Width (RelativeWidth (200)))) {
-                                        selectedColorId = (selectedColorId + 1) % playerColors.Length;
-                                    }
-                                } else if (PhotonNetwork.isMasterClient) {
+                                if (PhotonNetwork.isMasterClient && !player.isLocal) {
                                     if (GUILayout.Button ("Kick")) { // Kick button
                                         KickPlayer (player);
                                     }
@@ -223,11 +247,7 @@ public class RoomNetworkManager : Photon.PunBehaviour {
                                 GUILayout.Label (player.name);
                             }
 
-                            if (player.isLocal) { // Local player
-                                if (GUILayout.Button (colorTextures[selectedColorId], GUILayout.Width (RelativeWidth (200)))) {
-                                    selectedColorId = (selectedColorId + 1) % playerColors.Length;
-                                }
-                            } else if (PhotonNetwork.isMasterClient) {
+                            if (PhotonNetwork.isMasterClient && !player.isLocal) {
                                 if (GUILayout.Button ("Kick")) { // Kick button
                                     KickPlayer (player);
                                 }
@@ -285,6 +305,11 @@ public class RoomNetworkManager : Photon.PunBehaviour {
         GUILayout.EndHorizontal ();
     }
 
+    [PunRPC]
+    void RpcCycleTeamColor (int teamId) {
+        teams[teamId].colorId = (teams[teamId].colorId + 1) % teamColors.Length;
+    }
+
     void KickPlayer (PhotonPlayer kickedPlayer) {
         PhotonNetwork.CloseConnection (kickedPlayer);
     }
@@ -324,9 +349,9 @@ public class RoomNetworkManager : Photon.PunBehaviour {
     void RpcLoadLevel () {
         // Set color and class
         ExitGames.Client.Photon.Hashtable playerHashTable = new ExitGames.Client.Photon.Hashtable ();
-        playerHashTable["rColor"] = (byte) playerColors[selectedColorId].r;
-        playerHashTable["gColor"] = (byte) playerColors[selectedColorId].g;
-        playerHashTable["bColor"] = (byte) playerColors[selectedColorId].b;
+        playerHashTable["rColor"] = (byte) teamColors[teams[(byte) PhotonNetwork.player.customProperties["team"]].colorId].r;
+        playerHashTable["gColor"] = (byte) teamColors[teams[(byte) PhotonNetwork.player.customProperties["team"]].colorId].g;
+        playerHashTable["bColor"] = (byte) teamColors[teams[(byte) PhotonNetwork.player.customProperties["team"]].colorId].b;
         playerHashTable["class"] = (byte) selectedClassId;
         PhotonNetwork.player.SetCustomProperties (playerHashTable);
         // Temporarily pause message queue, to be resumed when the in-game scene loads

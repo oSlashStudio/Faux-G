@@ -8,6 +8,7 @@ public class Team : System.Object {
     public int id;
     public string name;
     public int maxPlayers;
+    public int colorId;
 
     public bool IsFull () {
         int playerCount = 0;
