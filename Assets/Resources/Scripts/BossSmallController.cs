@@ -18,11 +18,13 @@ public class BossSmallController : Photon.MonoBehaviour {
     private Rigidbody2D rigidBody;
     private GameObject minion;
     private PhotonTransformView photonTransformView;
+    private InGameNetworkManager networkManager;
 
     // Use this for initialization
     void Start () {
         rigidBody = GetComponent<Rigidbody2D> ();
         photonTransformView = GetComponent<PhotonTransformView> ();
+        networkManager = GameObject.FindObjectOfType<InGameNetworkManager> ();
 
         if (!photonView.isMine) {
             rigidBody.isKinematic = true; // If this client can't control, set isKinematic to true
@@ -96,6 +98,17 @@ public class BossSmallController : Photon.MonoBehaviour {
     [PunRPC]
     void RpcApplyPhysicalHitDamage (int targetViewId, float physicalHitDamage, Vector2 damagePoint) {
         PhotonView.Find (targetViewId).GetComponent<HealthController> ().Damage (physicalHitDamage, damagePoint);
+    }
+
+    void OnDestroy () {
+        if (!photonView.isMine) {
+            return;
+        }
+
+        if (minion != null) {
+            PhotonNetwork.Destroy (minion);
+        }
+        networkManager.EndGame ();
     }
 
 }

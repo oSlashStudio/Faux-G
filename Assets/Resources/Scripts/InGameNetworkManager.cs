@@ -116,7 +116,7 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     }
 
     // Update is called once per frame
-    void Update () {
+    protected virtual void Update () {
         if (isDead) {
             respawnTimer -= Time.deltaTime;
             if (respawnTimer <= 0.0f) {
@@ -484,6 +484,19 @@ public class InGameNetworkManager : Photon.PunBehaviour {
     [PunRPC]
     protected virtual void RpcAddScore (int teamId, float scoreIncrease) {
         teamData[teamId].score += scoreIncrease;
+    }
+
+    public virtual void EndGame () {
+        photonView.RPC ("RpcEndGame", PhotonTargets.All);
+    }
+
+    [PunRPC]
+    protected virtual void RpcEndGame () {
+        PhotonNetwork.LeaveRoom ();
+    }
+
+    public override void OnLeftRoom () {
+        PhotonNetwork.LoadLevel (1);
     }
 
 }

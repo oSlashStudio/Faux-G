@@ -248,6 +248,7 @@ public class LobbyNetworkManager : Photon.PunBehaviour {
         // Clear player properties (this can only be done by nullifying the members)
         ExitGames.Client.Photon.Hashtable playerHashTable = new ExitGames.Client.Photon.Hashtable ();
         playerHashTable["team"] = null;
+        playerHashTable["teamName"] = null;
         playerHashTable["ready"] = null;
         playerHashTable["rColor"] = null;
         playerHashTable["gColor"] = null;
