@@ -10,6 +10,7 @@ public class Rifle : Weapon {
     public float toggledRecoil = 0.6f; // The recoil when toggled, will be swapped with recoil on toggle
 
     private bool toggled;
+    private int checkedAmmo;
 
     public override void Toggle () {
         toggled = !toggled;
@@ -19,6 +20,15 @@ public class Rifle : Weapon {
         Swap (ref maxSpreadAngle, ref toggledMaxSpreadAngle);
         // Swap recoils
         Swap (ref recoil, ref toggledRecoil);
+    }
+
+    public override bool CanFire () {
+        if (!toggled) {
+            return base.CanFire ();
+        } else {
+            checkedAmmo = ammo; // Save the current # of ammo for determining # of bursted bullets
+            return base.CanFire ();
+        }
     }
 
     public override void Fire (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId) {
@@ -31,16 +41,25 @@ public class Rifle : Weapon {
 
     IEnumerator BurstFire (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId) {
         base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
-        if (ammo == 0) {
+        if (checkedAmmo < 2) {
             yield break;
         }
         yield return new WaitForSeconds (burstFireDelay);
         base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
-        if (ammo == 0) {
+        if (checkedAmmo < 3) {
             yield break;
         }
         yield return new WaitForSeconds (burstFireDelay);
         base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
+    }
+
+    public override void ResetFire () {
+        fireDelay = defaultFireDelay;
+        if (toggled) {
+            ammo = Mathf.Max (ammo - 3, 0);
+        } else {
+            ammo -= 1;
+        }
     }
 
     void Swap<T> (ref T lhs, ref T rhs) {

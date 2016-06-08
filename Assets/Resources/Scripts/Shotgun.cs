@@ -33,9 +33,6 @@ public class Shotgun : Weapon {
             }
         }
 
-        fireDelay = defaultFireDelay;
-        ammo -= 1;
-
         PlayFireSoundClip ();
     }
 

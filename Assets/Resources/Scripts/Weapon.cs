@@ -72,10 +72,12 @@ public class Weapon : MonoBehaviour {
 
         throwableObject.GetComponent<Rigidbody2D> ().AddForce (throwDirectionalForce);
 
+        PlayFireSoundClip ();
+    }
+
+    public virtual void ResetThrow () {
         fireDelay = defaultFireDelay;
         ammo -= 1;
-
-        PlayFireSoundClip ();
     }
 
     public virtual void Fire (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId) {
@@ -89,10 +91,12 @@ public class Weapon : MonoBehaviour {
         // Set projectile color
         projectile.GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<MeshRenderer> ().material.color);
 
+        PlayFireSoundClip ();
+    }
+
+    public virtual void ResetFire () {
         fireDelay = defaultFireDelay;
         ammo -= 1;
-
-        PlayFireSoundClip ();
     }
 
     public virtual void FireHoming (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId, int targetViewId) {
@@ -109,10 +113,12 @@ public class Weapon : MonoBehaviour {
         // Set projectile color
         projectile.GetComponent<TrailRenderer> ().material.SetColor ("_TintColor", player.GetComponent<MeshRenderer> ().material.color);
 
+        PlayFireSoundClip ();
+    }
+
+    public virtual void ResetFireHoming () {
         fireDelay = defaultFireDelay;
         ammo -= 1;
-
-        PlayFireSoundClip ();
     }
 
     protected void PlayFireSoundClip () {

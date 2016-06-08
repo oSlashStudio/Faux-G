@@ -162,7 +162,8 @@ public class WeaponController : Photon.MonoBehaviour {
 
         Vector3 throwDirection = (crosshair.transform.position - transform.position).normalized;
         Vector2 throwDirectionalForce = throwDirection * throwForce;
-        photonView.RPC ("RpcThrow", PhotonTargets.All, transform.position, throwDirectionalForce);
+        photonView.RPC ("RpcThrow", PhotonTargets.AllViaServer, transform.position, throwDirectionalForce);
+        weapons[currentWeapon].ResetThrow ();
         
         // Reset throw related variables
         isThrowing = false;
@@ -213,7 +214,8 @@ public class WeaponController : Photon.MonoBehaviour {
 
         int targetViewId = AcquireHomingTarget ();
 
-        photonView.RPC ("RpcFireHoming", PhotonTargets.All, transform.position, rotation, targetViewId);
+        photonView.RPC ("RpcFireHoming", PhotonTargets.AllViaServer, transform.position, rotation, targetViewId);
+        weapons[currentWeapon].ResetFireHoming ();
 
         // Firing after-effects
         IntroduceRecoil ();
@@ -253,7 +255,8 @@ public class WeaponController : Photon.MonoBehaviour {
         Vector3 directionVector = GetProjectileDirectionVector ();
         Quaternion rotation = GetProjectileRotation (directionVector);
 
-        photonView.RPC ("RpcFire", PhotonTargets.All, transform.position, rotation);
+        photonView.RPC ("RpcFire", PhotonTargets.AllViaServer, transform.position, rotation);
+        weapons[currentWeapon].ResetFire ();
 
         // Firing after-effects
         IntroduceRecoil ();
