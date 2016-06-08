@@ -36,14 +36,18 @@ public class PlayerController : Photon.MonoBehaviour {
     private StaminaController staminaController;
     private PhotonTransformView photonTransformView;
     private GameObject sprintTrail;
+    private Light minimapIcon;
 
-	// Use this for initialization
-	void Start () {
+    void Awake () {
         rigidBody = GetComponent<Rigidbody2D> ();
         healthController = GetComponent<HealthController> ();
         staminaController = GetComponent<StaminaController> ();
         photonTransformView = GetComponent<PhotonTransformView> ();
+        minimapIcon = GetComponentInChildren<Light> ();
+    }
 
+	// Use this for initialization
+	void Start () {
         moveSpeed = walkSpeed;
         jumpForce = 0.0f;
 
@@ -53,6 +57,9 @@ public class PlayerController : Photon.MonoBehaviour {
         }
 
         // Client specific instantiation begins here
+
+        minimapIcon.color = GetComponent<MeshRenderer> ().material.color;
+        minimapIcon.range = 5;
 
         // Synchronize color to instances over the network
         photonView.RPC ("RpcChangeColor", PhotonTargets.Others,
@@ -90,7 +97,10 @@ public class PlayerController : Photon.MonoBehaviour {
 
     [PunRPC]
     void RpcChangeColor (float rColor, float gColor, float bColor) {
-        GetComponent<MeshRenderer> ().material.color = new Color (rColor, gColor, bColor);
+        Color color = new Color (rColor, gColor, bColor);
+        GetComponent<MeshRenderer> ().material.color = color;
+        minimapIcon.color = color;
+        minimapIcon.range = 3;
     }
 
     /*

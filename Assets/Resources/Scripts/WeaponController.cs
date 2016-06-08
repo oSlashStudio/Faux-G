@@ -98,8 +98,7 @@ public class WeaponController : Photon.MonoBehaviour {
     }
 
     void InstantiateMinimapCamera () {
-        minimapCamera = (GameObject) Instantiate (minimapCameraPrefab, Vector3.zero, Quaternion.identity);
-        minimapCamera.GetComponent<CameraController> ().player = player;
+        minimapCamera = (GameObject) Instantiate (minimapCameraPrefab, new Vector3 (0, 0, -10), Quaternion.identity);
     }
 	
 	// Update is called once per frame
