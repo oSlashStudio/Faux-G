@@ -13,6 +13,22 @@ public class LandingNetworkManager : Photon.PunBehaviour {
 
     private string displayMessage = "";
 
+    private int selectedRegionId = 0;
+    private string[] regions = new string[] {
+        "Asia", 
+        "Australia", 
+        "Europe", 
+        "Japan",  
+        "US"
+    };
+    private CloudRegionCode[] regionCode = new CloudRegionCode[] {
+        CloudRegionCode.asia, 
+        CloudRegionCode.au, 
+        CloudRegionCode.eu, 
+        CloudRegionCode.jp, 
+        CloudRegionCode.us
+    };
+
 	// Use this for initialization
 	void Start () {
 
@@ -53,48 +69,66 @@ public class LandingNetworkManager : Photon.PunBehaviour {
         GUILayout.BeginArea (RelativeRect (0, 0, 1920, 1080));
 
         GUILayout.BeginHorizontal ();
-        GUILayout.FlexibleSpace (); // Left padding
+        {
+            GUILayout.FlexibleSpace (); // Left padding
 
-        GUILayout.BeginVertical (GUILayout.Width (RelativeWidth (800)));
-        GUILayout.FlexibleSpace (); // Top padding
+            GUILayout.BeginVertical (GUILayout.Width (RelativeWidth (800)));
+            {
+                GUILayout.FlexibleSpace (); // Top padding
 
-        GUIStyle leftAlignedLabel = new GUIStyle (GUI.skin.label);
-        leftAlignedLabel.alignment = TextAnchor.MiddleLeft;
+                GUIStyle leftAlignedLabel = new GUIStyle (GUI.skin.label);
+                leftAlignedLabel.alignment = TextAnchor.MiddleLeft;
 
-        GUILayout.BeginHorizontal ();
-        GUILayout.Label ("Username:", leftAlignedLabel);
-        GUI.SetNextControlName ("inputUsername");
-        inputUsername = GUILayout.TextField (inputUsername, 32, GUILayout.Width (RelativeWidth (400)));
-        if (inputUsername == "") {
-            GUI.FocusControl ("inputUsername"); // Focus while empty
+                GUILayout.BeginHorizontal ();
+                {
+                    GUILayout.Label ("Username:", leftAlignedLabel);
+                    GUI.SetNextControlName ("inputUsername");
+                    inputUsername = GUILayout.TextField (inputUsername, 32, GUILayout.Width (RelativeWidth (400)));
+                    if (inputUsername == "") {
+                        GUI.FocusControl ("inputUsername"); // Focus while empty
+                    }
+                }
+                GUILayout.EndHorizontal ();
+
+                GUILayout.BeginHorizontal ();
+                {
+                    GUILayout.Label ("Password:", leftAlignedLabel);
+                    inputPassword = GUILayout.PasswordField (inputPassword, '*', 32, GUILayout.Width (RelativeWidth (400)));
+                }
+                GUILayout.EndHorizontal ();
+
+                GUILayout.BeginHorizontal ();
+                {
+                    selectedRegionId = GUILayout.SelectionGrid (selectedRegionId, regions, 3);
+                }
+                GUILayout.EndHorizontal ();
+
+                GUILayout.BeginHorizontal ();
+                {
+                    if (GUILayout.Button ("Register")) {
+                        Register ();
+                    }
+                    GUILayout.FlexibleSpace ();
+                    if (GUILayout.Button ("Login")) {
+                        Login ();
+                    }
+                }
+                GUILayout.EndHorizontal ();
+
+                GUILayout.BeginHorizontal ();
+                {
+                    GUILayout.FlexibleSpace ();
+                    GUILayout.Label (displayMessage);
+                    GUILayout.FlexibleSpace ();
+                }
+                GUILayout.EndHorizontal ();
+
+                GUILayout.FlexibleSpace (); // Bottom padding
+            }
+            GUILayout.EndVertical ();
+
+            GUILayout.FlexibleSpace (); // Right padding
         }
-        GUILayout.EndHorizontal ();
-
-        GUILayout.BeginHorizontal ();
-        GUILayout.Label ("Password:", leftAlignedLabel);
-        inputPassword = GUILayout.PasswordField (inputPassword, '*', 32, GUILayout.Width (RelativeWidth (400)));
-        GUILayout.EndHorizontal ();
-
-        GUILayout.BeginHorizontal ();
-        if (GUILayout.Button ("Register")) {
-            Register ();
-        }
-        GUILayout.FlexibleSpace ();
-        if (GUILayout.Button ("Login")) {
-            Login ();
-        }
-        GUILayout.EndHorizontal ();
-
-        GUILayout.BeginHorizontal ();
-        GUILayout.FlexibleSpace ();
-        GUILayout.Label (displayMessage);
-        GUILayout.FlexibleSpace ();
-        GUILayout.EndHorizontal ();
-
-        GUILayout.FlexibleSpace (); // Bottom padding
-        GUILayout.EndVertical ();
-
-        GUILayout.FlexibleSpace (); // Right padding
         GUILayout.EndHorizontal ();
 
         GUILayout.EndArea ();
@@ -129,7 +163,7 @@ public class LandingNetworkManager : Photon.PunBehaviour {
 
         PhotonNetwork.sendRate = 15;
         PhotonNetwork.sendRateOnSerialize = 15;
-        PhotonNetwork.ConnectUsingSettings ("v0.1");
+        PhotonNetwork.ConnectToRegion (regionCode[selectedRegionId], "v0.2");
     }
 
     void Register () {
