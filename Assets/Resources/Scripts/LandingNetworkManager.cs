@@ -3,6 +3,7 @@ using System.Collections;
 using System.Text;
 using System.Security.Cryptography;
 using System.Collections.Generic;
+using System.Net;
 
 public class LandingNetworkManager : Photon.PunBehaviour {
 
@@ -21,6 +22,13 @@ public class LandingNetworkManager : Photon.PunBehaviour {
         "Japan",  
         "US"
     };
+    private string[] regionsAndPings = new string[] {
+        "Asia", 
+        "Australia", 
+        "Europe", 
+        "Japan", 
+        "US"
+    };
     private CloudRegionCode[] regionCode = new CloudRegionCode[] {
         CloudRegionCode.asia, 
         CloudRegionCode.au, 
@@ -28,16 +36,37 @@ public class LandingNetworkManager : Photon.PunBehaviour {
         CloudRegionCode.jp, 
         CloudRegionCode.us
     };
+    private string[] regionHost = new string[] {
+        "app-asia.exitgamescloud.com", 
+        "app-au.exitgamescloud.com", 
+        "app-eu.exitgamescloud.com", 
+        "app-jp.exitgamescloud.com", 
+        "app-us.exitgamescloud.com"
+    };
+    private string[] ping = new string[] {
+        "n/a", 
+        "n/a", 
+        "n/a", 
+        "n/a", 
+        "n/a"
+    };
 
 	// Use this for initialization
 	void Start () {
-
+        StartCoroutine (UpdatePing ());
 	}
-	
-	// Update is called once per frame
-	void Update () {
 
-	}
+    IEnumerator UpdatePing () {
+        while (true) {
+            for (int i = 0; i < regionHost.Length; i++) {
+                Ping pingHost = new Ping (GetIpAddress (regionHost[i]).ToString ());
+                yield return new WaitUntil (() => pingHost.isDone);
+                ping[i] = pingHost.time + " ms";
+                regionsAndPings[i] = regions[i] + " (" + ping[i] + ")";
+            }
+            yield return new WaitForSeconds (5);
+        }
+    }
 
     /*
      * Get a rectangle relative to full HD 1920:1080 screen
@@ -99,7 +128,7 @@ public class LandingNetworkManager : Photon.PunBehaviour {
 
                 GUILayout.BeginHorizontal ();
                 {
-                    selectedRegionId = GUILayout.SelectionGrid (selectedRegionId, regions, 3);
+                    selectedRegionId = GUILayout.SelectionGrid (selectedRegionId, regionsAndPings, 3);
                 }
                 GUILayout.EndHorizontal ();
 
@@ -186,6 +215,16 @@ public class LandingNetworkManager : Photon.PunBehaviour {
 
         // Proceed to lobby
         PhotonNetwork.LoadLevel (1);
+    }
+
+    IPAddress GetIpAddress (string hostName) {
+        IPHostEntry host;
+        host = Dns.GetHostEntry (hostName);
+
+        if (host.AddressList.Length == 0) {
+            return null;
+        }
+        return host.AddressList[0];
     }
 
 }
