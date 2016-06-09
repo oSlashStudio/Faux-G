@@ -16,55 +16,51 @@ public class LandingNetworkManager : Photon.PunBehaviour {
 
     private int selectedRegionId = 0;
     private string[] regions = new string[] {
-        "Asia", 
-        "Australia", 
-        "Europe", 
-        "Japan",  
+        "Asia",
+        "Australia",
+        "Europe",
+        "Japan",
         "US"
     };
     private string[] regionsAndPings = new string[] {
-        "Asia", 
-        "Australia", 
-        "Europe", 
-        "Japan", 
+        "Asia",
+        "Australia",
+        "Europe",
+        "Japan",
         "US"
     };
     private CloudRegionCode[] regionCode = new CloudRegionCode[] {
-        CloudRegionCode.asia, 
-        CloudRegionCode.au, 
-        CloudRegionCode.eu, 
-        CloudRegionCode.jp, 
+        CloudRegionCode.asia,
+        CloudRegionCode.au,
+        CloudRegionCode.eu,
+        CloudRegionCode.jp,
         CloudRegionCode.us
     };
     private string[] regionHost = new string[] {
-        "app-asia.exitgamescloud.com", 
-        "app-au.exitgamescloud.com", 
-        "app-eu.exitgamescloud.com", 
-        "app-jp.exitgamescloud.com", 
+        "app-asia.exitgamescloud.com",
+        "app-au.exitgamescloud.com",
+        "app-eu.exitgamescloud.com",
+        "app-jp.exitgamescloud.com",
         "app-us.exitgamescloud.com"
     };
-    private string[] ping = new string[] {
-        "n/a", 
-        "n/a", 
-        "n/a", 
-        "n/a", 
-        "n/a"
-    };
 
-	// Use this for initialization
-	void Start () {
-        StartCoroutine (UpdatePing ());
-	}
+    // Use this for initialization
+    void Start () {
+
+    }
 
     IEnumerator UpdatePing () {
-        while (true) {
-            for (int i = 0; i < regionHost.Length; i++) {
-                Ping pingHost = new Ping (GetIpAddress (regionHost[i]).ToString ());
-                yield return new WaitUntil (() => pingHost.isDone);
-                ping[i] = pingHost.time + " ms";
-                regionsAndPings[i] = regions[i] + " (" + ping[i] + ")";
+        Ping[] pings = new Ping[5];
+        for (int i = 0; i < regionHost.Length; i++) {
+            pings[i] = new Ping (GetIpAddress (regionHost[i]).ToString ());
+        }
+        yield return new WaitForSeconds (1.0f); // Wait for 1s
+        for (int i = 0; i < regionHost.Length; i++) {
+            if (pings[i].time == -1) {
+                regionsAndPings[i] = regions[i] + " (Timeout)";
+            } else {
+                regionsAndPings[i] = regions[i] + " (" + pings[i].time + " ms)";
             }
-            yield return new WaitForSeconds (5);
         }
     }
 
@@ -134,10 +130,13 @@ public class LandingNetworkManager : Photon.PunBehaviour {
 
                 GUILayout.BeginHorizontal ();
                 {
+                    if (GUILayout.Button ("Check Ping")) {
+                        StartCoroutine (UpdatePing ());
+                    }
+                    GUILayout.FlexibleSpace ();
                     if (GUILayout.Button ("Register")) {
                         Register ();
                     }
-                    GUILayout.FlexibleSpace ();
                     if (GUILayout.Button ("Login")) {
                         Login ();
                     }
@@ -192,7 +191,7 @@ public class LandingNetworkManager : Photon.PunBehaviour {
 
         PhotonNetwork.sendRate = 15;
         PhotonNetwork.sendRateOnSerialize = 15;
-        PhotonNetwork.ConnectToRegion (regionCode[selectedRegionId], "v0.2");
+        PhotonNetwork.ConnectToRegion (regionCode[selectedRegionId], "v0.1");
     }
 
     void Register () {
