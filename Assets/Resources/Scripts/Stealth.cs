@@ -10,14 +10,10 @@ public class Stealth : Ability {
     private bool isActive;
 
     // Cached components
-    private MeshRenderer[] meshRenderers;
-    private SpriteRenderer[] spriteRenderers;
-    private MeshRenderer[] childrenMeshRenderers;
-    private SpriteRenderer[] childrenSpriteRenderers;
+    private Renderer[] renderers;
 
     protected override void Start () {
-        meshRenderers = GetComponents<MeshRenderer> ().Concat (GetComponentsInChildren<MeshRenderer> ()).ToArray ();
-        spriteRenderers = GetComponents<SpriteRenderer> ().Concat (GetComponentsInChildren<SpriteRenderer> ()).ToArray ();
+        renderers = GetComponents<Renderer> ().Concat (GetComponentsInChildren<Renderer> ()).ToArray ();
     }
 
     protected override void Update () {
@@ -40,19 +36,11 @@ public class Stealth : Ability {
 
     void UpdateRendererAlpha () {
         float alpha = Mathf.Clamp (stealthFunction (duration), 0, 1);
-        foreach (MeshRenderer meshRenderer in meshRenderers) {
-            meshRenderer.material.color = new Color (
-                meshRenderer.material.color.r, 
-                meshRenderer.material.color.g, 
-                meshRenderer.material.color.b, 
-                alpha
-                );
-        }
-        foreach (SpriteRenderer spriteRenderer in spriteRenderers) {
-            spriteRenderer.material.color = new Color (
-                spriteRenderer.material.color.r,
-                spriteRenderer.material.color.g,
-                spriteRenderer.material.color.b,
+        foreach (Renderer renderer in renderers) {
+            renderer.material.color = new Color (
+                renderer.material.color.r,
+                renderer.material.color.g,
+                renderer.material.color.b, 
                 alpha
                 );
         }
