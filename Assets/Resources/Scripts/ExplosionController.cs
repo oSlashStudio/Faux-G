@@ -13,6 +13,7 @@ public class ExplosionController : MonoBehaviour {
     public float explosionDamage;
     private float explosionDuration; // Explosion duration (directly taken from particle emitter duration)
     public float explosionDurationOffset; // The offset from explosion duration, useful for slowly fading emitter
+    public float explosionForce;
 
     // Owner information variables
     private bool isPlayerInstantiated = false;
@@ -56,7 +57,8 @@ public class ExplosionController : MonoBehaviour {
     void DamagePlayersInArea () {
         Collider2D[] collidersInArea = Physics2D.OverlapCircleAll ((Vector2) transform.position, explosionArea);
         foreach (Collider2D currentCollider in collidersInArea) {
-            HealthController targetHealthController = currentCollider.gameObject.GetComponent<HealthController> ();
+            GameObject targetGameObject = currentCollider.gameObject;
+            HealthController targetHealthController = targetGameObject.GetComponent<HealthController> ();
             if (targetHealthController != null) { // If target has health component
                 if (isPlayerInstantiated) {
                     targetHealthController.Heal (explosionHeal, instantiatorId, currentCollider.transform.position);
@@ -64,6 +66,13 @@ public class ExplosionController : MonoBehaviour {
                 } else {
                     targetHealthController.Heal (explosionHeal, currentCollider.transform.position);
                     targetHealthController.Damage (explosionDamage, currentCollider.transform.position);
+                }
+            }
+            if (targetGameObject.tag != "Projectile") { // Projectiles are not affected by explosion force
+                Rigidbody2D targetRigidbody = targetGameObject.GetComponent<Rigidbody2D> ();
+                if (targetRigidbody != null) {
+                    Vector2 direction = (targetRigidbody.position - (Vector2) transform.position).normalized;
+                    targetRigidbody.AddForce (direction * explosionForce, ForceMode2D.Impulse);
                 }
             }
         }
