@@ -35,22 +35,20 @@ public class WeaponController : Photon.MonoBehaviour {
     private GameObject aimCamera;
     private Camera aimCameraComponent;
     private GameObject throwForceBar;
-    private AudioSource audioSource;
     private GameObject minimapCamera;
 
 	// Use this for initialization
 	void Start () {
         player = transform.parent.gameObject;
         playerController = player.GetComponent<PlayerController> ();
-        audioSource = gameObject.GetComponent<AudioSource> ();
-
-        InitializeWeapons ();
 
         if (!photonView.isMine) {
             return;
         }
 
         // Client specific initialization begins here
+        InstantiateWeapon ();
+
         InstantiateMainCamera ();
         InstantiateCrosshair ();
         InstantiateAimCamera ();
@@ -60,13 +58,14 @@ public class WeaponController : Photon.MonoBehaviour {
         ChangeWeapon (0); // Initialize equipped weapon (weapon 0 by default)
     }
 
-    void InitializeWeapons () {
+    void InstantiateWeapon () {
         for (int i = 0; i < weapons.Length; i++) {
             // Make a gameobject of each weapon (otherwise they will still be prefabs)
-            Weapon currentWeapon = (Weapon) Instantiate (weapons[i], Vector3.zero, Quaternion.identity);
-            currentWeapon.transform.parent = transform;
-            currentWeapon.audioSource = audioSource;
-            weapons[i] = currentWeapon;
+            GameObject currentWeaponGameObject = PhotonNetwork.Instantiate ("Weapons/" + weapons[i].name, Vector3.zero, Quaternion.identity, 0);
+            Weapon currentWeapon = currentWeaponGameObject.GetComponent<Weapon> ();
+            // Set weapons' networked information for networked initialization
+            currentWeapon.playerViewId = player.GetComponent<PhotonView> ().viewID;
+            currentWeapon.weaponId = i;
         }
     }
 
@@ -161,17 +160,12 @@ public class WeaponController : Photon.MonoBehaviour {
 
         Vector3 throwDirection = (crosshair.transform.position - transform.position).normalized;
         Vector2 throwDirectionalForce = throwDirection * throwForce;
-        photonView.RPC ("RpcThrow", PhotonTargets.AllViaServer, transform.position, throwDirectionalForce);
-        weapons[currentWeapon].ResetThrow ();
+
+        weapons[currentWeapon].Throw (transform.position, throwDirectionalForce);
         
         // Reset throw related variables
         isThrowing = false;
         throwForce = 0.0f;
-    }
-
-    [PunRPC]
-    void RpcThrow (Vector3 throwPosition, Vector2 throwDirectionalForce) {
-        weapons[currentWeapon].Throw (throwPosition, throwDirectionalForce, player, photonView.owner.ID);
     }
 
     void ChargeThrow () {
@@ -213,17 +207,11 @@ public class WeaponController : Photon.MonoBehaviour {
 
         int targetViewId = AcquireHomingTarget ();
 
-        photonView.RPC ("RpcFireHoming", PhotonTargets.AllViaServer, transform.position, rotation, targetViewId);
-        weapons[currentWeapon].ResetFireHoming ();
+        weapons[currentWeapon].FireHoming (transform.position, rotation, targetViewId);
 
         // Firing after-effects
         IntroduceRecoil ();
         IntroduceKnockback (-directionVector);
-    }
-
-    [PunRPC]
-    void RpcFireHoming (Vector3 projectilePosition, Quaternion projectileRotation, int targetViewId) {
-        weapons[currentWeapon].FireHoming (projectilePosition, projectileRotation, player, photonView.owner.ID, targetViewId);
     }
 
     /*
@@ -254,17 +242,11 @@ public class WeaponController : Photon.MonoBehaviour {
         Vector3 directionVector = GetProjectileDirectionVector ();
         Quaternion rotation = GetProjectileRotation (directionVector);
 
-        photonView.RPC ("RpcFire", PhotonTargets.AllViaServer, transform.position, rotation);
-        weapons[currentWeapon].ResetFire ();
+        weapons[currentWeapon].Fire (transform.position, rotation);
 
         // Firing after-effects
         IntroduceRecoil ();
         IntroduceKnockback (-directionVector);
-    }
-
-    [PunRPC]
-    void RpcFire (Vector3 projectilePosition, Quaternion projectileRotation) {
-        weapons[currentWeapon].Fire (projectilePosition, projectileRotation, player, photonView.owner.ID);
     }
 
     Vector3 GetProjectileDirectionVector () {

@@ -22,44 +22,26 @@ public class Rifle : Weapon {
         Swap (ref recoil, ref toggledRecoil);
     }
 
-    public override bool CanFire () {
-        if (!toggled) {
-            return base.CanFire ();
-        } else {
-            checkedAmmo = ammo; // Save the current # of ammo for determining # of bursted bullets
-            return base.CanFire ();
-        }
-    }
-
-    public override void Fire (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId) {
+    public override void Fire (Vector3 projectilePosition, Quaternion projectileRotation) {
         if (!toggled) { // Semi-automatic mode
-            base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
+            base.Fire (projectilePosition, projectileRotation);
         } else { // Burst fire mode
-            StartCoroutine (BurstFire (projectilePosition, projectileRotation, player, instantiatorId));
+            StartCoroutine (BurstFire (projectilePosition, projectileRotation));
         }
     }
 
-    IEnumerator BurstFire (Vector3 projectilePosition, Quaternion projectileRotation, GameObject player, int instantiatorId) {
-        base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
-        if (checkedAmmo < 2) {
+    IEnumerator BurstFire (Vector3 projectilePosition, Quaternion projectileRotation) {
+        base.Fire (projectilePosition, projectileRotation);
+        if (ammo == 0) {
             yield break;
         }
         yield return new WaitForSeconds (burstFireDelay);
-        base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
-        if (checkedAmmo < 3) {
+        base.Fire (projectilePosition, projectileRotation);
+        if (ammo == 0) {
             yield break;
         }
         yield return new WaitForSeconds (burstFireDelay);
-        base.Fire (projectilePosition, projectileRotation, player, instantiatorId);
-    }
-
-    public override void ResetFire () {
-        fireDelay = defaultFireDelay;
-        if (toggled) {
-            ammo = Mathf.Max (ammo - 3, 0);
-        } else {
-            ammo -= 1;
-        }
+        base.Fire (projectilePosition, projectileRotation);
     }
 
     void Swap<T> (ref T lhs, ref T rhs) {
