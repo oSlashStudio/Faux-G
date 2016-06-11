@@ -68,11 +68,6 @@ public class Stealth : Ability {
     }
 
     void DeactivateAbility () {
-        photonView.RPC ("RpcDeactivateAbility", PhotonTargets.All);
-    }
-
-    [PunRPC]
-    void RpcDeactivateAbility () {
         isActive = false;
     }
 
