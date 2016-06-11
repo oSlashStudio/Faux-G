@@ -58,7 +58,7 @@ public class Stealth : Ability {
     }
 
     protected override void ActivateAbility () {
-        photonView.RPC ("RpcActivateAbility", PhotonTargets.All);
+        photonView.RPC ("RpcActivateAbility", PhotonTargets.AllViaServer);
     }
 
     [PunRPC]
