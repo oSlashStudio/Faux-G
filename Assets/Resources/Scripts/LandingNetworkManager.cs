@@ -12,7 +12,7 @@ public class LandingNetworkManager : Photon.PunBehaviour {
     private string inputUsername = "";
     private string inputPassword = "";
 
-    private string displayMessage = "";
+    private string displayMessage = "Welcome to Faux-G";
 
     private int selectedRegionId = 0;
     private string[] regions = new string[] {
@@ -100,57 +100,59 @@ public class LandingNetworkManager : Photon.PunBehaviour {
             GUILayout.BeginVertical (GUILayout.Width (RelativeWidth (800)));
             {
                 GUILayout.FlexibleSpace (); // Top padding
-
-                GUIStyle leftAlignedLabel = new GUIStyle (GUI.skin.label);
-                leftAlignedLabel.alignment = TextAnchor.MiddleLeft;
-
-                GUILayout.BeginHorizontal ();
+                GUILayout.BeginVertical (GUI.skin.box);
                 {
-                    GUILayout.Label ("Username:", leftAlignedLabel);
-                    GUI.SetNextControlName ("inputUsername");
-                    inputUsername = GUILayout.TextField (inputUsername, 32, GUILayout.Width (RelativeWidth (400)));
-                    if (inputUsername == "") {
-                        GUI.FocusControl ("inputUsername"); // Focus while empty
+                    GUIStyle leftAlignedLabel = new GUIStyle (GUI.skin.label);
+                    leftAlignedLabel.alignment = TextAnchor.MiddleLeft;
+
+                    GUILayout.BeginHorizontal ();
+                    {
+                        GUILayout.Label ("Username:", leftAlignedLabel);
+                        GUI.SetNextControlName ("inputUsername");
+                        inputUsername = GUILayout.TextField (inputUsername, 32, GUILayout.Width (RelativeWidth (400)));
+                        if (inputUsername == "") {
+                            GUI.FocusControl ("inputUsername"); // Focus while empty
+                        }
                     }
-                }
-                GUILayout.EndHorizontal ();
+                    GUILayout.EndHorizontal ();
 
-                GUILayout.BeginHorizontal ();
-                {
-                    GUILayout.Label ("Password:", leftAlignedLabel);
-                    inputPassword = GUILayout.PasswordField (inputPassword, '*', 32, GUILayout.Width (RelativeWidth (400)));
-                }
-                GUILayout.EndHorizontal ();
-
-                GUILayout.BeginHorizontal ();
-                {
-                    selectedRegionId = GUILayout.SelectionGrid (selectedRegionId, regionsAndPings, 3);
-                }
-                GUILayout.EndHorizontal ();
-
-                GUILayout.BeginHorizontal ();
-                {
-                    if (GUILayout.Button ("Check Ping")) {
-                        StartCoroutine (UpdatePing ());
+                    GUILayout.BeginHorizontal ();
+                    {
+                        GUILayout.Label ("Password:", leftAlignedLabel);
+                        inputPassword = GUILayout.PasswordField (inputPassword, '*', 32, GUILayout.Width (RelativeWidth (400)));
                     }
-                    GUILayout.FlexibleSpace ();
-                    if (GUILayout.Button ("Register")) {
-                        Register ();
-                    }
-                    if (GUILayout.Button ("Login")) {
-                        Login ();
-                    }
-                }
-                GUILayout.EndHorizontal ();
+                    GUILayout.EndHorizontal ();
 
-                GUILayout.BeginHorizontal ();
-                {
-                    GUILayout.FlexibleSpace ();
-                    GUILayout.Label (displayMessage);
-                    GUILayout.FlexibleSpace ();
-                }
-                GUILayout.EndHorizontal ();
+                    GUILayout.BeginHorizontal ();
+                    {
+                        selectedRegionId = GUILayout.SelectionGrid (selectedRegionId, regionsAndPings, 3);
+                    }
+                    GUILayout.EndHorizontal ();
 
+                    GUILayout.BeginHorizontal ();
+                    {
+                        if (GUILayout.Button ("Check Ping")) {
+                            StartCoroutine (UpdatePing ());
+                        }
+                        GUILayout.FlexibleSpace ();
+                        if (GUILayout.Button ("Register")) {
+                            Register ();
+                        }
+                        if (GUILayout.Button ("Login")) {
+                            Login ();
+                        }
+                    }
+                    GUILayout.EndHorizontal ();
+
+                    GUILayout.BeginHorizontal ();
+                    {
+                        GUILayout.FlexibleSpace ();
+                        GUILayout.Label (displayMessage);
+                        GUILayout.FlexibleSpace ();
+                    }
+                    GUILayout.EndHorizontal ();
+                }
+                GUILayout.EndVertical ();
                 GUILayout.FlexibleSpace (); // Bottom padding
             }
             GUILayout.EndVertical ();
