@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.Networking;
 using System.Collections;
+using System;
 
 public class ExplosionController : MonoBehaviour {
 
@@ -58,6 +59,12 @@ public class ExplosionController : MonoBehaviour {
         Collider2D[] collidersInArea = Physics2D.OverlapCircleAll ((Vector2) transform.position, explosionArea);
         foreach (Collider2D currentCollider in collidersInArea) {
             GameObject targetGameObject = currentCollider.gameObject;
+            
+            RaycastHit2D hitInfo = Physics2D.Raycast (transform.position, targetGameObject.transform.position - transform.position);
+            if (hitInfo.transform.gameObject != targetGameObject) { // Target is shielded, ignore explosion effect
+                continue;
+            }
+
             HealthController targetHealthController = targetGameObject.GetComponent<HealthController> ();
             if (targetHealthController != null) { // If target has health component
                 if (isPlayerInstantiated) {
