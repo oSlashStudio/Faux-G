@@ -112,7 +112,7 @@ public class HealthController : Photon.MonoBehaviour {
     /*
      * This function handles damage from player.
      */
-    public void Damage (float damageAmount, int damagingPlayerId, Vector2 damagePoint) {
+    public void Damage (float damageAmount, int damagingPlayerId, Vector2 damagePoint, bool isArmorPiercing = false) {
         if (!photonView.isMine) {
             return;
         }
@@ -120,8 +120,11 @@ public class HealthController : Photon.MonoBehaviour {
             return;
         }
 
-        // Scale damage amount depending on armor
-        damageAmount = damageAmount * (1.0f - ArmorReduction ());
+        if (!isArmorPiercing) {
+            // Scale damage amount depending on armor
+            damageAmount = damageAmount * (1.0f - ArmorReduction ());
+        }
+
         // Special case: if health after damage goes below 0
         if (currentHealth - damageAmount < 0.0f) {
             damageAmount = currentHealth;
@@ -136,7 +139,7 @@ public class HealthController : Photon.MonoBehaviour {
     /*
      * This function handles damage from enemy / unknown sources.
      */
-    public void Damage (float damageAmount, Vector2 damagePoint) {
+    public void Damage (float damageAmount, Vector2 damagePoint, bool isArmorPiercing = false) {
         if (!photonView.isMine) {
             return;
         }
@@ -144,8 +147,11 @@ public class HealthController : Photon.MonoBehaviour {
             return;
         }
 
-        // Scale damage amount depending on armor
-        damageAmount = damageAmount * (1.0f - ArmorReduction ());
+        if (!isArmorPiercing) {
+            // Scale damage amount depending on armor
+            damageAmount = damageAmount * (1.0f - ArmorReduction ());
+        }
+
         // Special case: if health after damage goes below 0
         if (currentHealth - damageAmount < 0.0f) {
             damageAmount = currentHealth;

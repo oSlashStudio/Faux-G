@@ -12,6 +12,7 @@ public class ExplosionController : MonoBehaviour {
     public float explosionArea;
     public float explosionHeal;
     public float explosionDamage;
+    public bool isArmorPiercing;
     private float explosionDuration; // Explosion duration (directly taken from particle emitter duration)
     public float explosionDurationOffset; // The offset from explosion duration, useful for slowly fading emitter
     public float explosionForce;
@@ -69,10 +70,10 @@ public class ExplosionController : MonoBehaviour {
             if (targetHealthController != null) { // If target has health component
                 if (isPlayerInstantiated) {
                     targetHealthController.Heal (explosionHeal, instantiatorId, currentCollider.transform.position);
-                    targetHealthController.Damage (explosionDamage, instantiatorId, currentCollider.transform.position);
+                    targetHealthController.Damage (explosionDamage, instantiatorId, currentCollider.transform.position, isArmorPiercing);
                 } else {
                     targetHealthController.Heal (explosionHeal, currentCollider.transform.position);
-                    targetHealthController.Damage (explosionDamage, currentCollider.transform.position);
+                    targetHealthController.Damage (explosionDamage, currentCollider.transform.position, isArmorPiercing);
                 }
             }
             if (targetGameObject.tag != "Projectile") { // Projectiles are not affected by explosion force

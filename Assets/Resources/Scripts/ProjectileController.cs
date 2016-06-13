@@ -11,6 +11,7 @@ public class ProjectileController : MonoBehaviour {
 
     public float projectileHeal;
     public float projectileDamage;
+    public bool isArmorPiercing;
 
     // Owner information variables
     private bool isPlayerInstantiated = false;
@@ -54,10 +55,10 @@ public class ProjectileController : MonoBehaviour {
         if (targetHealthController != null) { // If target has health component
             if (isPlayerInstantiated) {
                 targetHealthController.Heal (projectileHeal, instantiatorId, collision.contacts[0].point);
-                targetHealthController.Damage (projectileDamage, instantiatorId, collision.contacts[0].point);
+                targetHealthController.Damage (projectileDamage, instantiatorId, collision.contacts[0].point, isArmorPiercing);
             } else {
                 targetHealthController.Heal (projectileHeal, collision.contacts[0].point);
-                targetHealthController.Damage (projectileDamage, collision.contacts[0].point);
+                targetHealthController.Damage (projectileDamage, collision.contacts[0].point, isArmorPiercing);
             }
         }
 
