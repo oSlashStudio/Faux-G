@@ -68,7 +68,7 @@ public class BossSmallController : Photon.MonoBehaviour {
     void RpcFire (Vector3 position) {
         for (int i = 0; i < numBulletsSpawned; i++) {
             Vector3 angle = new Vector3 (0.0f, 0.0f, i * 360.0f / numBulletsSpawned);
-            Vector3 positionShift = Quaternion.Euler (angle) * Vector3.right * 1.0f;
+            Vector3 positionShift = Quaternion.Euler (angle) * Vector3.right * 2.0f;
 
             GameObject projectile = (GameObject) Instantiate (bulletPrefab, position + positionShift, Quaternion.LookRotation (positionShift));
 
