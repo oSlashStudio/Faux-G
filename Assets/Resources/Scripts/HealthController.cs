@@ -55,9 +55,9 @@ public class HealthController : Photon.MonoBehaviour {
     }
 
     /*
-     * This function handles heal from player.
+     * This function handles heal from player, enemy, or unknown sources.
      */
-    public void Heal (float healAmount, int healingPlayerId, Vector2 healPoint) {
+    public void Heal (float healAmount, Vector2 healPoint, int healingPlayerId = 0) {
         if (!photonView.isMine) {
             return;
         }
@@ -72,26 +72,9 @@ public class HealthController : Photon.MonoBehaviour {
 
         photonView.RPC ("RpcHeal", PhotonTargets.All, healAmount, healPoint);
 
-        networkManager.AddHealData (healingPlayerId, healAmount);
-    }
-
-    /*
-     * This function handles heal from enemy / unknown sources.
-     */
-    public void Heal (float healAmount, Vector2 healPoint) {
-        if (!photonView.isMine) {
-            return;
+        if (healingPlayerId != 0) {
+            networkManager.AddHealData (healingPlayerId, healAmount);
         }
-        if (healAmount == 0.0f) { // Ignore 0 heal
-            return;
-        }
-
-        // Special case: if health after heal exceeds max health
-        if (currentHealth + healAmount > maxHealth) {
-            healAmount = maxHealth - currentHealth;
-        }
-
-        photonView.RPC ("RpcHeal", PhotonTargets.All, healAmount, healPoint);
     }
 
     [PunRPC]
@@ -110,9 +93,9 @@ public class HealthController : Photon.MonoBehaviour {
     }
 
     /*
-     * This function handles damage from player.
+     * This function handles damage from player, enemy, or unknown sources.
      */
-    public void Damage (float damageAmount, int damagingPlayerId, Vector2 damagePoint, bool isArmorPiercing = false) {
+    public void Damage (float damageAmount, Vector2 damagePoint, bool isArmorPiercing = false, int damagingPlayerId = 0) {
         if (!photonView.isMine) {
             return;
         }
@@ -133,32 +116,10 @@ public class HealthController : Photon.MonoBehaviour {
         photonView.RPC ("RpcDamage", PhotonTargets.All, damageAmount, damagePoint);
 
         lastDamagerId = damagingPlayerId;
-        networkManager.AddDamageData (damagingPlayerId, damageAmount);
-    }
 
-    /*
-     * This function handles damage from enemy / unknown sources.
-     */
-    public void Damage (float damageAmount, Vector2 damagePoint, bool isArmorPiercing = false) {
-        if (!photonView.isMine) {
-            return;
+        if (damagingPlayerId != 0) {
+            networkManager.AddDamageData (damagingPlayerId, damageAmount);
         }
-        if (damageAmount == 0.0f) { // Ignore 0 damage
-            return;
-        }
-
-        if (!isArmorPiercing) {
-            // Scale damage amount depending on armor
-            damageAmount = damageAmount * (1.0f - ArmorReduction ());
-        }
-
-        // Special case: if health after damage goes below 0
-        if (currentHealth - damageAmount < 0.0f) {
-            damageAmount = currentHealth;
-        }
-
-        photonView.RPC ("RpcDamage", PhotonTargets.All, damageAmount, damagePoint);
-        lastDamagerId = 0;
     }
 
     [PunRPC]

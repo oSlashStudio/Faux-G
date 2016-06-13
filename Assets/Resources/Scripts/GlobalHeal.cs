@@ -19,7 +19,7 @@ public class GlobalHeal : Ability {
     [PunRPC]
     void RpcHealTarget (int targetViewId, int healingPlayerId) {
         PhotonView targetPhotonView = PhotonView.Find (targetViewId);
-        targetPhotonView.GetComponent<HealthController> ().Heal (healAmount, healingPlayerId, targetPhotonView.transform.position);
+        targetPhotonView.GetComponent<HealthController> ().Heal (healAmount, targetPhotonView.transform.position, healingPlayerId);
     }
 
 }

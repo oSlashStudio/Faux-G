@@ -54,8 +54,8 @@ public class ProjectileController : MonoBehaviour {
         HealthController targetHealthController = collision.gameObject.GetComponent<HealthController> ();
         if (targetHealthController != null) { // If target has health component
             if (isPlayerInstantiated) {
-                targetHealthController.Heal (projectileHeal, instantiatorId, collision.contacts[0].point);
-                targetHealthController.Damage (projectileDamage, instantiatorId, collision.contacts[0].point, isArmorPiercing);
+                targetHealthController.Heal (projectileHeal, collision.contacts[0].point, instantiatorId);
+                targetHealthController.Damage (projectileDamage, collision.contacts[0].point, isArmorPiercing, instantiatorId);
             } else {
                 targetHealthController.Heal (projectileHeal, collision.contacts[0].point);
                 targetHealthController.Damage (projectileDamage, collision.contacts[0].point, isArmorPiercing);

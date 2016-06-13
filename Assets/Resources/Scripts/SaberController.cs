@@ -4,6 +4,7 @@ using System.Collections;
 public class SaberController : MonoBehaviour {
 
     public float slashDamage;
+    public bool isArmorPiercing;
     [HideInInspector]
     public int instantiatorId;
 
@@ -21,7 +22,7 @@ public class SaberController : MonoBehaviour {
         HealthController collidingHealthController = collidingObject.GetComponent<HealthController> ();
 
         if (collidingHealthController != null) {
-            collidingHealthController.Damage (slashDamage, instantiatorId, collidingObject.transform.position);
+            collidingHealthController.Damage (slashDamage, collidingObject.transform.position, isArmorPiercing, instantiatorId);
         }
     }
 

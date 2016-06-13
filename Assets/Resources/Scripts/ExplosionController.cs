@@ -69,8 +69,8 @@ public class ExplosionController : MonoBehaviour {
             HealthController targetHealthController = targetGameObject.GetComponent<HealthController> ();
             if (targetHealthController != null) { // If target has health component
                 if (isPlayerInstantiated) {
-                    targetHealthController.Heal (explosionHeal, instantiatorId, currentCollider.transform.position);
-                    targetHealthController.Damage (explosionDamage, instantiatorId, currentCollider.transform.position, isArmorPiercing);
+                    targetHealthController.Heal (explosionHeal, currentCollider.transform.position, instantiatorId);
+                    targetHealthController.Damage (explosionDamage, currentCollider.transform.position, isArmorPiercing, instantiatorId);
                 } else {
                     targetHealthController.Heal (explosionHeal, currentCollider.transform.position);
                     targetHealthController.Damage (explosionDamage, currentCollider.transform.position, isArmorPiercing);

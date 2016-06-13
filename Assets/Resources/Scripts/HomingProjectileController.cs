@@ -9,6 +9,7 @@ public class HomingProjectileController : MonoBehaviour {
     public float projectileSpeed = 20.0f;
     public float projectileLifetime = 1.0f;
     public float projectileDamage = 5.0f;
+    public bool isArmorPiercing;
 
     // Homing related variables
     private int targetViewId;
@@ -71,9 +72,9 @@ public class HomingProjectileController : MonoBehaviour {
         HealthController targetHealthController = collision.gameObject.GetComponent<HealthController> ();
         if (targetHealthController != null) { // If target has health component
             if (isPlayerInstantiated) {
-                targetHealthController.Damage (projectileDamage, instantiatorId, collision.contacts[0].point);
+                targetHealthController.Damage (projectileDamage, collision.contacts[0].point, isArmorPiercing, instantiatorId);
             } else {
-                targetHealthController.Damage (projectileDamage, collision.contacts[0].point);
+                targetHealthController.Damage (projectileDamage, collision.contacts[0].point, isArmorPiercing);
             }
         }
 
