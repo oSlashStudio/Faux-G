@@ -6,7 +6,9 @@ public class HealthController : Photon.MonoBehaviour {
     public GameObject calloutPrefab;
 
     public float maxHealth = 100.0f;
+    [HideInInspector]
     public float currentHealth;
+    public float armor;
 
     // Killer information variables
     private int lastDamagerId;
@@ -43,6 +45,15 @@ public class HealthController : Photon.MonoBehaviour {
         }
 	}
 
+    [PunRPC]
+    public void RpcHealOwner (float healAmount, Vector2 healPoint) {
+        if (!photonView.isMine) { // Not owner, forward to owner
+            photonView.RPC ("RpcHealOwner", photonView.owner, healAmount, healPoint);
+        } else {
+            Heal (healAmount, healPoint);
+        }
+    }
+
     /*
      * This function handles heal from player.
      */
@@ -53,18 +64,15 @@ public class HealthController : Photon.MonoBehaviour {
         if (healAmount == 0.0f) { // Ignore 0 heal
             return;
         }
+
+        // Special case: if health after heal exceeds max health
+        if (currentHealth + healAmount > maxHealth) {
+            healAmount = maxHealth - currentHealth;
+        }
+
         photonView.RPC ("RpcHeal", PhotonTargets.All, healAmount, healPoint);
 
         networkManager.AddHealData (healingPlayerId, healAmount);
-    }
-
-    [PunRPC]
-    public void RpcHealOwner (float healAmount, Vector2 healPoint) {
-        if (!photonView.isMine) { // Not owner, forward to owner
-            photonView.RPC ("RpcHealOwner", photonView.owner, healAmount, healPoint);
-        } else {
-            Heal (healAmount, healPoint);
-        }
     }
 
     /*
@@ -77,17 +85,18 @@ public class HealthController : Photon.MonoBehaviour {
         if (healAmount == 0.0f) { // Ignore 0 heal
             return;
         }
+
+        // Special case: if health after heal exceeds max health
+        if (currentHealth + healAmount > maxHealth) {
+            healAmount = maxHealth - currentHealth;
+        }
+
         photonView.RPC ("RpcHeal", PhotonTargets.All, healAmount, healPoint);
     }
 
     [PunRPC]
     void RpcHeal (float healAmount, Vector2 healPoint) {
-        // Special case: if health after heal exceeds max health
-        if (currentHealth + healAmount > maxHealth) {
-            currentHealth = maxHealth;
-        } else {
-            currentHealth += healAmount;
-        }
+        currentHealth += healAmount;
 
         InstantiateHealCallout (healAmount, healPoint);
     }
@@ -110,9 +119,17 @@ public class HealthController : Photon.MonoBehaviour {
         if (damageAmount == 0.0f) { // Ignore 0 damage
             return;
         }
-        photonView.RPC ("RpcDamage", PhotonTargets.All, damageAmount, damagePoint);
-        lastDamagerId = damagingPlayerId;
 
+        // Scale damage amount depending on armor
+        damageAmount = damageAmount * (1.0f - ArmorReduction ());
+        // Special case: if health after damage goes below 0
+        if (currentHealth - damageAmount < 0.0f) {
+            damageAmount = currentHealth;
+        }
+
+        photonView.RPC ("RpcDamage", PhotonTargets.All, damageAmount, damagePoint);
+
+        lastDamagerId = damagingPlayerId;
         networkManager.AddDamageData (damagingPlayerId, damageAmount);
     }
 
@@ -126,18 +143,21 @@ public class HealthController : Photon.MonoBehaviour {
         if (damageAmount == 0.0f) { // Ignore 0 damage
             return;
         }
+
+        // Scale damage amount depending on armor
+        damageAmount = damageAmount * (1.0f - ArmorReduction ());
+        // Special case: if health after damage goes below 0
+        if (currentHealth - damageAmount < 0.0f) {
+            damageAmount = currentHealth;
+        }
+
         photonView.RPC ("RpcDamage", PhotonTargets.All, damageAmount, damagePoint);
         lastDamagerId = 0;
     }
 
     [PunRPC]
     void RpcDamage (float damageAmount, Vector2 damagePoint) {
-        // Special case: if health after damage goes below 0
-        if (currentHealth - damageAmount < 0.0f) {
-            currentHealth = 0.0f;
-        } else {
-            currentHealth -= damageAmount;
-        }
+        currentHealth -= damageAmount;
 
         InstantiateDamageCallout (damageAmount, damagePoint);
     }
@@ -148,6 +168,14 @@ public class HealthController : Photon.MonoBehaviour {
         GameObject callout = (GameObject) Instantiate (calloutPrefab, calloutPosition, calloutRotation);
         callout.GetComponent<TextMesh> ().text = "-" + damageAmount.ToString ("0");
         callout.GetComponent<TextMesh> ().color = Color.red;
+    }
+
+    /*
+     * This method returns the percentage of damage blocked depending on the current armor.
+     * Return 1 for 100% damage block, 0 for 0% damage block.
+     */
+    float ArmorReduction () {
+        return armor / (10 + armor);
     }
 
 }
