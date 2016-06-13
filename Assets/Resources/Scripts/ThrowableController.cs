@@ -36,11 +36,13 @@ public class ThrowableController : MonoBehaviour {
     // Cached components
     private Component halo;
     private Rigidbody2D rigidBody;
+    private Collider2D colliderComponent;
 
     // Use this for initialization
     void Start () {
         halo = GetComponent ("Halo");
         rigidBody = GetComponent<Rigidbody2D> ();
+        colliderComponent = GetComponent<Collider2D> ();
     }
 
     // Update is called once per frame
@@ -68,6 +70,7 @@ public class ThrowableController : MonoBehaviour {
             if (collision.gameObject.tag == "Player" || collision.gameObject.tag == "Enemy") {
                 transform.parent = collision.transform;
                 rigidBody.isKinematic = true;
+                colliderComponent.enabled = false;
 
                 if (isExplodingOnLatch) {
                     Explode ();
