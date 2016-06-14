@@ -8,24 +8,22 @@ public class SaberController : MonoBehaviour {
     [HideInInspector]
     public int instantiatorId;
 
-    private float lifetime;
+    private float lifeTime;
 
 	// Use this for initialization
 	void Start () {
-        lifetime = 0.0f;
+        lifeTime = 0.0f;
 	}
 
     void Update () {
-        lifetime += Time.deltaTime;
-        
-        if (lifetime <= 0.25f) {
-            float angularSpeed = Mathf.Lerp (0, 2880, lifetime / 0.25f);
-            transform.RotateAround (transform.parent.position, Vector3.forward, angularSpeed * Time.deltaTime);
-        } else if (lifetime <= 0.5f) {
-            float angularSpeed = Mathf.Lerp (0, 2880, (lifetime - 0.25f) / 0.25f);
-            transform.RotateAround (transform.parent.position, Vector3.forward, -angularSpeed * Time.deltaTime);
+        lifeTime += Time.deltaTime;
+
+        if (lifeTime <= 0.25f) {
+            transform.RotateAround (transform.parent.position, Vector3.forward, 1440f * Time.deltaTime);
+        } else if (lifeTime <= 0.5f) {
+            transform.RotateAround (transform.parent.position, Vector3.forward, -1440f * Time.deltaTime);
         } else {
-            Destroy (gameObject);
+            Destroy (gameObject, 0.25f);
         }
     }
 
