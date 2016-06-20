@@ -4,6 +4,7 @@ using System.Collections;
 public class FauxGravityCircularAttractor : Attractor {
 
 	public float gravity = 9.8f;
+    public bool isOutwards = true;
 
     public override void Attract (Transform targetTransform, Rigidbody2D targetRigidbody) {
 		Vector3 attractorNormal = (targetTransform.position - transform.position).normalized;
@@ -55,6 +56,7 @@ public class FauxGravityCircularAttractor : Attractor {
         }
 
         collider.gameObject.GetComponent<FauxGravityBody> ().attractor = GetComponent<Attractor> ();
+        collider.gameObject.GetComponent<FauxGravityBody> ().isAttracted = isOutwards;
     }
 
 }

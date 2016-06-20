@@ -4,6 +4,7 @@ using System.Collections;
 public class FauxGravityLinearAttractor : Attractor {
 
 	public float gravity = 9.8f;
+    public bool isOutwards = true;
 	
 	public override void Attract (Transform targetTransform, Rigidbody2D targetRigidbody) {
         // Calculate attractor normal using dot product - IMPROVE IF POSSIBLE (hefty calculations)
@@ -53,6 +54,7 @@ public class FauxGravityLinearAttractor : Attractor {
         }
 
         collider.gameObject.GetComponent<FauxGravityBody> ().attractor = GetComponent<Attractor> ();
+        collider.gameObject.GetComponent<FauxGravityBody> ().isAttracted = isOutwards;
     }
 
 }
